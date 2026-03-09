@@ -37,21 +37,57 @@ main{flex:1;padding:3rem 0}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .fade-in{animation:fadeIn .4s ease forwards}
 
-/* Test-specific styles */
-.round-counter{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim);margin-bottom:1rem;letter-spacing:1px;text-transform:uppercase}
-.canvas-wrapper{position:relative;display:inline-block;border-radius:12px;overflow:hidden;border:1px solid var(--border)}
-canvas{display:block;cursor:default}
-canvas.clickable{cursor:crosshair}
-.phase-label{font-family:'Space Mono',monospace;font-size:.9rem;color:var(--text-dim);margin-top:1rem;min-height:1.4em;text-align:center}
-.feedback-overlay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Space Mono',monospace;font-size:2rem;font-weight:700;pointer-events:none;opacity:0;transition:opacity .2s}
-.feedback-overlay.correct{color:var(--primary)}
-.feedback-overlay.wrong{color:var(--secondary)}
-.feedback-overlay.show{opacity:1}
+/* Test-specific */
+.round-counter{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim);margin-bottom:.85rem;letter-spacing:1px}
 .test-inner{display:flex;flex-direction:column;align-items:center}
 .score-tally{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim);margin-top:.75rem}
 .score-tally span{color:var(--text)}
+.phase-label{font-family:'Space Mono',monospace;font-size:.9rem;color:var(--text-dim);margin-top:.85rem;min-height:1.4em;text-align:center}
 
-/* Intro feature list */
+.canvas-wrap{
+  position:relative;
+  width:100%;
+  max-width:620px;
+  border-radius:16px;
+  overflow:hidden;
+  border:1px solid var(--border);
+  background:#0a0a0a;
+  transition:border-color .4s;
+}
+.canvas-wrap.phase-track{border-color:rgba(0,255,157,0.25);}
+.canvas-wrap.phase-select{
+  border-color:rgba(0,255,157,0.5);
+  box-shadow:0 0 30px rgba(0,255,157,0.06);
+}
+canvas{display:block;width:100%;height:auto;cursor:default;}
+canvas.clickable{cursor:crosshair;}
+
+/* Overlay blocks all mouse events during non-select phases */
+.click-shield{
+  position:absolute;
+  inset:0;
+  z-index:5;
+  cursor:default;
+}
+.click-shield.off{display:none;}
+
+/* Feedback overlay */
+.feedback-overlay{
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  font-family:'Space Mono',monospace;
+  font-size:3rem;font-weight:700;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity .15s;
+  z-index:10;
+}
+.feedback-overlay.correct{color:var(--primary)}
+.feedback-overlay.wrong{color:var(--secondary)}
+.feedback-overlay.show{opacity:1}
+
+/* Intro list */
 .feature-list{list-style:none;margin-bottom:2rem;display:flex;flex-direction:column;gap:.6rem}
 .feature-list li{color:var(--text-dim);font-size:.95rem;display:flex;align-items:flex-start;gap:.6rem}
 .feature-list li::before{content:'—';color:var(--primary);flex-shrink:0}
@@ -71,33 +107,34 @@ canvas.clickable{cursor:crosshair}
 <main>
   <div class="container">
 
-    <!-- INTRO SCREEN -->
+    <!-- INTRO -->
     <div id="screen-intro" class="screen active fade-in">
       <div class="test-title">Ball Tracking</div>
-      <p class="test-desc">Can you keep your eye on the ball — even when all the balls look the same?</p>
+      <p class="test-desc">Can you keep your eye on the ball — even when they all look the same?</p>
       <ul class="feature-list">
-        <li>One ball starts red. Remember it.</li>
-        <li>All balls turn gray and bounce around for 8 seconds.</li>
-        <li>When they stop, click the ball that was originally red.</li>
-        <li>5 rounds total. Stay sharp.</li>
+        <li>One ball glows green. Remember it.</li>
+        <li>All balls turn identical and bounce for 8 seconds.</li>
+        <li>Click the ball that was originally green.</li>
+        <li>5 rounds — each round adds more balls and gets faster.</li>
       </ul>
       <button class="btn" onclick="startTest()">Start Test</button>
     </div>
 
-    <!-- TEST SCREEN -->
+    <!-- TEST -->
     <div id="screen-test" class="screen">
       <div class="test-inner">
         <div class="round-counter" id="round-counter">Round 1 of 5</div>
-        <div class="canvas-wrapper">
-          <canvas id="game-canvas" width="600" height="400"></canvas>
+        <div class="canvas-wrap" id="canvas-wrap">
+          <canvas id="game-canvas" width="620" height="400"></canvas>
+          <div class="click-shield" id="click-shield"></div>
           <div class="feedback-overlay" id="feedback-overlay"></div>
         </div>
-        <div class="phase-label" id="phase-label">Memorize the red ball…</div>
+        <div class="phase-label" id="phase-label">Memorize the glowing ball…</div>
         <div class="score-tally" id="score-tally">Score: <span>0</span> / 0</div>
       </div>
     </div>
 
-    <!-- RESULT SCREEN -->
+    <!-- RESULT -->
     <div id="screen-result" class="screen fade-in">
       <div class="test-title">Results</div>
       <div class="best-line" id="best-line">Personal best: <span>—</span></div>
@@ -125,230 +162,311 @@ canvas.clickable{cursor:crosshair}
 </main>
 
 <script>
-// ─── Constants ───────────────────────────────────────────────────────────────
 const TOTAL_ROUNDS = 5;
-const BALL_RADIUS = 20;
-const BALL_COUNT = 5;
-const CANVAS_W = 600;
-const CANVAS_H = 400;
-const MEMORIZE_MS = 1500;
-const BOUNCE_MS = 8000;
-const FEEDBACK_MS = 900;
-const BALL_COLOR_NEUTRAL = '#aaaaaa';
-const BALL_COLOR_TARGET = '#ff3366';
-const BALL_COLOR_CORRECT_HIGHLIGHT = '#00ff9d';
-const HUMAN_AVG = 68;
-const LS_KEY = 'ah_ball-tracking';
+const BALL_RADIUS   = 22;
+// Round 1→4 balls, Round 5→8 balls; speed also scales per round
+function roundBallCount(r){ return 3 + r; }               // 4,5,6,7,8
+function roundSpeedRange(r){ return [4.0 + r*0.5, 6.5 + r*0.55]; } // faster ramp
+const CANVAS_W      = 620;
+const CANVAS_H      = 400;
+const MEMORIZE_MS   = 1800;
+const BOUNCE_MS     = 8000;
+const FEEDBACK_MS   = 900;
+const HUMAN_AVG     = 68;
+const LS_KEY        = 'ah_ball-tracking';
 
-// ─── State ────────────────────────────────────────────────────────────────────
-let round = 0;
+let round        = 0;
 let correctCount = 0;
-let targetIndex = -1;
-let balls = [];
-let animFrameId = null;
-let phase = 'idle'; // memorize | bouncing | waiting | feedback
-let bounceStartTime = 0;
-let canvasClickable = false;
+let targetIndex  = -1;
+let balls        = [];
+let animFrameId  = null;
+let phase        = 'idle'; // memorize | bouncing | waiting | feedback
+let bounceStart  = 0;
 
-// ─── Canvas ───────────────────────────────────────────────────────────────────
-const canvas = document.getElementById('game-canvas');
-const ctx = canvas.getContext('2d');
+const canvas   = document.getElementById('game-canvas');
+const ctx      = canvas.getContext('2d');
+const shield   = document.getElementById('click-shield');
+const canvasWrap = document.getElementById('canvas-wrap');
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-function rand(min, max) { return Math.random() * (max - min) + min; }
+// ── helpers ──────────────────────────────────────────────────────────────────
+function rand(a, b){ return Math.random()*(b-a)+a; }
 
-function getPercentile(score, avgHuman, lowerIsBetter) {
-  const ratio = lowerIsBetter ? avgHuman / score : score / avgHuman;
-  if (ratio >= 2) return 'Top 5%';
-  if (ratio >= 1.5) return 'Top 15%';
-  if (ratio >= 1.2) return 'Top 30%';
-  if (ratio >= 0.85) return 'Around 50%';
-  if (ratio >= 0.6) return 'Bottom 30%';
+function getPercentile(score, avg, lower) {
+  const r = lower ? avg/score : score/avg;
+  if(r>=2)   return 'Top 5%';
+  if(r>=1.5) return 'Top 15%';
+  if(r>=1.2) return 'Top 30%';
+  if(r>=0.85)return 'Around 50%';
+  if(r>=0.6) return 'Bottom 30%';
   return 'Bottom 15%';
 }
 
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
-function setPhaseLabel(txt) {
-  document.getElementById('phase-label').textContent = txt;
+function setLabel(txt){ document.getElementById('phase-label').textContent = txt; }
+
+function updateTally(){
+  document.getElementById('score-tally').innerHTML =
+    `Score: <span>${correctCount}</span> / ${round}`;
 }
 
-function updateScoreTally() {
-  const el = document.getElementById('score-tally');
-  el.innerHTML = `Score: <span>${correctCount}</span> / ${round}`;
+function setPhaseClass(cls){
+  canvasWrap.classList.remove('phase-track','phase-select');
+  if(cls) canvasWrap.classList.add(cls);
 }
 
-// ─── Ball generation ─────────────────────────────────────────────────────────
-function createBalls() {
+// Block/unblock clicks on canvas via shield overlay
+function setClickable(on){
+  if(on){
+    shield.classList.add('off');
+    canvas.classList.add('clickable');
+  } else {
+    shield.classList.remove('off');
+    canvas.classList.remove('clickable');
+  }
+}
+
+function showFeedback(correct){
+  const el = document.getElementById('feedback-overlay');
+  el.textContent = correct ? '✓' : '✗';
+  el.className = 'feedback-overlay '+(correct?'correct':'wrong')+' show';
+}
+function hideFeedback(){
+  document.getElementById('feedback-overlay').className = 'feedback-overlay';
+}
+
+// ── ball generation ───────────────────────────────────────────────────────────
+function createBalls(){
   balls = [];
-  const margin = BALL_RADIUS + 4;
-  for (let i = 0; i < BALL_COUNT; i++) {
-    let x, y, overlap;
-    let attempts = 0;
+  const count  = roundBallCount(round);
+  const [sMin, sMax] = roundSpeedRange(round);
+  const margin = BALL_RADIUS + 6;
+  for(let i=0; i<count; i++){
+    let x, y, ok, tries=0;
     do {
-      overlap = false;
+      ok = true;
       x = rand(margin, CANVAS_W - margin);
       y = rand(margin, CANVAS_H - margin);
-      for (const b of balls) {
-        const dx = b.x - x, dy = b.y - y;
-        if (Math.sqrt(dx*dx + dy*dy) < BALL_RADIUS * 2 + 6) { overlap = true; break; }
+      for(const b of balls){
+        const dx=b.x-x, dy=b.y-y;
+        if(Math.sqrt(dx*dx+dy*dy) < BALL_RADIUS*2+12){ ok=false; break; }
       }
-      attempts++;
-    } while (overlap && attempts < 200);
-
-    const angle = rand(0, Math.PI * 2);
-    const speed = rand(2, 4);
-    balls.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed });
+      tries++;
+    } while(!ok && tries<300);
+    const angle = rand(0, Math.PI*2);
+    const speed = rand(sMin, sMax);
+    balls.push({ x, y, vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed });
   }
 }
 
-// ─── Drawing ──────────────────────────────────────────────────────────────────
-function drawBalls(showTarget, highlightIndex = -1, missIndex = -1) {
-  ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
-  ctx.fillStyle = '#111111';
+// ── drawing ───────────────────────────────────────────────────────────────────
+function drawScene(mode, highlightIdx=-1, missIdx=-1){
+  // Background
+  ctx.fillStyle = '#0a0a0a';
   ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
 
-  balls.forEach((b, i) => {
-    ctx.beginPath();
-    ctx.arc(b.x, b.y, BALL_RADIUS, 0, Math.PI * 2);
-
-    let color = BALL_COLOR_NEUTRAL;
-    if (showTarget && i === targetIndex) color = BALL_COLOR_TARGET;
-    if (i === highlightIndex) color = BALL_COLOR_CORRECT_HIGHLIGHT;
-    if (i === missIndex) color = BALL_COLOR_TARGET;
-
-    ctx.fillStyle = color;
-    ctx.fill();
-
-    // Subtle shine
-    const grad = ctx.createRadialGradient(b.x - BALL_RADIUS * 0.3, b.y - BALL_RADIUS * 0.3, 2, b.x, b.y, BALL_RADIUS);
-    grad.addColorStop(0, 'rgba(255,255,255,0.18)');
-    grad.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.beginPath();
-    ctx.arc(b.x, b.y, BALL_RADIUS, 0, Math.PI * 2);
-    ctx.fillStyle = grad;
-    ctx.fill();
-
-    // Star on target during memorize phase
-    if (showTarget && i === targetIndex) {
-      ctx.fillStyle = 'rgba(255,255,255,0.9)';
-      ctx.font = 'bold 14px Manrope, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('★', b.x, b.y);
-    }
-  });
-}
-
-// ─── Animation loop ───────────────────────────────────────────────────────────
-function animLoop(ts) {
-  if (phase !== 'bouncing') return;
-
-  const elapsed = ts - bounceStartTime;
-  const remaining = BOUNCE_MS - elapsed;
-
-  if (remaining <= 0) {
-    // Stop bouncing
-    phase = 'waiting';
-    drawBalls(false);
-    setPhaseLabel('Click the ball that was originally red.');
-    canvas.classList.add('clickable');
-    canvasClickable = true;
-    return;
+  // Subtle grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.028)';
+  ctx.lineWidth = 1;
+  for(let x=0; x<=CANVAS_W; x+=50){
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,CANVAS_H); ctx.stroke();
+  }
+  for(let y=0; y<=CANVAS_H; y+=50){
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(CANVAS_W,y); ctx.stroke();
   }
 
-  // Move balls
+  balls.forEach((b, i) => {
+    const isTarget  = i === targetIndex;
+    const isCorrect = i === highlightIdx;
+    const isWrong   = i === missIdx;
+
+    // Determine colors
+    let fillColor, strokeColor, glowColor=null, glowSize=0, label=null;
+
+    if(mode === 'memorize' && isTarget){
+      fillColor   = 'rgba(0,255,157,0.14)';
+      strokeColor = '#00ff9d';
+      glowColor   = 'rgba(0,255,157,1)';
+      glowSize    = 28;
+      label = '★';
+    } else if(isCorrect){
+      fillColor   = 'rgba(0,255,157,0.12)';
+      strokeColor = '#00ff9d';
+      glowColor   = 'rgba(0,255,157,0.9)';
+      glowSize    = 22;
+    } else if(isWrong){
+      fillColor   = 'rgba(255,51,102,0.12)';
+      strokeColor = '#ff3366';
+      glowColor   = 'rgba(255,51,102,0.8)';
+      glowSize    = 20;
+    } else {
+      fillColor   = 'rgba(255,255,255,0.05)';
+      strokeColor = 'rgba(255,255,255,0.22)';
+    }
+
+    // Draw glow halo
+    if(glowColor){
+      ctx.save();
+      ctx.shadowBlur   = glowSize;
+      ctx.shadowColor  = glowColor;
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, BALL_RADIUS, 0, Math.PI*2);
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth   = 2.5;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Fill
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, BALL_RADIUS, 0, Math.PI*2);
+    ctx.fillStyle = fillColor;
+    ctx.fill();
+
+    // Stroke
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, BALL_RADIUS, 0, Math.PI*2);
+    ctx.strokeStyle = strokeColor;
+    ctx.lineWidth   = glowColor ? 2.5 : 1.8;
+    ctx.stroke();
+
+    // Subtle inner highlight shimmer
+    const shine = ctx.createRadialGradient(
+      b.x - BALL_RADIUS*0.35, b.y - BALL_RADIUS*0.35, 1,
+      b.x, b.y, BALL_RADIUS
+    );
+    shine.addColorStop(0, 'rgba(255,255,255,0.1)');
+    shine.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, BALL_RADIUS, 0, Math.PI*2);
+    ctx.fillStyle = shine;
+    ctx.fill();
+
+    // Label (star for target during memorize)
+    if(label){
+      ctx.fillStyle = '#00ff9d';
+      ctx.font = "bold 15px 'Space Mono', monospace";
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(label, b.x, b.y);
+    }
+  });
+
+  // Countdown timer during bounce
+  if(mode === 'bouncing'){
+    const elapsed   = performance.now() - bounceStart;
+    const remaining = Math.max(0, BOUNCE_MS - elapsed);
+    const secs      = Math.ceil(remaining/1000);
+    ctx.fillStyle = 'rgba(255,255,255,0.16)';
+    ctx.font = "700 20px 'Space Mono', monospace";
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'top';
+    ctx.fillText(secs + 's', CANVAS_W - 14, 12);
+  }
+}
+
+// ── animation loop ────────────────────────────────────────────────────────────
+function animLoop(ts){
+  if(phase !== 'bouncing') return;
+
+  const elapsed   = ts - bounceStart;
+  const remaining = BOUNCE_MS - elapsed;
+
+  // Move & bounce
   balls.forEach(b => {
     b.x += b.vx;
     b.y += b.vy;
-    if (b.x - BALL_RADIUS < 0) { b.x = BALL_RADIUS; b.vx = Math.abs(b.vx); }
-    if (b.x + BALL_RADIUS > CANVAS_W) { b.x = CANVAS_W - BALL_RADIUS; b.vx = -Math.abs(b.vx); }
-    if (b.y - BALL_RADIUS < 0) { b.y = BALL_RADIUS; b.vy = Math.abs(b.vy); }
-    if (b.y + BALL_RADIUS > CANVAS_H) { b.y = CANVAS_H - BALL_RADIUS; b.vy = -Math.abs(b.vy); }
+    if(b.x - BALL_RADIUS < 0)        { b.x = BALL_RADIUS;        b.vx =  Math.abs(b.vx); }
+    if(b.x + BALL_RADIUS > CANVAS_W) { b.x = CANVAS_W-BALL_RADIUS; b.vx = -Math.abs(b.vx); }
+    if(b.y - BALL_RADIUS < 0)        { b.y = BALL_RADIUS;        b.vy =  Math.abs(b.vy); }
+    if(b.y + BALL_RADIUS > CANVAS_H) { b.y = CANVAS_H-BALL_RADIUS; b.vy = -Math.abs(b.vy); }
   });
 
-  drawBalls(false);
+  drawScene('bouncing');
 
-  // Countdown overlay
-  const secs = Math.ceil(remaining / 1000);
-  ctx.fillStyle = 'rgba(255,255,255,0.18)';
-  ctx.font = "700 22px 'Space Mono', monospace";
-  ctx.textAlign = 'right';
-  ctx.textBaseline = 'top';
-  ctx.fillText(secs + 's', CANVAS_W - 12, 10);
+  if(remaining <= 0){
+    phase = 'waiting';
+    drawScene('waiting');
+    setLabel('Which ball was originally green? Click it.');
+    setPhaseClass('phase-select');
+    setClickable(true);
+    return;
+  }
 
   animFrameId = requestAnimationFrame(animLoop);
 }
 
-// ─── Round logic ──────────────────────────────────────────────────────────────
-function startRound() {
+// ── round logic ───────────────────────────────────────────────────────────────
+function startRound(){
   round++;
-  canvasClickable = false;
-  canvas.classList.remove('clickable');
-  document.getElementById('round-counter').textContent = `Round ${round} of ${TOTAL_ROUNDS}`;
-  updateScoreTally();
   hideFeedback();
+  setClickable(false);
+  setPhaseClass('');
+  document.getElementById('round-counter').textContent =
+    `Round ${round} of ${TOTAL_ROUNDS} — ${roundBallCount(round)} balls`;
+  updateTally();
 
   createBalls();
-  targetIndex = Math.floor(Math.random() * BALL_COUNT);
+  targetIndex = Math.floor(Math.random() * roundBallCount(round));
 
   phase = 'memorize';
-  drawBalls(true);
-  setPhaseLabel('Memorize the red ball…');
+  drawScene('memorize');
+  setLabel('Memorize the glowing ball…');
 
   setTimeout(() => {
     phase = 'bouncing';
-    drawBalls(false);
-    setPhaseLabel('Track it while the balls move…');
-    bounceStartTime = performance.now();
+    drawScene('bouncing');
+    setLabel('Track it…');
+    setPhaseClass('phase-track');
+    bounceStart = performance.now();
     animFrameId = requestAnimationFrame(animLoop);
   }, MEMORIZE_MS);
 }
 
-// ─── Click handling ───────────────────────────────────────────────────────────
+// ── click handling ────────────────────────────────────────────────────────────
 canvas.addEventListener('click', e => {
-  if (!canvasClickable || phase !== 'waiting') return;
+  if(phase !== 'waiting') return;
 
-  canvasClickable = false;
-  canvas.classList.remove('clickable');
   phase = 'feedback';
+  setClickable(false);
+  setPhaseClass('');
 
-  const rect = canvas.getBoundingClientRect();
+  const rect   = canvas.getBoundingClientRect();
   const scaleX = CANVAS_W / rect.width;
   const scaleY = CANVAS_H / rect.height;
   const mx = (e.clientX - rect.left) * scaleX;
-  const my = (e.clientY - rect.top) * scaleY;
+  const my = (e.clientY - rect.top)  * scaleY;
 
   let clicked = -1;
-  for (let i = 0; i < balls.length; i++) {
+  for(let i=0; i<balls.length; i++){
     const dx = balls[i].x - mx, dy = balls[i].y - my;
-    if (Math.sqrt(dx*dx + dy*dy) <= BALL_RADIUS) { clicked = i; break; }
+    if(Math.sqrt(dx*dx + dy*dy) <= BALL_RADIUS + 4){ clicked = i; break; }
   }
 
-  if (clicked === -1) {
-    // Missed all balls — count as wrong
-    drawBalls(false);
+  const isCorrect = clicked === targetIndex;
+  if(isCorrect) correctCount++;
+
+  if(clicked === -1){
+    drawScene('reveal', targetIndex);
     showFeedback(false);
-    setPhaseLabel('Missed! The marked ball was somewhere else.');
-    drawBalls(false, targetIndex); // show where it was
-  } else if (clicked === targetIndex) {
-    correctCount++;
-    drawBalls(false, targetIndex);
+    setLabel('Missed — the green ball is revealed.');
+  } else if(isCorrect){
+    drawScene('reveal', targetIndex);
     showFeedback(true);
-    setPhaseLabel('Correct!');
+    setLabel('Correct!');
   } else {
-    drawBalls(false, targetIndex, clicked);
+    drawScene('reveal', targetIndex, clicked);
     showFeedback(false);
-    setPhaseLabel('Wrong. The red ball is highlighted.');
+    setLabel('Wrong — the green ball is revealed.');
   }
 
-  updateScoreTally();
+  updateTally();
 
   setTimeout(() => {
-    if (round < TOTAL_ROUNDS) {
+    if(round < TOTAL_ROUNDS){
       startRound();
     } else {
       endTest();
@@ -356,52 +474,33 @@ canvas.addEventListener('click', e => {
   }, FEEDBACK_MS);
 });
 
-function showFeedback(correct) {
-  const el = document.getElementById('feedback-overlay');
-  el.textContent = correct ? '✓' : '✗';
-  el.className = 'feedback-overlay ' + (correct ? 'correct' : 'wrong') + ' show';
-}
-
-function hideFeedback() {
-  const el = document.getElementById('feedback-overlay');
-  el.className = 'feedback-overlay';
-}
-
-// ─── Test lifecycle ───────────────────────────────────────────────────────────
-function startTest() {
-  round = 0;
+// ── lifecycle ─────────────────────────────────────────────────────────────────
+function startTest(){
+  round        = 0;
   correctCount = 0;
-  if (animFrameId) cancelAnimationFrame(animFrameId);
+  if(animFrameId) cancelAnimationFrame(animFrameId);
   phase = 'idle';
+  setClickable(false);
+  setPhaseClass('');
   showScreen('screen-test');
-  updateScoreTally();
+  updateTally();
   startRound();
 }
 
-function endTest() {
+function endTest(){
   const pct = Math.round((correctCount / TOTAL_ROUNDS) * 100);
-  saveResult(pct);
-  showResults(pct);
-}
-
-function saveResult(score) {
-  let data = JSON.parse(localStorage.getItem(LS_KEY) || 'null') || { attempts: 0, best: null, history: [] };
-  data.attempts = (data.attempts || 0) + 1;
-  data.history.push({ score, ts: Date.now() });
-  if (data.best === null || score > data.best) data.best = score;
+  let data = JSON.parse(localStorage.getItem(LS_KEY)||'null') || {attempts:0,best:null,history:[]};
+  data.attempts = (data.attempts||0) + 1;
+  data.history.push({score:pct, ts:Date.now()});
+  if(data.best === null || pct > data.best) data.best = pct;
   localStorage.setItem(LS_KEY, JSON.stringify(data));
-}
 
-function showResults(score) {
-  const data = JSON.parse(localStorage.getItem(LS_KEY) || 'null') || {};
-  const best = data.best !== undefined ? data.best + '%' : score + '%';
-
-  document.getElementById('res-score').textContent = score + '%';
-  document.getElementById('res-percentile').textContent = getPercentile(score, HUMAN_AVG, false);
-  document.getElementById('best-line').innerHTML = `Personal best: <span>${best}</span>`;
+  document.getElementById('res-score').textContent      = pct + '%';
+  document.getElementById('res-percentile').textContent = getPercentile(pct, HUMAN_AVG, false);
+  document.getElementById('best-line').innerHTML        =
+    `Personal best: <span>${data.best}%</span> &nbsp;·&nbsp; Attempts: <span>${data.attempts}</span>`;
 
   showScreen('screen-result');
-  document.getElementById('screen-result').classList.add('fade-in');
 }
 </script>
 </body>

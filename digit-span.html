@@ -132,17 +132,14 @@
     <div class="screen active fade-in" id="screen-intro">
       <div class="test-title">Digit Span</div>
       <div class="test-desc">
-        A sequence of digits will flash on screen one at a time. After the sequence ends, type all the digits in order and hit Submit. Each correct round adds one more digit. The test ends when you get a sequence wrong.
-      </div>
-      <div class="test-desc" style="margin-bottom:2rem;">
-        The average person can hold <strong style="color:var(--primary)">7 digits</strong> in working memory. How far can you go?
+        A sequence of 7 digits will flash on screen one at a time. After the sequence ends, type all the digits in order. 5 rounds total — how many can you get right?
       </div>
       <button class="btn" onclick="startTest()">Start Test</button>
     </div>
 
     <!-- TEST -->
     <div class="screen" id="screen-test">
-      <div id="level-badge" class="level-badge">Level 3 — 3 digits</div>
+      <div id="level-badge" class="level-badge">Round 1 of 5</div>
 
       <div class="digit-arena">
         <div class="digit-display" id="digit-display">—</div>
@@ -176,12 +173,10 @@
         <div class="stat-card">
           <div class="label">Your Score</div>
           <div class="value" id="res-score">—</div>
-          <div style="font-size:.75rem;color:var(--text-dim);margin-top:.25rem;">digits</div>
         </div>
         <div class="stat-card">
           <div class="label">Human Average</div>
-          <div class="value neutral">7</div>
-          <div style="font-size:.75rem;color:var(--text-dim);margin-top:.25rem;">digits</div>
+          <div class="value neutral">3/5</div>
         </div>
         <div class="stat-card">
           <div class="label">Percentile</div>
@@ -203,10 +198,12 @@
 <script>
   const STORAGE_KEY = 'ah_digit-span';
   const AVG_HUMAN = 7;
+  const TOTAL_ROUNDS = 5;
+  const DIGITS = 7;
 
-  let currentLevel = 3;
+  let currentRound = 0;
+  let correctCount = 0;
   let currentSequence = [];
-  let score = 0;
   let testRunning = false;
 
   function showScreen(id) {
@@ -246,8 +243,8 @@
   }
 
   function startTest() {
-    currentLevel = 3;
-    score = 0;
+    currentRound = 0;
+    correctCount = 0;
     testRunning = true;
     showScreen('screen-test');
     document.getElementById('input-area').style.display = 'none';
@@ -256,9 +253,9 @@
   }
 
   function runRound() {
-    currentSequence = generateSequence(currentLevel);
-    document.getElementById('level-badge').textContent =
-      `Level ${currentLevel} — ${currentLevel} digit${currentLevel > 1 ? 's' : ''}`;
+    currentRound++;
+    currentSequence = generateSequence(DIGITS);
+    document.getElementById('level-badge').textContent = `Round ${currentRound} of ${TOTAL_ROUNDS}`;
     document.getElementById('input-area').style.display = 'none';
     document.getElementById('digit-input').value = '';
     document.getElementById('feedback-msg').textContent = '';
@@ -309,18 +306,21 @@
     const feedback = document.getElementById('feedback-msg');
 
     if (input === correct) {
-      score = currentLevel;
+      correctCount++;
       feedback.textContent = 'Correct!';
       feedback.className = 'feedback-msg correct';
-      currentLevel++;
+    } else {
+      feedback.textContent = `Wrong — it was: ${correct}`;
+      feedback.className = 'feedback-msg wrong';
+    }
+
+    if (currentRound < TOTAL_ROUNDS) {
       setTimeout(() => {
         document.getElementById('feedback-msg').textContent = '';
         runRound();
-      }, 800);
+      }, 1000);
     } else {
-      feedback.textContent = `Wrong! The sequence was: ${correct}`;
-      feedback.className = 'feedback-msg wrong';
-      setTimeout(() => showResult(), 1400);
+      setTimeout(() => showResult(), 1200);
     }
   }
 
@@ -340,33 +340,21 @@
     const store = getStorage();
     store.attempts = (store.attempts || 0) + 1;
     const prevBest = store.best || 0;
-    if (score > prevBest) store.best = score;
+    if (correctCount > prevBest) store.best = correctCount;
     store.history = store.history || [];
-    store.history.push(score);
+    store.history.push(correctCount);
     saveStorage(store);
 
-    document.getElementById('res-score').textContent = score;
+    document.getElementById('res-score').textContent = `${correctCount}/${TOTAL_ROUNDS}`;
     document.getElementById('res-percentile').textContent =
-      score === 0 ? '—' : getPercentile(score, AVG_HUMAN, false);
+      getPercentile(correctCount / TOTAL_ROUNDS, AVG_HUMAN / 10, false);
 
     const best = store.best;
     const bl = document.getElementById('best-line');
-    if (store.attempts > 1) {
-      bl.innerHTML = `Personal best: <span>${best} digits</span> — Attempt #${store.attempts}`;
-    } else {
-      bl.innerHTML = `First attempt! Personal best: <span>${best} digits</span>`;
-    }
+    bl.innerHTML = `Personal best: <span>${best}/${TOTAL_ROUNDS}</span> &nbsp;·&nbsp; Attempts: <span>${store.attempts}</span>`;
 
     const desc = document.getElementById('result-desc');
-    if (score === 0) {
-      desc.textContent = 'You were not able to recall any sequence correctly.';
-    } else if (score < AVG_HUMAN) {
-      desc.textContent = `You successfully recalled sequences up to ${score} digits. The human average is ${AVG_HUMAN}.`;
-    } else if (score === AVG_HUMAN) {
-      desc.textContent = `You matched the human average of ${AVG_HUMAN} digits. Well done!`;
-    } else {
-      desc.textContent = `Impressive! You recalled sequences of ${score} digits — above the human average of ${AVG_HUMAN}.`;
-    }
+    desc.textContent = `You got ${correctCount} out of ${TOTAL_ROUNDS} sequences correct (all ${DIGITS} digits each).`;
   }
 </script>
 </body>

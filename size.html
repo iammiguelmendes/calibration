@@ -38,25 +38,18 @@ main{flex:1;padding:3rem 0}
 
 /* Test-specific */
 .round-label{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim);margin-bottom:1.5rem}
-.circles-row{display:flex;justify-content:center;gap:3rem;margin-bottom:2rem;align-items:center}
-.circle-box{display:flex;flex-direction:column;align-items:center;gap:1rem}
-.circle-box .box-label{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px}
-.circle-holder{width:200px;height:200px;display:flex;align-items:center;justify-content:center}
-.circle{border-radius:50%;background:var(--text);display:block;transition:background .2s}
-.choice-btns{display:flex;gap:1rem;justify-content:center;margin-bottom:1rem}
-.choice-btn{background:var(--card-bg);border:1px solid var(--border);color:var(--text);padding:.75rem 2rem;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Manrope',sans-serif}
-.choice-btn:hover{border-color:var(--primary);color:var(--primary)}
-.choice-btn.selected{border-color:var(--primary);color:var(--primary)}
-.choice-btn.wrong{border-color:var(--secondary);color:var(--secondary)}
-.phase2-row{display:flex;align-items:center;gap:1rem;margin-top:1rem;justify-content:center}
-.phase2-row input[type=number]{background:var(--card-bg);border:1px solid var(--border);color:var(--text);padding:.75rem 1rem;border-radius:8px;font-family:'Space Mono',monospace;font-size:1.1rem;width:120px;outline:none;transition:border-color .2s}
-.phase2-row input[type=number]:focus{border-color:var(--primary)}
-.phase2-row label{color:var(--text-dim);font-size:.9rem}
-.feedback{font-family:'Space Mono',monospace;font-size:.9rem;margin-bottom:1rem;min-height:1.4em;color:var(--text-dim);text-align:center}
+.circles-row{display:flex;justify-content:center;gap:4rem;margin-bottom:2.5rem;align-items:center}
+.circle-box{display:flex;flex-direction:column;align-items:center;gap:.75rem}
+.circle-box .box-label{font-family:'Space Mono',monospace;font-size:.8rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px}
+.circle-holder{width:220px;height:220px;display:flex;align-items:center;justify-content:center}
+.circle{border-radius:50%;background:var(--text);display:block}
+.guess-row{display:flex;align-items:center;gap:1rem;justify-content:center;margin-bottom:.75rem}
+.guess-row input[type=number]{background:var(--card-bg);border:1px solid var(--border);color:var(--text);padding:.75rem 1rem;border-radius:8px;font-family:'Space Mono',monospace;font-size:1.2rem;width:120px;outline:none;transition:border-color .2s;text-align:center}
+.guess-row input[type=number]:focus{border-color:var(--primary)}
+.guess-row label{color:var(--text-dim);font-size:.9rem}
+.guess-prompt{color:var(--text-dim);font-size:.95rem;text-align:center;margin-bottom:1rem}
+.feedback{font-family:'Space Mono',monospace;font-size:.9rem;margin-top:.75rem;min-height:1.4em;color:var(--text-dim);text-align:center}
 .feedback.correct{color:var(--primary)}
-.feedback.wrong{color:var(--secondary)}
-.phase2-section{margin-top:1.5rem;text-align:center}
-.phase2-prompt{color:var(--text-dim);font-size:.95rem;margin-bottom:1rem}
 </style>
 </head>
 <body>
@@ -76,7 +69,7 @@ main{flex:1;padding:3rem 0}
     <!-- INTRO -->
     <div id="screen-intro" class="screen active">
       <div class="test-title">Size Comparison</div>
-      <div class="test-desc">Two circles will appear side by side. First, decide which one is bigger. Then estimate by how many percent it is bigger. You'll get 10 rounds — accuracy on both questions counts.</div>
+      <div class="test-desc">Two circles will appear — one bigger than the other. Estimate by how many percent the larger one is bigger than the smaller one. 10 rounds, keep your error as low as possible.</div>
       <button class="btn" onclick="startTest()">Start Test</button>
     </div>
 
@@ -93,19 +86,13 @@ main{flex:1;padding:3rem 0}
           <div class="circle-holder"><div class="circle" id="circle-b"></div></div>
         </div>
       </div>
-      <div class="choice-btns">
-        <button class="choice-btn" id="btn-a" onclick="chooseCircle('A')">A is bigger</button>
-        <button class="choice-btn" id="btn-b" onclick="chooseCircle('B')">B is bigger</button>
+      <div class="guess-prompt">How much bigger is the larger circle? (in %)</div>
+      <div class="guess-row">
+        <input type="number" id="pct-input" min="1" max="300" placeholder="e.g. 25">
+        <label>%</label>
+        <button class="btn" id="submit-btn" onclick="submitGuess()">Submit</button>
       </div>
       <div class="feedback" id="feedback"></div>
-      <div class="phase2-section" id="phase2-section" style="display:none">
-        <div class="phase2-prompt">How much bigger is it? (in %)</div>
-        <div class="phase2-row">
-          <input type="number" id="pct-input" min="1" max="200" placeholder="e.g. 25">
-          <label>%</label>
-          <button class="btn" id="phase2-btn" onclick="submitPct()">Submit</button>
-        </div>
-      </div>
     </div>
 
     <!-- RESULT -->
@@ -118,7 +105,7 @@ main{flex:1;padding:3rem 0}
         </div>
         <div class="stat-card">
           <div class="label">Human Average</div>
-          <div class="value neutral">7.3/10</div>
+          <div class="value neutral">±20%</div>
         </div>
         <div class="stat-card">
           <div class="label">Percentile</div>
@@ -137,16 +124,13 @@ main{flex:1;padding:3rem 0}
 
 <script>
 const TOTAL_ROUNDS = 10;
-const AVG_HUMAN = 0.73; // 73% correct = 7.3/10
+const AVG_HUMAN = 20; // ±20% average error on size estimation
 const BASE_SIZE = 120;
 const KEY = 'ah_size';
 
 let currentRound = 0;
-let correctCount = 0;
-let pctErrors = [];
-let largerCircle = ''; // 'A' or 'B'
+let errors = [];
 let actualPctDiff = 0;
-let phase = 1; // 1 = identification, 2 = percentage guess
 let awaitingNext = false;
 
 function randInt(min, max) {
@@ -170,8 +154,7 @@ function showScreen(id) {
 
 function startTest() {
   currentRound = 0;
-  correctCount = 0;
-  pctErrors = [];
+  errors = [];
   awaitingNext = false;
   showScreen('screen-test');
   nextRound();
@@ -179,24 +162,17 @@ function startTest() {
 
 function nextRound() {
   awaitingNext = false;
-  phase = 1;
   currentRound++;
   document.getElementById('round-label').textContent = `Round ${currentRound} of ${TOTAL_ROUNDS}`;
   document.getElementById('feedback').textContent = '';
   document.getElementById('feedback').className = 'feedback';
-  document.getElementById('phase2-section').style.display = 'none';
   document.getElementById('pct-input').value = '';
-
-  const btnA = document.getElementById('btn-a');
-  const btnB = document.getElementById('btn-b');
-  btnA.className = 'choice-btn';
-  btnB.className = 'choice-btn';
-  btnA.disabled = false;
-  btnB.disabled = false;
+  document.getElementById('pct-input').disabled = false;
+  document.getElementById('submit-btn').textContent = 'Submit';
+  document.getElementById('pct-input').focus();
 
   actualPctDiff = randInt(5, 50);
-  largerCircle = Math.random() < 0.5 ? 'A' : 'B';
-
+  const largerCircle = Math.random() < 0.5 ? 'A' : 'B';
   const largerSize = Math.round(BASE_SIZE * (1 + actualPctDiff / 100));
   const sizeA = largerCircle === 'A' ? largerSize : BASE_SIZE;
   const sizeB = largerCircle === 'B' ? largerSize : BASE_SIZE;
@@ -207,32 +183,7 @@ function nextRound() {
   document.getElementById('circle-b').style.height = sizeB + 'px';
 }
 
-function chooseCircle(choice) {
-  if (phase !== 1 || awaitingNext) return;
-  phase = 2;
-
-  const btnA = document.getElementById('btn-a');
-  const btnB = document.getElementById('btn-b');
-  btnA.disabled = true;
-  btnB.disabled = true;
-
-  const correct = choice === largerCircle;
-  if (correct) {
-    correctCount++;
-    document.getElementById(choice === 'A' ? 'btn-a' : 'btn-b').className = 'choice-btn selected';
-    document.getElementById('feedback').textContent = 'Correct! Now estimate by how much.';
-    document.getElementById('feedback').className = 'feedback correct';
-  } else {
-    document.getElementById(choice === 'A' ? 'btn-a' : 'btn-b').className = 'choice-btn wrong';
-    document.getElementById('feedback').textContent = `Wrong — ${largerCircle} was bigger. Now estimate by how much.`;
-    document.getElementById('feedback').className = 'feedback wrong';
-  }
-
-  document.getElementById('phase2-section').style.display = 'block';
-  document.getElementById('pct-input').focus();
-}
-
-function submitPct() {
+function submitGuess() {
   if (awaitingNext) {
     if (currentRound >= TOTAL_ROUNDS) {
       showResult();
@@ -246,50 +197,44 @@ function submitPct() {
   const val = parseFloat(input.value);
   if (isNaN(val) || val < 1) {
     document.getElementById('feedback').textContent = 'Enter a percentage (e.g. 25).';
-    document.getElementById('feedback').className = 'feedback';
     return;
   }
 
   const err = Math.abs(val - actualPctDiff);
-  pctErrors.push(err);
+  errors.push(err);
 
-  document.getElementById('feedback').textContent = `Actual difference: ${actualPctDiff}% — Your estimate: ${val}% — Error: ${err.toFixed(1)}pp`;
-  document.getElementById('feedback').className = 'feedback';
+  const fb = document.getElementById('feedback');
+  fb.textContent = `Actual: ${actualPctDiff}% — Your guess: ${val}% — Error: ${err.toFixed(1)}%`;
+  fb.className = err <= 3 ? 'feedback correct' : 'feedback';
 
   input.disabled = true;
   awaitingNext = true;
-
-  if (currentRound >= TOTAL_ROUNDS) {
-    document.getElementById('phase2-btn').textContent = 'See Results';
-  } else {
-    document.getElementById('phase2-btn').textContent = 'Next Round';
-  }
+  document.getElementById('submit-btn').textContent = currentRound >= TOTAL_ROUNDS ? 'See Results' : 'Next Round';
 }
 
 function showResult() {
-  const scoreRatio = correctCount / TOTAL_ROUNDS;
-  const scoreStr = `${correctCount}/10`;
-  const percentile = getPercentile(scoreRatio, AVG_HUMAN, false);
+  const meanErr = errors.reduce((a, b) => a + b, 0) / errors.length;
+  const scoreStr = '±' + meanErr.toFixed(1) + '%';
+  const percentile = getPercentile(meanErr, AVG_HUMAN, true);
 
   document.getElementById('res-score').textContent = scoreStr;
   document.getElementById('res-percentile').textContent = percentile;
 
   let data = JSON.parse(localStorage.getItem(KEY) || 'null') || { attempts: 0, best: null, history: [] };
   data.attempts = (data.attempts || 0) + 1;
-  data.history.push(correctCount);
-  const isNewBest = data.best === null || correctCount > data.best;
-  if (isNewBest) data.best = correctCount;
+  data.history.push(parseFloat(meanErr.toFixed(2)));
+  if (data.best === null || meanErr < data.best) data.best = parseFloat(meanErr.toFixed(2));
   localStorage.setItem(KEY, JSON.stringify(data));
 
-  const bestLine = document.getElementById('best-line');
-  bestLine.innerHTML = `Personal best: <span>${data.best}/10</span> &nbsp;·&nbsp; Attempts: <span>${data.attempts}</span>`;
+  document.getElementById('best-line').innerHTML =
+    `Personal best: <span>±${data.best.toFixed(1)}%</span> &nbsp;·&nbsp; Attempts: <span>${data.attempts}</span>`;
 
   showScreen('screen-result');
 }
 
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Enter' && document.getElementById('screen-test').classList.contains('active')) {
-    if (phase === 2) submitPct();
+    submitGuess();
   }
 });
 </script>

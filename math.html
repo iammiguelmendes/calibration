@@ -37,14 +37,24 @@ main{flex:1;padding:3rem 0}
 .fade-in{animation:fadeIn .4s ease forwards}
 
 /* Test-specific */
-.round-label{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim);margin-bottom:1.5rem}
-.problem-display{font-family:'Space Mono',monospace;font-size:2.8rem;font-weight:700;text-align:center;padding:2.5rem 2rem;background:var(--card-bg);border:1px solid var(--border);border-radius:16px;margin-bottom:2rem;letter-spacing:2px}
+.round-label{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim);margin-bottom:1rem}
+
+/* Timer bar */
+.timer-track{width:100%;height:4px;background:var(--border);border-radius:2px;margin-bottom:1.5rem;overflow:hidden}
+.timer-bar{height:100%;background:var(--primary);border-radius:2px;width:100%;transition:width linear,background linear}
+.timer-bar.urgent{background:var(--secondary)}
+
+.problem-display{font-family:'Space Mono',monospace;font-size:2.8rem;font-weight:700;text-align:center;padding:2.5rem 2rem;background:var(--card-bg);border:1px solid var(--border);border-radius:16px;margin-bottom:.75rem;letter-spacing:2px;position:relative}
 .problem-display .equals{color:var(--text-dim)}
+.timer-num{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim);text-align:right;margin-bottom:1.25rem;transition:color .2s}
+.timer-num.urgent{color:var(--secondary)}
+
 .guess-row{display:flex;align-items:center;gap:1rem}
 .guess-row input[type=number]{background:var(--card-bg);border:1px solid var(--border);color:var(--text);padding:.75rem 1rem;border-radius:8px;font-family:'Space Mono',monospace;font-size:1.1rem;width:160px;outline:none;transition:border-color .2s}
 .guess-row input[type=number]:focus{border-color:var(--primary)}
 .feedback{font-family:'Space Mono',monospace;font-size:.9rem;margin-top:1rem;min-height:1.4em;color:var(--text-dim)}
 .feedback.good{color:var(--primary)}
+.feedback.miss{color:var(--secondary)}
 </style>
 </head>
 <body>
@@ -64,16 +74,18 @@ main{flex:1;padding:3rem 0}
     <!-- INTRO -->
     <div id="screen-intro" class="screen active">
       <div class="test-title">Math Estimation</div>
-      <div class="test-desc">You'll be shown 10 multiplication problems. Your goal is not to calculate exactly — just estimate as close as you can. Rounds 1–5 use two 2-digit numbers; rounds 6–10 mix a 3-digit and a 2-digit number. No time limit.</div>
+      <div class="test-desc">You'll be shown 10 multiplication problems. Estimate as close as you can — you have 5 seconds per round. Rounds 1–5 use two 2-digit numbers; rounds 6–10 mix a 3-digit and a 2-digit number.</div>
       <button class="btn" onclick="startTest()">Start Test</button>
     </div>
 
     <!-- TEST -->
     <div id="screen-test" class="screen">
       <div class="round-label" id="round-label">Round 1 of 10</div>
+      <div class="timer-track"><div class="timer-bar" id="timer-bar"></div></div>
       <div class="problem-display" id="problem-display">
         <span id="num-a">—</span> × <span id="num-b">—</span> <span class="equals">=</span> ?
       </div>
+      <div class="timer-num" id="timer-num">5.0s</div>
       <div class="guess-row">
         <input type="number" id="math-input" min="1" placeholder="Your estimate">
         <button class="btn" id="submit-btn" onclick="submitGuess()">Submit</button>
@@ -113,10 +125,14 @@ const TOTAL_ROUNDS = 10;
 const AVG_HUMAN = 15;
 const KEY = 'ah_math';
 
+const TIMER_DURATION = 5000;
+
 let currentRound = 0;
 let numA = 0, numB = 0, actual = 0;
 let pctErrors = [];
 let awaitingNext = false;
+let timerInterval = null;
+let timerStart = null;
 
 function randInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -137,10 +153,70 @@ function showScreen(id) {
   document.getElementById(id).classList.add('active');
 }
 
+function clearTimer() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+}
+
+function startTimer() {
+  clearTimer();
+  timerStart = performance.now();
+  const bar = document.getElementById('timer-bar');
+  const num = document.getElementById('timer-num');
+  bar.style.transition = 'none';
+  bar.style.width = '100%';
+  bar.className = 'timer-bar';
+  num.className = 'timer-num';
+
+  // Kick off smooth CSS transition
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      bar.style.transition = `width ${TIMER_DURATION}ms linear`;
+      bar.style.width = '0%';
+    });
+  });
+
+  timerInterval = setInterval(() => {
+    const elapsed = performance.now() - timerStart;
+    const remaining = Math.max(0, (TIMER_DURATION - elapsed) / 1000);
+    num.textContent = remaining.toFixed(1) + 's';
+
+    if (remaining <= 2) {
+      bar.className = 'timer-bar urgent';
+      num.className = 'timer-num urgent';
+    }
+
+    if (elapsed >= TIMER_DURATION) {
+      clearTimer();
+      timeUp();
+    }
+  }, 50);
+}
+
+function timeUp() {
+  if (awaitingNext) return;
+  const input = document.getElementById('math-input');
+  const val = parseFloat(input.value);
+
+  // If they typed something, submit it; otherwise count as 100% error
+  if (!isNaN(val) && val >= 1) {
+    submitGuess();
+  } else {
+    pctErrors.push(100);
+    const fb = document.getElementById('feedback');
+    fb.textContent = `Time's up! Actual: ${actual.toLocaleString()} — No answer submitted`;
+    fb.className = 'feedback miss';
+    input.disabled = true;
+    awaitingNext = true;
+    document.getElementById('submit-btn').textContent = currentRound >= TOTAL_ROUNDS ? 'See Results' : 'Next Round';
+    document.getElementById('timer-num').textContent = '0.0s';
+  }
+}
+
 function startTest() {
   currentRound = 0;
   pctErrors = [];
   awaitingNext = false;
+  clearTimer();
   showScreen('screen-test');
   nextRound();
 }
@@ -155,6 +231,7 @@ function nextRound() {
   document.getElementById('math-input').disabled = false;
   document.getElementById('submit-btn').textContent = 'Submit';
   document.getElementById('math-input').focus();
+  startTimer();
 
   if (currentRound <= 5) {
     numA = randInt(11, 99);
@@ -192,6 +269,7 @@ function submitGuess() {
     return;
   }
 
+  clearTimer();
   const pctErr = (Math.abs(val - actual) / actual) * 100;
   pctErrors.push(pctErr);
 
@@ -210,6 +288,7 @@ function submitGuess() {
 }
 
 function showResult() {
+  clearTimer();
   const meanPctErr = pctErrors.reduce((a, b) => a + b, 0) / pctErrors.length;
   const scoreStr = meanPctErr.toFixed(1) + '%';
   const percentile = getPercentile(meanPctErr, AVG_HUMAN, true);

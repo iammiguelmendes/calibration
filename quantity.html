@@ -36,43 +36,124 @@ main{flex:1;padding:3rem 0}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .fade-in{animation:fadeIn .4s ease forwards}
 
-/* Test-specific styles */
-.round-counter{font-family:'Space Mono',monospace;font-size:.9rem;color:var(--text-dim);margin-bottom:1.5rem}
-.flash-area{
-  width:400px;height:300px;
-  background:var(--card-bg);
-  border:1px solid var(--border);
-  border-radius:12px;
-  position:relative;
-  overflow:hidden;
-  margin-bottom:1.5rem;
+/* Round counter */
+.round-progress {
+  font-family: 'Space Mono', monospace;
+  font-size: .85rem;
+  color: var(--text-dim);
+  margin-bottom: 1.5rem;
 }
-.dot{
-  position:absolute;
-  width:8px;height:8px;
-  background:var(--primary);
-  border-radius:50%;
-  opacity:1;
-  transition:opacity 0.15s ease;
+
+/* Flash area */
+.flash-area {
+  width: 100%;
+  height: 340px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 2rem;
+  transition: border-color .3s ease;
 }
-.dot.hidden{opacity:0}
-.guess-form{display:none;margin-top:.5rem}
-.guess-form.visible{display:block}
-.guess-label{font-size:1rem;color:var(--text-dim);margin-bottom:.75rem}
-.guess-input-row{display:flex;gap:.75rem;align-items:center}
-.number-input{
-  background:var(--card-bg);
-  border:1px solid var(--border);
-  color:var(--text);
-  padding:.75rem 1rem;
-  border-radius:8px;
-  font-size:1.1rem;
-  font-family:'Space Mono',monospace;
-  width:120px;
-  outline:none;
-  transition:border-color .2s;
+.flash-area.revealing {
+  border-color: rgba(0,255,157,0.3);
+  box-shadow: 0 0 40px rgba(0,255,157,0.04);
 }
-.number-input:focus{border-color:var(--primary)}
+.flash-area.hiding {
+  border-color: var(--border);
+}
+
+/* Status label inside flash area */
+.flash-status {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Space Mono', monospace;
+  font-size: .8rem;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: 1;
+  transition: opacity .3s ease;
+  pointer-events: none;
+}
+.flash-status.hidden { opacity: 0; }
+
+/* Dots */
+@keyframes dotPop {
+  0%   { transform: scale(0); opacity: 0; }
+  60%  { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes dotFade {
+  0%   { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.5); }
+}
+.dot {
+  position: absolute;
+  border-radius: 50%;
+  animation: dotPop 0.25s cubic-bezier(.34,1.56,.64,1) forwards;
+  will-change: transform, opacity;
+}
+.dot.fading {
+  animation: dotFade 0.25s ease forwards;
+}
+
+/* Guess form */
+.guess-form {
+  display: none;
+  animation: fadeIn .35s ease forwards;
+}
+.guess-form.visible { display: block; }
+
+.guess-label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+.guess-label span {
+  color: var(--text-dim);
+  font-weight: 400;
+  font-size: .95rem;
+}
+
+.guess-input-row { display: flex; gap: .75rem; align-items: center; }
+
+.number-input {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: .85rem 1.25rem;
+  border-radius: 10px;
+  font-size: 1.4rem;
+  font-family: 'Space Mono', monospace;
+  width: 130px;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  text-align: center;
+}
+.number-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0,255,157,0.1);
+}
+
+/* Round result flash */
+.round-feedback {
+  display: none;
+  font-family: 'Space Mono', monospace;
+  font-size: .9rem;
+  margin-top: 1rem;
+  padding: .75rem 1rem;
+  border-radius: 8px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  animation: fadeIn .25s ease forwards;
+}
+.round-feedback.visible { display: block; }
+.round-feedback .actual { color: var(--primary); }
+.round-feedback .error { color: var(--text-dim); }
 </style>
 </head>
 <body>
@@ -92,27 +173,30 @@ main{flex:1;padding:3rem 0}
     <!-- Intro Screen -->
     <div id="screen-intro" class="screen active">
       <h1 class="test-title">Quantity Estimation</h1>
-      <p class="test-desc">A cluster of dots will flash on screen for a brief moment. After they disappear, enter how many dots you saw. You'll complete 5 rounds with increasing difficulty. No counting — go with your gut.</p>
+      <p class="test-desc">A cluster of dots will flash on screen for a brief moment. After they disappear, enter how many you saw. 5 rounds total — trust your gut, no counting.</p>
       <button class="btn" onclick="startTest()">Start Test</button>
     </div>
 
     <!-- Test Screen -->
     <div id="screen-test" class="screen">
-      <div class="round-counter" id="round-counter">Round 1 of 5</div>
-      <div class="flash-area" id="flash-area"></div>
+      <div class="round-progress" id="round-progress"></div>
+      <div class="flash-area" id="flash-area">
+        <div class="flash-status" id="flash-status">Get ready…</div>
+      </div>
       <div class="guess-form" id="guess-form">
-        <p class="guess-label">How many dots did you see?</p>
+        <p class="guess-label">How many dots did you see? <span>Enter your best guess</span></p>
         <div class="guess-input-row">
-          <input type="number" class="number-input" id="guess-input" min="0" max="500" placeholder="0">
+          <input type="number" class="number-input" id="guess-input" min="0" max="200" placeholder="?">
           <button class="btn" onclick="submitGuess()">Submit</button>
         </div>
+        <div class="round-feedback" id="round-feedback"></div>
       </div>
     </div>
 
     <!-- Result Screen -->
     <div id="screen-result" class="screen">
       <h1 class="test-title fade-in">Test Complete</h1>
-      <p class="test-desc fade-in" style="margin-bottom:1.25rem">Here's how your quantity estimation compares.</p>
+      <p class="test-desc fade-in" style="margin-bottom:1.25rem">Here's how your quantity estimation stacks up.</p>
       <div class="result-stats fade-in">
         <div class="stat-card">
           <div class="label">Your Score</div>
@@ -120,7 +204,7 @@ main{flex:1;padding:3rem 0}
         </div>
         <div class="stat-card">
           <div class="label">Human Average</div>
-          <div class="value neutral">40%</div>
+          <div class="value neutral">±40%</div>
         </div>
         <div class="stat-card">
           <div class="label">Percentile</div>
@@ -140,13 +224,13 @@ main{flex:1;padding:3rem 0}
 <script>
 const STORAGE_KEY = 'ah_quantity';
 const HUMAN_AVG = 40;
-const RANGES = [[10,30],[30,60],[60,100],[100,150],[150,200]];
 const TOTAL_ROUNDS = 5;
+const MAX_DOTS = 32;
 
 let currentRound = 0;
 let actualCounts = [];
 let guesses = [];
-let flashTimeout = null;
+let accepting = false;
 
 function randInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -185,6 +269,10 @@ function showScreen(id) {
   document.getElementById(id).classList.add('active');
 }
 
+function buildPips() {
+  document.getElementById('round-progress').textContent = `Round ${currentRound + 1} of ${TOTAL_ROUNDS}`;
+}
+
 function startTest() {
   currentRound = 0;
   actualCounts = [];
@@ -194,54 +282,126 @@ function startTest() {
 }
 
 function runRound() {
-  const [min, max] = RANGES[currentRound];
-  const count = randInt(min, max);
+  accepting = false;
+  buildPips();
+
+  const count = randInt(1, MAX_DOTS);
   actualCounts.push(count);
 
-  document.getElementById('round-counter').textContent = `Round ${currentRound + 1} of ${TOTAL_ROUNDS}`;
-  document.getElementById('guess-form').classList.remove('visible');
-  document.getElementById('guess-input').value = '';
-
+  const guessForm = document.getElementById('guess-form');
+  const feedback = document.getElementById('round-feedback');
   const flashArea = document.getElementById('flash-area');
-  flashArea.innerHTML = '';
+  const statusEl = document.getElementById('flash-status');
 
-  // Place dots
-  const areaW = 400, areaH = 300, dotSize = 8, margin = 10;
+  guessForm.classList.remove('visible');
+  feedback.classList.remove('visible');
+  document.getElementById('guess-input').value = '';
+  flashArea.innerHTML = '';
+  flashArea.classList.remove('revealing', 'hiding');
+
+  // Re-add status label
+  const newStatus = document.createElement('div');
+  newStatus.className = 'flash-status';
+  newStatus.id = 'flash-status';
+  newStatus.textContent = 'Get ready…';
+  flashArea.appendChild(newStatus);
+
+  // Short delay then show dots
+  setTimeout(() => {
+    newStatus.classList.add('hidden');
+    flashArea.classList.add('revealing');
+    placeDots(flashArea, count);
+
+    // Hide dots after 1600ms
+    setTimeout(() => {
+      flashArea.classList.remove('revealing');
+      flashArea.classList.add('hiding');
+      flashArea.querySelectorAll('.dot').forEach((d, i) => {
+        setTimeout(() => d.classList.add('fading'), i * 8);
+      });
+
+      // Show input after dots finish fading
+      setTimeout(() => {
+        flashArea.innerHTML = '';
+        guessForm.classList.add('visible');
+        document.getElementById('guess-input').focus();
+        accepting = true;
+      }, 300);
+    }, 1600);
+  }, 500);
+}
+
+function placeDots(container, count) {
+  const W = container.clientWidth || 700;
+  const H = container.clientHeight || 340;
+  const placed = [];
+
   for (let i = 0; i < count; i++) {
+    const size = randInt(9, 17);
+    const margin = size + 6;
+    let x, y, tries = 0;
+
+    // Simple overlap avoidance
+    do {
+      x = randInt(margin, W - margin - size);
+      y = randInt(margin, H - margin - size);
+      tries++;
+    } while (tries < 30 && placed.some(p => {
+      const dx = p.x - x, dy = p.y - y;
+      return Math.sqrt(dx*dx + dy*dy) < (p.size + size) / 2 + 4;
+    }));
+
+    placed.push({ x, y, size });
+
     const dot = document.createElement('div');
     dot.className = 'dot';
-    dot.style.left = randInt(margin, areaW - margin - dotSize) + 'px';
-    dot.style.top = randInt(margin, areaH - margin - dotSize) + 'px';
-    flashArea.appendChild(dot);
-  }
+    dot.style.width = size + 'px';
+    dot.style.height = size + 'px';
+    dot.style.left = x + 'px';
+    dot.style.top = y + 'px';
+    dot.style.animationDelay = (i * 12) + 'ms';
 
-  // Hide dots after 600ms
-  flashTimeout = setTimeout(() => {
-    flashArea.querySelectorAll('.dot').forEach(d => d.classList.add('hidden'));
-    setTimeout(() => {
-      document.getElementById('guess-form').classList.add('visible');
-      document.getElementById('guess-input').focus();
-    }, 200);
-  }, 600);
+    // Color: mostly primary, occasional white or dimmer variant
+    dot.style.background = 'var(--primary)';
+
+    // Subtle glow on some dots
+    if (Math.random() > 0.6) {
+      dot.style.boxShadow = '0 0 6px rgba(0,255,157,0.5)';
+    }
+
+    container.appendChild(dot);
+  }
 }
 
 function submitGuess() {
+  if (!accepting) return;
   const input = document.getElementById('guess-input');
   const val = parseInt(input.value, 10);
   if (isNaN(val) || val < 0) return;
 
+  accepting = false;
   guesses.push(val);
 
+  // Show per-round feedback
+  const actual = actualCounts[currentRound];
+  const err = Math.round(Math.abs(val - actual) / actual * 100);
+  const feedback = document.getElementById('round-feedback');
+  feedback.innerHTML = `There were <span class="actual">${actual}</span> dots &nbsp;·&nbsp; <span class="error">Your error: ${err}%</span>`;
+  feedback.classList.add('visible');
+
   currentRound++;
+
   if (currentRound < TOTAL_ROUNDS) {
-    runRound();
+    setTimeout(() => runRound(), 1200);
   } else {
-    finishTest();
+    setTimeout(() => finishTest(), 1200);
   }
 }
 
-document.getElementById('guess-input').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') submitGuess();
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && document.getElementById('screen-test').classList.contains('active')) {
+    submitGuess();
+  }
 });
 
 function finishTest() {
@@ -250,12 +410,11 @@ function finishTest() {
     totalError += Math.abs(guesses[i] - actualCounts[i]) / actualCounts[i] * 100;
   }
   const score = Math.round(totalError / TOTAL_ROUNDS);
-
   const data = saveStorage(score);
 
-  document.getElementById('res-score').textContent = score + '%';
+  document.getElementById('res-score').textContent = '±' + score + '%';
   document.getElementById('res-percentile').textContent = getPercentile(score, HUMAN_AVG, true);
-  document.getElementById('res-best').textContent = data.best + '%';
+  document.getElementById('res-best').textContent = '±' + data.best + '%';
 
   showScreen('screen-result');
 }

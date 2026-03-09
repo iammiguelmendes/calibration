@@ -147,13 +147,12 @@ function showScreen(id) {
 }
 
 function drawAngle(deg) {
-  // SVG: 0° = right (east), angles measured from positive x-axis
-  // We want 0° to appear as horizontal-right, 90° as straight up, 180° as horizontal-left
-  // Convert: SVG y is flipped, so subtract from 360 for clockwise
+  // 0° = right, 90° = straight up, 180° = left (standard math convention)
+  // SVG y-axis is flipped so we negate the sin component
   const rad = (deg * Math.PI) / 180;
   const cx = 150, cy = 150, r = 115;
-  const x2 = cx + r * Math.cos(Math.PI - rad);
-  const y2 = cy - r * Math.sin(Math.PI - rad);
+  const x2 = cx + r * Math.cos(rad);
+  const y2 = cy - r * Math.sin(rad);
   document.getElementById('angle-line').setAttribute('x1', cx);
   document.getElementById('angle-line').setAttribute('y1', cy);
   document.getElementById('angle-line').setAttribute('x2', x2.toFixed(2));

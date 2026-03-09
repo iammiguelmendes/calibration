@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Angle Guesser — AverageHuman</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0d0d0d;--card-bg:#1a1a1a;--primary:#00ff9d;--secondary:#ff3366;--text:#fff;--text-dim:#888;--border:#2a2a2a}
+body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+.container{max-width:800px;margin:0 auto;padding:0 2rem;width:100%}
+header{padding:1.25rem 0;border-bottom:1px solid var(--border)}
+.header-content{display:flex;align-items:center;gap:1rem}
+.back-btn{background:none;border:1px solid var(--border);color:var(--text-dim);padding:.5rem .9rem;border-radius:8px;cursor:pointer;font-size:1rem;transition:all .2s;text-decoration:none;font-family:'Manrope',sans-serif}
+.back-btn:hover{border-color:var(--primary);color:var(--primary)}
+.logo{font-size:1.4rem;font-weight:800;letter-spacing:-0.5px}
+.logo span{color:var(--primary)}
+main{flex:1;padding:3rem 0}
+.screen{display:none}.screen.active{display:block}
+.test-title{font-size:2rem;font-weight:800;margin-bottom:.75rem}
+.test-desc{color:var(--text-dim);font-size:1rem;line-height:1.6;margin-bottom:2rem;max-width:560px}
+.btn{background:var(--primary);color:#000;border:none;padding:.85rem 2rem;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Manrope',sans-serif}
+.btn:hover{opacity:.85;transform:translateY(-1px)}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--text-dim);padding:.75rem 1.5rem;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Manrope',sans-serif}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
+.stat-card{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:1.25rem;text-align:center}
+.stat-card .label{font-size:.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem}
+.stat-card .value{font-family:'Space Mono',monospace;font-size:1.6rem;font-weight:700;color:var(--primary)}
+.stat-card .value.neutral{color:var(--text)}
+.result-actions{display:flex;gap:1rem;flex-wrap:wrap}
+.best-line{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim);margin-bottom:1.5rem}
+.best-line span{color:var(--primary)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .4s ease forwards}
+
+/* Test-specific */
+.round-label{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim);margin-bottom:1.5rem}
+.svg-wrapper{display:flex;justify-content:center;margin-bottom:2rem}
+.svg-wrapper svg{background:var(--card-bg);border:1px solid var(--border);border-radius:12px}
+.guess-row{display:flex;align-items:center;gap:1rem;margin-bottom:.5rem}
+.guess-row input[type=number]{background:var(--card-bg);border:1px solid var(--border);color:var(--text);padding:.75rem 1rem;border-radius:8px;font-family:'Space Mono',monospace;font-size:1.1rem;width:120px;outline:none;transition:border-color .2s}
+.guess-row input[type=number]:focus{border-color:var(--primary)}
+.guess-row label{color:var(--text-dim);font-size:.9rem}
+.feedback{font-family:'Space Mono',monospace;font-size:.9rem;margin-bottom:1rem;min-height:1.4em;color:var(--text-dim)}
+.feedback.correct{color:var(--primary)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div class="header-content">
+      <a href="index.html" class="back-btn">←</a>
+      <div class="logo">Average<span>Human</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+
+    <!-- INTRO -->
+    <div id="screen-intro" class="screen active">
+      <div class="test-title">Angle Guesser</div>
+      <div class="test-desc">A line will be drawn on screen at a random angle. Your job is to estimate the angle in degrees (0–180°). A faint horizontal baseline is shown for reference. You'll have 8 rounds — try to keep your average error as low as possible.</div>
+      <button class="btn" onclick="startTest()">Start Test</button>
+    </div>
+
+    <!-- TEST -->
+    <div id="screen-test" class="screen">
+      <div class="round-label" id="round-label">Round 1 of 8</div>
+      <div class="svg-wrapper">
+        <svg id="angle-svg" width="300" height="300" viewBox="0 0 300 300">
+          <!-- baseline -->
+          <line id="baseline" x1="30" y1="150" x2="270" y2="150" stroke="#333" stroke-width="1.5" stroke-dasharray="4,4"/>
+          <!-- angle line -->
+          <line id="angle-line" x1="150" y1="150" x2="150" y2="150" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+          <!-- center dot -->
+          <circle cx="150" cy="150" r="3" fill="var(--primary)"/>
+        </svg>
+      </div>
+      <div class="feedback" id="feedback"></div>
+      <div class="guess-row">
+        <input type="number" id="angle-input" min="0" max="180" placeholder="0–180">
+        <label>degrees</label>
+        <button class="btn" id="submit-btn" onclick="submitGuess()">Submit</button>
+      </div>
+    </div>
+
+    <!-- RESULT -->
+    <div id="screen-result" class="screen">
+      <div class="test-title fade-in">Results</div>
+      <div class="result-stats fade-in">
+        <div class="stat-card">
+          <div class="label">Your Score</div>
+          <div class="value" id="res-score">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Human Average</div>
+          <div class="value neutral">15°</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Percentile</div>
+          <div class="value" id="res-percentile">—</div>
+        </div>
+      </div>
+      <div class="best-line" id="best-line"></div>
+      <div class="result-actions">
+        <button class="btn" onclick="startTest()">Try Again</button>
+        <a href="index.html" class="btn-outline">Back to Tests</a>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+const TOTAL_ROUNDS = 8;
+const AVG_HUMAN = 15;
+const KEY = 'ah_angle';
+
+let currentRound = 0;
+let targetAngle = 0;
+let errors = [];
+let awaitingNext = false;
+
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function getPercentile(score, avgHuman, lowerIsBetter) {
+  const ratio = lowerIsBetter ? avgHuman / score : score / avgHuman;
+  if (ratio >= 2) return 'Top 5%';
+  if (ratio >= 1.5) return 'Top 15%';
+  if (ratio >= 1.2) return 'Top 30%';
+  if (ratio >= 0.85) return 'Around 50%';
+  if (ratio >= 0.6) return 'Bottom 30%';
+  return 'Bottom 15%';
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function drawAngle(deg) {
+  // SVG: 0° = right (east), angles measured from positive x-axis
+  // We want 0° to appear as horizontal-right, 90° as straight up, 180° as horizontal-left
+  // Convert: SVG y is flipped, so subtract from 360 for clockwise
+  const rad = (deg * Math.PI) / 180;
+  const cx = 150, cy = 150, r = 115;
+  const x2 = cx + r * Math.cos(Math.PI - rad);
+  const y2 = cy - r * Math.sin(Math.PI - rad);
+  document.getElementById('angle-line').setAttribute('x1', cx);
+  document.getElementById('angle-line').setAttribute('y1', cy);
+  document.getElementById('angle-line').setAttribute('x2', x2.toFixed(2));
+  document.getElementById('angle-line').setAttribute('y2', y2.toFixed(2));
+}
+
+function startTest() {
+  currentRound = 0;
+  errors = [];
+  awaitingNext = false;
+  showScreen('screen-test');
+  nextRound();
+}
+
+function nextRound() {
+  awaitingNext = false;
+  currentRound++;
+  document.getElementById('round-label').textContent = `Round ${currentRound} of ${TOTAL_ROUNDS}`;
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('angle-input').value = '';
+  document.getElementById('angle-input').disabled = false;
+  document.getElementById('submit-btn').textContent = 'Submit';
+  document.getElementById('angle-input').focus();
+
+  targetAngle = randInt(5, 175);
+  drawAngle(targetAngle);
+}
+
+function submitGuess() {
+  if (awaitingNext) {
+    if (currentRound >= TOTAL_ROUNDS) {
+      showResult();
+    } else {
+      nextRound();
+    }
+    return;
+  }
+
+  const input = document.getElementById('angle-input');
+  const val = parseFloat(input.value);
+  if (isNaN(val) || val < 0 || val > 180) {
+    document.getElementById('feedback').textContent = 'Enter a value between 0 and 180.';
+    return;
+  }
+
+  const err = Math.abs(val - targetAngle);
+  errors.push(err);
+
+  const fb = document.getElementById('feedback');
+  fb.textContent = `Actual: ${targetAngle}° — Error: ${err.toFixed(1)}°`;
+  fb.className = err <= 5 ? 'feedback correct' : 'feedback';
+
+  input.disabled = true;
+  awaitingNext = true;
+
+  if (currentRound >= TOTAL_ROUNDS) {
+    document.getElementById('submit-btn').textContent = 'See Results';
+  } else {
+    document.getElementById('submit-btn').textContent = 'Next Round';
+  }
+}
+
+function showResult() {
+  const meanErr = errors.reduce((a, b) => a + b, 0) / errors.length;
+  const scoreStr = meanErr.toFixed(1) + '°';
+  const percentile = getPercentile(meanErr, AVG_HUMAN, true);
+
+  document.getElementById('res-score').textContent = scoreStr;
+  document.getElementById('res-percentile').textContent = percentile;
+
+  // localStorage
+  let data = JSON.parse(localStorage.getItem(KEY) || 'null') || { attempts: 0, best: null, history: [] };
+  data.attempts = (data.attempts || 0) + 1;
+  data.history.push(parseFloat(meanErr.toFixed(2)));
+  const isNewBest = data.best === null || meanErr < data.best;
+  if (isNewBest) data.best = parseFloat(meanErr.toFixed(2));
+  localStorage.setItem(KEY, JSON.stringify(data));
+
+  const bestLine = document.getElementById('best-line');
+  bestLine.innerHTML = `Personal best: <span>${data.best.toFixed(1)}°</span> &nbsp;·&nbsp; Attempts: <span>${data.attempts}</span>`;
+
+  showScreen('screen-result');
+}
+
+// Allow Enter key to submit
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && document.getElementById('screen-test').classList.contains('active')) {
+    submitGuess();
+  }
+});
+</script>
+</body>
+</html>

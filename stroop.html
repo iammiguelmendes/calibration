@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stroop Test — AverageHuman</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0d0d0d;--card-bg:#1a1a1a;--primary:#00ff9d;--secondary:#ff3366;--text:#fff;--text-dim:#888;--border:#2a2a2a}
+body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+.container{max-width:800px;margin:0 auto;padding:0 2rem;width:100%}
+header{padding:1.25rem 0;border-bottom:1px solid var(--border)}
+.header-content{display:flex;align-items:center;gap:1rem}
+.back-btn{background:none;border:1px solid var(--border);color:var(--text-dim);padding:.5rem .9rem;border-radius:8px;cursor:pointer;font-size:1rem;transition:all .2s;text-decoration:none;font-family:'Manrope',sans-serif}
+.back-btn:hover{border-color:var(--primary);color:var(--primary)}
+.logo{font-size:1.4rem;font-weight:800;letter-spacing:-0.5px}
+.logo span{color:var(--primary)}
+main{flex:1;padding:3rem 0}
+.screen{display:none}.screen.active{display:block}
+.test-title{font-size:2rem;font-weight:800;margin-bottom:.75rem}
+.test-desc{color:var(--text-dim);font-size:1rem;line-height:1.6;margin-bottom:2rem;max-width:560px}
+.btn{background:var(--primary);color:#000;border:none;padding:.85rem 2rem;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Manrope',sans-serif}
+.btn:hover{opacity:.85;transform:translateY(-1px)}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--text-dim);padding:.75rem 1.5rem;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Manrope',sans-serif}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
+.stat-card{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:1.25rem;text-align:center}
+.stat-card .label{font-size:.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem}
+.stat-card .value{font-family:'Space Mono',monospace;font-size:1.6rem;font-weight:700;color:var(--primary)}
+.stat-card .value.neutral{color:var(--text)}
+.result-actions{display:flex;gap:1rem;flex-wrap:wrap}
+.best-line{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim);margin-bottom:1.5rem}
+.best-line span{color:var(--primary)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .4s ease forwards}
+
+/* ── Stroop-specific ── */
+.stroop-wrapper{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;overflow:hidden;max-width:560px}
+
+/* Timer bar */
+.timer-track{height:4px;background:var(--border);position:relative}
+.timer-bar{height:100%;background:var(--primary);width:100%;transform-origin:left;transition:none}
+
+/* Main area */
+.stroop-body{padding:2.5rem 2rem 2rem}
+.round-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem}
+.round-counter{font-family:'Space Mono',monospace;font-size:.8rem;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase}
+.score-counter{font-family:'Space Mono',monospace;font-size:.8rem;color:var(--text-dim)}
+.score-counter span{color:var(--text)}
+
+/* Word display */
+.word-area{text-align:center;min-height:120px;display:flex;align-items:center;justify-content:center;margin-bottom:2.5rem}
+.color-word{font-family:'Space Mono',monospace;font-size:5rem;font-weight:700;letter-spacing:2px;transition:color .05s;line-height:1}
+
+/* Color buttons */
+.color-buttons{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.color-btn{padding:1rem;border-radius:10px;background:transparent;font-family:'Space Mono',monospace;font-size:1rem;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .15s;border:2px solid;text-transform:uppercase}
+.color-btn:hover{opacity:.85;transform:translateY(-1px)}
+.color-btn:disabled{cursor:default;transform:none;opacity:.5}
+.color-btn[data-color="Red"]{border-color:#ff3366;color:#ff3366}
+.color-btn[data-color="Blue"]{border-color:#4488ff;color:#4488ff}
+.color-btn[data-color="Green"]{border-color:#00ff9d;color:#00ff9d}
+.color-btn[data-color="Yellow"]{border-color:#ffdd00;color:#ffdd00}
+
+/* Feedback flash states */
+.color-btn.flash-correct{background:rgba(0,255,157,0.15);border-color:#00ff9d !important;color:#00ff9d !important}
+.color-btn.flash-wrong{background:rgba(255,51,102,0.15);border-color:#ff3366 !important;color:#ff3366 !important}
+
+/* Intro feature list */
+.feature-list{list-style:none;margin-bottom:2rem;display:flex;flex-direction:column;gap:.6rem}
+.feature-list li{color:var(--text-dim);font-size:.95rem;display:flex;align-items:flex-start;gap:.6rem}
+.feature-list li::before{content:'—';color:var(--primary);flex-shrink:0}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div class="header-content">
+      <a href="index.html" class="back-btn">←</a>
+      <div class="logo">Average<span>Human</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+
+    <!-- INTRO SCREEN -->
+    <div id="screen-intro" class="screen active fade-in">
+      <div class="test-title">Stroop Test</div>
+      <p class="test-desc">Your brain wants to read the word. Your job is to ignore it.</p>
+      <ul class="feature-list">
+        <li>A color word appears in a different ink color.</li>
+        <li>Click the button matching the <strong style="color:var(--text)">ink color</strong> — not the word.</li>
+        <li>You have 3 seconds per round. 20 rounds total.</li>
+        <li>No answer in time counts as wrong.</li>
+      </ul>
+      <button class="btn" onclick="startTest()">Start Test</button>
+    </div>
+
+    <!-- TEST SCREEN -->
+    <div id="screen-test" class="screen">
+      <div class="stroop-wrapper">
+        <div class="timer-track">
+          <div class="timer-bar" id="timer-bar"></div>
+        </div>
+        <div class="stroop-body">
+          <div class="round-meta">
+            <div class="round-counter" id="round-counter">Round 1 of 20</div>
+            <div class="score-counter">Correct: <span id="correct-count">0</span></div>
+          </div>
+          <div class="word-area">
+            <div class="color-word" id="color-word">RED</div>
+          </div>
+          <div class="color-buttons" id="color-buttons">
+            <button class="color-btn" data-color="Red" onclick="handleAnswer('Red')">Red</button>
+            <button class="color-btn" data-color="Blue" onclick="handleAnswer('Blue')">Blue</button>
+            <button class="color-btn" data-color="Green" onclick="handleAnswer('Green')">Green</button>
+            <button class="color-btn" data-color="Yellow" onclick="handleAnswer('Yellow')">Yellow</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULT SCREEN -->
+    <div id="screen-result" class="screen fade-in">
+      <div class="test-title">Results</div>
+      <div class="best-line" id="best-line">Personal best: <span>—</span></div>
+      <div class="result-stats">
+        <div class="stat-card">
+          <div class="label">Your Score</div>
+          <div class="value" id="res-score">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Human Average</div>
+          <div class="value neutral">65%</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Percentile</div>
+          <div class="value" id="res-percentile">—</div>
+        </div>
+      </div>
+      <div class="result-actions">
+        <button class="btn" onclick="startTest()">Try Again</button>
+        <a href="index.html" class="btn-outline">Back to Tests</a>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+// ─── Constants ───────────────────────────────────────────────────────────────
+const TOTAL_ROUNDS = 20;
+const ROUND_MS = 3000;
+const FEEDBACK_MS = 400;
+const HUMAN_AVG = 65;
+const LS_KEY = 'ah_stroop';
+
+const WORDS = ['RED', 'BLUE', 'GREEN', 'YELLOW'];
+const COLOR_MAP = {
+  RED:    '#ff3366',
+  BLUE:   '#4488ff',
+  GREEN:  '#00ff9d',
+  YELLOW: '#ffdd00'
+};
+// Button order is always fixed: Red, Blue, Green, Yellow
+const BUTTON_ORDER = ['Red', 'Blue', 'Green', 'Yellow'];
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let trials = [];       // [{word, inkColor}]
+let currentRound = 0;  // 0-based index into trials
+let correctCount = 0;
+let roundTimer = null;
+let timerAnim = null;
+let answered = false;
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function getPercentile(score, avgHuman, lowerIsBetter) {
+  const ratio = lowerIsBetter ? avgHuman / score : score / avgHuman;
+  if (ratio >= 2) return 'Top 5%';
+  if (ratio >= 1.5) return 'Top 15%';
+  if (ratio >= 1.2) return 'Top 30%';
+  if (ratio >= 0.85) return 'Around 50%';
+  if (ratio >= 0.6) return 'Bottom 30%';
+  return 'Bottom 15%';
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ─── Trial generation ─────────────────────────────────────────────────────────
+// 5 congruent + 15 incongruent, shuffled
+function generateTrials() {
+  const list = [];
+
+  // 5 congruent
+  for (let i = 0; i < 5; i++) {
+    const w = WORDS[i % WORDS.length];
+    list.push({ word: w, inkColor: w });
+  }
+
+  // 15 incongruent
+  while (list.length < TOTAL_ROUNDS) {
+    const word = WORDS[Math.floor(Math.random() * WORDS.length)];
+    // Pick a different ink color
+    const others = WORDS.filter(c => c !== word);
+    const ink = others[Math.floor(Math.random() * others.length)];
+    list.push({ word, inkColor: ink });
+  }
+
+  return shuffle(list);
+}
+
+// ─── Timer bar ────────────────────────────────────────────────────────────────
+function startTimerBar() {
+  const bar = document.getElementById('timer-bar');
+  bar.style.transition = 'none';
+  bar.style.width = '100%';
+  // Force reflow so transition resets
+  bar.getBoundingClientRect();
+  bar.style.transition = `width ${ROUND_MS}ms linear`;
+  bar.style.width = '0%';
+}
+
+function stopTimerBar() {
+  const bar = document.getElementById('timer-bar');
+  const computed = getComputedStyle(bar).width;
+  bar.style.transition = 'none';
+  bar.style.width = computed;
+}
+
+// ─── Round logic ──────────────────────────────────────────────────────────────
+function showRound() {
+  answered = false;
+  const trial = trials[currentRound];
+
+  document.getElementById('round-counter').textContent = `Round ${currentRound + 1} of ${TOTAL_ROUNDS}`;
+  document.getElementById('correct-count').textContent = correctCount;
+
+  const wordEl = document.getElementById('color-word');
+  wordEl.textContent = trial.word;
+  wordEl.style.color = COLOR_MAP[trial.inkColor];
+
+  // Enable all buttons, clear feedback classes
+  document.querySelectorAll('.color-btn').forEach(btn => {
+    btn.disabled = false;
+    btn.classList.remove('flash-correct', 'flash-wrong');
+  });
+
+  startTimerBar();
+
+  // Auto-advance after 3 seconds (timeout = wrong)
+  roundTimer = setTimeout(() => {
+    if (!answered) {
+      handleAnswer(null); // no answer
+    }
+  }, ROUND_MS);
+}
+
+function handleAnswer(chosen) {
+  if (answered) return;
+  answered = true;
+
+  clearTimeout(roundTimer);
+  stopTimerBar();
+
+  // Disable all buttons during feedback
+  document.querySelectorAll('.color-btn').forEach(btn => btn.disabled = true);
+
+  const trial = trials[currentRound];
+  const correct = chosen === trial.inkColor.charAt(0).toUpperCase() + trial.inkColor.slice(1).toLowerCase();
+
+  // Normalize: trial.inkColor is like "RED", button data-color is like "Red"
+  const correctAnswer = trial.inkColor.charAt(0) + trial.inkColor.slice(1).toLowerCase();
+
+  if (correct) correctCount++;
+
+  // Flash feedback on buttons
+  if (chosen) {
+    const chosenBtn = document.querySelector(`.color-btn[data-color="${chosen}"]`);
+    if (chosenBtn) {
+      chosenBtn.classList.add(correct ? 'flash-correct' : 'flash-wrong');
+    }
+  }
+  // Always highlight the correct answer
+  if (!correct) {
+    const correctBtn = document.querySelector(`.color-btn[data-color="${correctAnswer}"]`);
+    if (correctBtn) correctBtn.classList.add('flash-correct');
+  }
+
+  document.getElementById('correct-count').textContent = correctCount;
+
+  setTimeout(() => {
+    currentRound++;
+    if (currentRound >= TOTAL_ROUNDS) {
+      endTest();
+    } else {
+      showRound();
+    }
+  }, FEEDBACK_MS);
+}
+
+// ─── Test lifecycle ───────────────────────────────────────────────────────────
+function startTest() {
+  trials = generateTrials();
+  currentRound = 0;
+  correctCount = 0;
+  clearTimeout(roundTimer);
+  showScreen('screen-test');
+  showRound();
+}
+
+function endTest() {
+  const pct = Math.round((correctCount / TOTAL_ROUNDS) * 100);
+  saveResult(pct);
+  showResults(pct);
+}
+
+function saveResult(score) {
+  let data = JSON.parse(localStorage.getItem(LS_KEY) || 'null') || { attempts: 0, best: null, history: [] };
+  data.attempts = (data.attempts || 0) + 1;
+  data.history.push({ score, ts: Date.now() });
+  if (data.best === null || score > data.best) data.best = score;
+  localStorage.setItem(LS_KEY, JSON.stringify(data));
+}
+
+function showResults(score) {
+  const data = JSON.parse(localStorage.getItem(LS_KEY) || 'null') || {};
+  const best = data.best !== undefined ? data.best + '%' : score + '%';
+
+  document.getElementById('res-score').textContent = score + '%';
+  document.getElementById('res-percentile').textContent = getPercentile(score, HUMAN_AVG, false);
+  document.getElementById('best-line').innerHTML = `Personal best: <span>${best}</span>`;
+
+  showScreen('screen-result');
+  document.getElementById('screen-result').classList.add('fade-in');
+}
+</script>
+</body>
+</html>

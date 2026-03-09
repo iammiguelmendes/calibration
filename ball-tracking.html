@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ball Tracking — AverageHuman</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0d0d0d;--card-bg:#1a1a1a;--primary:#00ff9d;--secondary:#ff3366;--text:#fff;--text-dim:#888;--border:#2a2a2a}
+body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+.container{max-width:800px;margin:0 auto;padding:0 2rem;width:100%}
+header{padding:1.25rem 0;border-bottom:1px solid var(--border)}
+.header-content{display:flex;align-items:center;gap:1rem}
+.back-btn{background:none;border:1px solid var(--border);color:var(--text-dim);padding:.5rem .9rem;border-radius:8px;cursor:pointer;font-size:1rem;transition:all .2s;text-decoration:none;font-family:'Manrope',sans-serif}
+.back-btn:hover{border-color:var(--primary);color:var(--primary)}
+.logo{font-size:1.4rem;font-weight:800;letter-spacing:-0.5px}
+.logo span{color:var(--primary)}
+main{flex:1;padding:3rem 0}
+.screen{display:none}.screen.active{display:block}
+.test-title{font-size:2rem;font-weight:800;margin-bottom:.75rem}
+.test-desc{color:var(--text-dim);font-size:1rem;line-height:1.6;margin-bottom:2rem;max-width:560px}
+.btn{background:var(--primary);color:#000;border:none;padding:.85rem 2rem;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Manrope',sans-serif}
+.btn:hover{opacity:.85;transform:translateY(-1px)}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--text-dim);padding:.75rem 1.5rem;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Manrope',sans-serif}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
+.stat-card{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:1.25rem;text-align:center}
+.stat-card .label{font-size:.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem}
+.stat-card .value{font-family:'Space Mono',monospace;font-size:1.6rem;font-weight:700;color:var(--primary)}
+.stat-card .value.neutral{color:var(--text)}
+.result-actions{display:flex;gap:1rem;flex-wrap:wrap}
+.best-line{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim);margin-bottom:1.5rem}
+.best-line span{color:var(--primary)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .4s ease forwards}
+
+/* Test-specific styles */
+.round-counter{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim);margin-bottom:1rem;letter-spacing:1px;text-transform:uppercase}
+.canvas-wrapper{position:relative;display:inline-block;border-radius:12px;overflow:hidden;border:1px solid var(--border)}
+canvas{display:block;cursor:default}
+canvas.clickable{cursor:crosshair}
+.phase-label{font-family:'Space Mono',monospace;font-size:.9rem;color:var(--text-dim);margin-top:1rem;min-height:1.4em;text-align:center}
+.feedback-overlay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Space Mono',monospace;font-size:2rem;font-weight:700;pointer-events:none;opacity:0;transition:opacity .2s}
+.feedback-overlay.correct{color:var(--primary)}
+.feedback-overlay.wrong{color:var(--secondary)}
+.feedback-overlay.show{opacity:1}
+.test-inner{display:flex;flex-direction:column;align-items:center}
+.score-tally{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim);margin-top:.75rem}
+.score-tally span{color:var(--text)}
+
+/* Intro feature list */
+.feature-list{list-style:none;margin-bottom:2rem;display:flex;flex-direction:column;gap:.6rem}
+.feature-list li{color:var(--text-dim);font-size:.95rem;display:flex;align-items:flex-start;gap:.6rem}
+.feature-list li::before{content:'—';color:var(--primary);flex-shrink:0}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div class="header-content">
+      <a href="index.html" class="back-btn">←</a>
+      <div class="logo">Average<span>Human</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+
+    <!-- INTRO SCREEN -->
+    <div id="screen-intro" class="screen active fade-in">
+      <div class="test-title">Ball Tracking</div>
+      <p class="test-desc">Can you keep your eye on the ball — even when all the balls look the same?</p>
+      <ul class="feature-list">
+        <li>One ball starts red. Remember it.</li>
+        <li>All balls turn gray and bounce around for 8 seconds.</li>
+        <li>When they stop, click the ball that was originally red.</li>
+        <li>5 rounds total. Stay sharp.</li>
+      </ul>
+      <button class="btn" onclick="startTest()">Start Test</button>
+    </div>
+
+    <!-- TEST SCREEN -->
+    <div id="screen-test" class="screen">
+      <div class="test-inner">
+        <div class="round-counter" id="round-counter">Round 1 of 5</div>
+        <div class="canvas-wrapper">
+          <canvas id="game-canvas" width="600" height="400"></canvas>
+          <div class="feedback-overlay" id="feedback-overlay"></div>
+        </div>
+        <div class="phase-label" id="phase-label">Memorize the red ball…</div>
+        <div class="score-tally" id="score-tally">Score: <span>0</span> / 0</div>
+      </div>
+    </div>
+
+    <!-- RESULT SCREEN -->
+    <div id="screen-result" class="screen fade-in">
+      <div class="test-title">Results</div>
+      <div class="best-line" id="best-line">Personal best: <span>—</span></div>
+      <div class="result-stats">
+        <div class="stat-card">
+          <div class="label">Your Score</div>
+          <div class="value" id="res-score">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Human Average</div>
+          <div class="value neutral">68%</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Percentile</div>
+          <div class="value" id="res-percentile">—</div>
+        </div>
+      </div>
+      <div class="result-actions">
+        <button class="btn" onclick="startTest()">Try Again</button>
+        <a href="index.html" class="btn-outline">Back to Tests</a>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+// ─── Constants ───────────────────────────────────────────────────────────────
+const TOTAL_ROUNDS = 5;
+const BALL_RADIUS = 20;
+const BALL_COUNT = 5;
+const CANVAS_W = 600;
+const CANVAS_H = 400;
+const MEMORIZE_MS = 1500;
+const BOUNCE_MS = 8000;
+const FEEDBACK_MS = 900;
+const BALL_COLOR_NEUTRAL = '#aaaaaa';
+const BALL_COLOR_TARGET = '#ff3366';
+const BALL_COLOR_CORRECT_HIGHLIGHT = '#00ff9d';
+const HUMAN_AVG = 68;
+const LS_KEY = 'ah_ball-tracking';
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let round = 0;
+let correctCount = 0;
+let targetIndex = -1;
+let balls = [];
+let animFrameId = null;
+let phase = 'idle'; // memorize | bouncing | waiting | feedback
+let bounceStartTime = 0;
+let canvasClickable = false;
+
+// ─── Canvas ───────────────────────────────────────────────────────────────────
+const canvas = document.getElementById('game-canvas');
+const ctx = canvas.getContext('2d');
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function rand(min, max) { return Math.random() * (max - min) + min; }
+
+function getPercentile(score, avgHuman, lowerIsBetter) {
+  const ratio = lowerIsBetter ? avgHuman / score : score / avgHuman;
+  if (ratio >= 2) return 'Top 5%';
+  if (ratio >= 1.5) return 'Top 15%';
+  if (ratio >= 1.2) return 'Top 30%';
+  if (ratio >= 0.85) return 'Around 50%';
+  if (ratio >= 0.6) return 'Bottom 30%';
+  return 'Bottom 15%';
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function setPhaseLabel(txt) {
+  document.getElementById('phase-label').textContent = txt;
+}
+
+function updateScoreTally() {
+  const el = document.getElementById('score-tally');
+  el.innerHTML = `Score: <span>${correctCount}</span> / ${round}`;
+}
+
+// ─── Ball generation ─────────────────────────────────────────────────────────
+function createBalls() {
+  balls = [];
+  const margin = BALL_RADIUS + 4;
+  for (let i = 0; i < BALL_COUNT; i++) {
+    let x, y, overlap;
+    let attempts = 0;
+    do {
+      overlap = false;
+      x = rand(margin, CANVAS_W - margin);
+      y = rand(margin, CANVAS_H - margin);
+      for (const b of balls) {
+        const dx = b.x - x, dy = b.y - y;
+        if (Math.sqrt(dx*dx + dy*dy) < BALL_RADIUS * 2 + 6) { overlap = true; break; }
+      }
+      attempts++;
+    } while (overlap && attempts < 200);
+
+    const angle = rand(0, Math.PI * 2);
+    const speed = rand(2, 4);
+    balls.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed });
+  }
+}
+
+// ─── Drawing ──────────────────────────────────────────────────────────────────
+function drawBalls(showTarget, highlightIndex = -1, missIndex = -1) {
+  ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+  ctx.fillStyle = '#111111';
+  ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+  balls.forEach((b, i) => {
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, BALL_RADIUS, 0, Math.PI * 2);
+
+    let color = BALL_COLOR_NEUTRAL;
+    if (showTarget && i === targetIndex) color = BALL_COLOR_TARGET;
+    if (i === highlightIndex) color = BALL_COLOR_CORRECT_HIGHLIGHT;
+    if (i === missIndex) color = BALL_COLOR_TARGET;
+
+    ctx.fillStyle = color;
+    ctx.fill();
+
+    // Subtle shine
+    const grad = ctx.createRadialGradient(b.x - BALL_RADIUS * 0.3, b.y - BALL_RADIUS * 0.3, 2, b.x, b.y, BALL_RADIUS);
+    grad.addColorStop(0, 'rgba(255,255,255,0.18)');
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, BALL_RADIUS, 0, Math.PI * 2);
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // Star on target during memorize phase
+    if (showTarget && i === targetIndex) {
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.font = 'bold 14px Manrope, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('★', b.x, b.y);
+    }
+  });
+}
+
+// ─── Animation loop ───────────────────────────────────────────────────────────
+function animLoop(ts) {
+  if (phase !== 'bouncing') return;
+
+  const elapsed = ts - bounceStartTime;
+  const remaining = BOUNCE_MS - elapsed;
+
+  if (remaining <= 0) {
+    // Stop bouncing
+    phase = 'waiting';
+    drawBalls(false);
+    setPhaseLabel('Click the ball that was originally red.');
+    canvas.classList.add('clickable');
+    canvasClickable = true;
+    return;
+  }
+
+  // Move balls
+  balls.forEach(b => {
+    b.x += b.vx;
+    b.y += b.vy;
+    if (b.x - BALL_RADIUS < 0) { b.x = BALL_RADIUS; b.vx = Math.abs(b.vx); }
+    if (b.x + BALL_RADIUS > CANVAS_W) { b.x = CANVAS_W - BALL_RADIUS; b.vx = -Math.abs(b.vx); }
+    if (b.y - BALL_RADIUS < 0) { b.y = BALL_RADIUS; b.vy = Math.abs(b.vy); }
+    if (b.y + BALL_RADIUS > CANVAS_H) { b.y = CANVAS_H - BALL_RADIUS; b.vy = -Math.abs(b.vy); }
+  });
+
+  drawBalls(false);
+
+  // Countdown overlay
+  const secs = Math.ceil(remaining / 1000);
+  ctx.fillStyle = 'rgba(255,255,255,0.18)';
+  ctx.font = "700 22px 'Space Mono', monospace";
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'top';
+  ctx.fillText(secs + 's', CANVAS_W - 12, 10);
+
+  animFrameId = requestAnimationFrame(animLoop);
+}
+
+// ─── Round logic ──────────────────────────────────────────────────────────────
+function startRound() {
+  round++;
+  canvasClickable = false;
+  canvas.classList.remove('clickable');
+  document.getElementById('round-counter').textContent = `Round ${round} of ${TOTAL_ROUNDS}`;
+  updateScoreTally();
+  hideFeedback();
+
+  createBalls();
+  targetIndex = Math.floor(Math.random() * BALL_COUNT);
+
+  phase = 'memorize';
+  drawBalls(true);
+  setPhaseLabel('Memorize the red ball…');
+
+  setTimeout(() => {
+    phase = 'bouncing';
+    drawBalls(false);
+    setPhaseLabel('Track it while the balls move…');
+    bounceStartTime = performance.now();
+    animFrameId = requestAnimationFrame(animLoop);
+  }, MEMORIZE_MS);
+}
+
+// ─── Click handling ───────────────────────────────────────────────────────────
+canvas.addEventListener('click', e => {
+  if (!canvasClickable || phase !== 'waiting') return;
+
+  canvasClickable = false;
+  canvas.classList.remove('clickable');
+  phase = 'feedback';
+
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = CANVAS_W / rect.width;
+  const scaleY = CANVAS_H / rect.height;
+  const mx = (e.clientX - rect.left) * scaleX;
+  const my = (e.clientY - rect.top) * scaleY;
+
+  let clicked = -1;
+  for (let i = 0; i < balls.length; i++) {
+    const dx = balls[i].x - mx, dy = balls[i].y - my;
+    if (Math.sqrt(dx*dx + dy*dy) <= BALL_RADIUS) { clicked = i; break; }
+  }
+
+  if (clicked === -1) {
+    // Missed all balls — count as wrong
+    drawBalls(false);
+    showFeedback(false);
+    setPhaseLabel('Missed! The marked ball was somewhere else.');
+    drawBalls(false, targetIndex); // show where it was
+  } else if (clicked === targetIndex) {
+    correctCount++;
+    drawBalls(false, targetIndex);
+    showFeedback(true);
+    setPhaseLabel('Correct!');
+  } else {
+    drawBalls(false, targetIndex, clicked);
+    showFeedback(false);
+    setPhaseLabel('Wrong. The red ball is highlighted.');
+  }
+
+  updateScoreTally();
+
+  setTimeout(() => {
+    if (round < TOTAL_ROUNDS) {
+      startRound();
+    } else {
+      endTest();
+    }
+  }, FEEDBACK_MS);
+});
+
+function showFeedback(correct) {
+  const el = document.getElementById('feedback-overlay');
+  el.textContent = correct ? '✓' : '✗';
+  el.className = 'feedback-overlay ' + (correct ? 'correct' : 'wrong') + ' show';
+}
+
+function hideFeedback() {
+  const el = document.getElementById('feedback-overlay');
+  el.className = 'feedback-overlay';
+}
+
+// ─── Test lifecycle ───────────────────────────────────────────────────────────
+function startTest() {
+  round = 0;
+  correctCount = 0;
+  if (animFrameId) cancelAnimationFrame(animFrameId);
+  phase = 'idle';
+  showScreen('screen-test');
+  updateScoreTally();
+  startRound();
+}
+
+function endTest() {
+  const pct = Math.round((correctCount / TOTAL_ROUNDS) * 100);
+  saveResult(pct);
+  showResults(pct);
+}
+
+function saveResult(score) {
+  let data = JSON.parse(localStorage.getItem(LS_KEY) || 'null') || { attempts: 0, best: null, history: [] };
+  data.attempts = (data.attempts || 0) + 1;
+  data.history.push({ score, ts: Date.now() });
+  if (data.best === null || score > data.best) data.best = score;
+  localStorage.setItem(LS_KEY, JSON.stringify(data));
+}
+
+function showResults(score) {
+  const data = JSON.parse(localStorage.getItem(LS_KEY) || 'null') || {};
+  const best = data.best !== undefined ? data.best + '%' : score + '%';
+
+  document.getElementById('res-score').textContent = score + '%';
+  document.getElementById('res-percentile').textContent = getPercentile(score, HUMAN_AVG, false);
+  document.getElementById('best-line').innerHTML = `Personal best: <span>${best}</span>`;
+
+  showScreen('screen-result');
+  document.getElementById('screen-result').classList.add('fade-in');
+}
+</script>
+</body>
+</html>

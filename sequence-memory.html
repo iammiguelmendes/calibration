@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sequence Memory — AverageHuman</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0d0d0d;--card-bg:#1a1a1a;--primary:#00ff9d;--secondary:#ff3366;--text:#fff;--text-dim:#888;--border:#2a2a2a}
+body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+.container{max-width:800px;margin:0 auto;padding:0 2rem;width:100%}
+header{padding:1.25rem 0;border-bottom:1px solid var(--border)}
+.header-content{display:flex;align-items:center;gap:1rem}
+.back-btn{background:none;border:1px solid var(--border);color:var(--text-dim);padding:.5rem .9rem;border-radius:8px;cursor:pointer;font-size:1rem;transition:all .2s;text-decoration:none;font-family:'Manrope',sans-serif}
+.back-btn:hover{border-color:var(--primary);color:var(--primary)}
+.logo{font-size:1.4rem;font-weight:800;letter-spacing:-0.5px}
+.logo span{color:var(--primary)}
+main{flex:1;padding:3rem 0}
+.screen{display:none}.screen.active{display:block}
+.test-title{font-size:2rem;font-weight:800;margin-bottom:.75rem}
+.test-desc{color:var(--text-dim);font-size:1rem;line-height:1.6;margin-bottom:2rem;max-width:560px}
+.btn{background:var(--primary);color:#000;border:none;padding:.85rem 2rem;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Manrope',sans-serif}
+.btn:hover{opacity:.85;transform:translateY(-1px)}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--text-dim);padding:.75rem 1.5rem;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Manrope',sans-serif;text-decoration:none;display:inline-block}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
+.stat-card{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:1.25rem;text-align:center}
+.stat-card .label{font-size:.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem}
+.stat-card .value{font-family:'Space Mono',monospace;font-size:1.6rem;font-weight:700;color:var(--primary)}
+.stat-card .value.neutral{color:var(--text)}
+.result-actions{display:flex;gap:1rem;flex-wrap:wrap}
+.best-line{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim);margin-bottom:1.5rem}
+.best-line span{color:var(--primary)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .4s ease forwards}
+.feature-list{list-style:none;margin-bottom:2rem;display:flex;flex-direction:column;gap:.6rem}
+.feature-list li{color:var(--text-dim);font-size:.95rem;display:flex;align-items:flex-start;gap:.6rem}
+.feature-list li::before{content:'—';color:var(--primary);flex-shrink:0}
+
+/* ── Game area ── */
+.game-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;max-width:320px}
+.level-badge{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim)}
+.level-badge span{color:var(--text);font-size:1.1rem}
+.status-msg{
+  font-family:'Space Mono',monospace;font-size:.9rem;
+  text-align:center;min-height:1.4rem;margin-bottom:1.25rem;
+  letter-spacing:.5px;max-width:320px;
+  transition:color .2s;
+}
+.status-msg.watching{color:var(--text-dim)}
+.status-msg.your-turn{color:var(--primary)}
+.status-msg.wrong{color:var(--secondary)}
+
+/* 3×3 grid */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  width:min(320px, calc(100vw - 4rem));
+  aspect-ratio:1;
+}
+.sq{
+  border-radius:12px;
+  border:2px solid var(--border);
+  background:transparent;
+  cursor:default;
+  transition:background .1s, border-color .15s, box-shadow .15s;
+  aspect-ratio:1;
+}
+.sq.clickable{cursor:pointer}
+.sq.clickable:hover{border-color:rgba(255,255,255,0.2)}
+.sq.lit{
+  background:var(--primary);
+  border-color:var(--primary);
+  box-shadow:0 0 20px rgba(0,255,157,0.45);
+}
+@keyframes correctFlash{0%{background:var(--primary);box-shadow:0 0 20px rgba(0,255,157,.5)}100%{background:transparent;box-shadow:none}}
+.sq.correct-flash{animation:correctFlash .35s ease forwards}
+@keyframes wrongFlash{0%{background:var(--secondary);border-color:var(--secondary);box-shadow:0 0 20px rgba(255,51,102,.5)}100%{background:rgba(255,51,102,.12);border-color:var(--secondary);box-shadow:none}}
+.sq.wrong-flash{animation:wrongFlash .4s ease forwards;animation-fill-mode:forwards}
+
+.progress-dots{display:flex;gap:6px;margin-top:1.25rem;flex-wrap:wrap;max-width:320px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:background .2s}
+.dot.filled{background:var(--primary)}
+.dot.active{background:var(--text-dim)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div class="header-content">
+      <a href="index.html" class="back-btn">←</a>
+      <div class="logo">Average<span>Human</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+
+    <!-- INTRO -->
+    <div id="screen-intro" class="screen active fade-in">
+      <div class="test-title">Sequence Memory</div>
+      <p class="test-desc">Watch the pattern, then repeat it. Each level adds one more square to the sequence.</p>
+      <ul class="feature-list">
+        <li>Squares light up one at a time — memorize the order.</li>
+        <li>Click the squares in the same sequence.</li>
+        <li>One wrong tap and the game ends.</li>
+        <li>How far can you go?</li>
+      </ul>
+      <button class="btn" onclick="startTest()">Start Test</button>
+    </div>
+
+    <!-- TEST -->
+    <div id="screen-test" class="screen">
+      <div class="game-header">
+        <div class="level-badge">Level <span id="level-num">1</span></div>
+        <div class="level-badge" id="seq-len-label">3 squares</div>
+      </div>
+      <div class="status-msg watching" id="status-msg">Watch carefully…</div>
+      <div class="grid" id="grid"></div>
+      <div class="progress-dots" id="progress-dots"></div>
+    </div>
+
+    <!-- RESULT -->
+    <div id="screen-result" class="screen fade-in">
+      <div class="test-title">Game Over</div>
+      <div class="result-stats">
+        <div class="stat-card">
+          <div class="label">Your Level</div>
+          <div class="value" id="res-score">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Human Average</div>
+          <div class="value neutral">8</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Percentile</div>
+          <div class="value" id="res-percentile">—</div>
+        </div>
+      </div>
+      <div class="best-line" id="best-line">Personal best: <span>—</span></div>
+      <div class="result-actions">
+        <button class="btn" onclick="startTest()">Try Again</button>
+        <a href="index.html" class="btn-outline">Back to Tests</a>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<div id="cd-overlay" style="display:none;position:fixed;inset:0;background:rgba(13,13,13,0.94);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:.5rem;">
+  <div id="cd-num" style="font-family:'Space Mono',monospace;font-size:9rem;font-weight:700;color:#00ff9d;line-height:1;"></div>
+  <div style="font-family:'Space Mono',monospace;font-size:.9rem;color:#888;letter-spacing:2px;">GET READY</div>
+</div>
+
+<script>
+function showCountdown(cb) {
+  const ov  = document.getElementById('cd-overlay');
+  const num = document.getElementById('cd-num');
+  ov.style.display = 'flex';
+  let c = 3;
+  num.textContent = c;
+  const t = setInterval(() => {
+    c--;
+    if (c > 0) {
+      num.textContent = c;
+    } else {
+      clearInterval(t);
+      ov.style.display = 'none';
+      cb();
+    }
+  }, 1000);
+}
+
+const GRID_SIZE     = 9;
+const LIGHT_MS      = 400;
+const PAUSE_MS      = 800;  // gap between each square (includes light time)
+const POST_SEQ_MS   = 500;  // pause after sequence before user turn
+const HUMAN_AVG     = 8;
+const LS_KEY        = 'ah_seqmem';
+
+let sequence     = [];
+let userClicks   = [];
+let level        = 1;
+let accepting    = false;
+
+// ── Grid ─────────────────────────────────────────────────────────────────────
+function buildGrid() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  for (let i = 0; i < GRID_SIZE; i++) {
+    const sq = document.createElement('div');
+    sq.className = 'sq';
+    sq.dataset.idx = i;
+    sq.addEventListener('click', () => handleClick(i));
+    grid.appendChild(sq);
+  }
+}
+
+function getSquare(idx) {
+  return document.querySelector(`.sq[data-idx="${idx}"]`);
+}
+
+function lightSquare(idx, ms = LIGHT_MS) {
+  return new Promise(resolve => {
+    const sq = getSquare(idx);
+    sq.classList.add('lit');
+    setTimeout(() => {
+      sq.classList.remove('lit');
+      resolve();
+    }, ms);
+  });
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ── Progress dots ─────────────────────────────────────────────────────────────
+function buildDots(total) {
+  const el = document.getElementById('progress-dots');
+  el.innerHTML = '';
+  for (let i = 0; i < total; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.id = `dot-${i}`;
+    el.appendChild(d);
+  }
+}
+
+function setDot(idx, state) { // state: 'filled' | 'active' | ''
+  const d = document.getElementById(`dot-${idx}`);
+  if (d) { d.className = 'dot' + (state ? ' '+state : ''); }
+}
+
+// ── Sequence generation ───────────────────────────────────────────────────────
+function extendSequence() {
+  let next;
+  do {
+    next = Math.floor(Math.random() * GRID_SIZE);
+  } while (sequence.length > 0 && next === sequence[sequence.length - 1]);
+  sequence.push(next);
+}
+
+// ── Playback ──────────────────────────────────────────────────────────────────
+async function playSequence() {
+  setStatus('Watch carefully…', 'watching');
+  setAccepting(false);
+  buildDots(sequence.length);
+
+  for (let i = 0; i < sequence.length; i++) {
+    setDot(i, 'active');
+    await lightSquare(sequence[i], LIGHT_MS);
+    setDot(i, 'filled');
+    if (i < sequence.length - 1) await sleep(PAUSE_MS - LIGHT_MS);
+  }
+
+  await sleep(POST_SEQ_MS);
+  userClicks = [];
+  buildDots(sequence.length);
+  setStatus('Your turn!', 'your-turn');
+  setAccepting(true);
+}
+
+// ── User interaction ──────────────────────────────────────────────────────────
+function setAccepting(val) {
+  accepting = val;
+  document.querySelectorAll('.sq').forEach(sq => {
+    sq.classList.toggle('clickable', val);
+  });
+}
+
+function handleClick(idx) {
+  if (!accepting) return;
+  const pos = userClicks.length;
+  userClicks.push(idx);
+
+  if (idx === sequence[pos]) {
+    // Correct
+    const sq = getSquare(idx);
+    sq.classList.add('correct-flash');
+    sq.addEventListener('animationend', () => sq.classList.remove('correct-flash'), {once:true});
+    setDot(pos, 'filled');
+
+    if (userClicks.length === sequence.length) {
+      // Completed sequence — advance level
+      setAccepting(false);
+      level++;
+      setTimeout(() => loadLevel(), 600);
+    }
+  } else {
+    // Wrong
+    setAccepting(false);
+    const sq = getSquare(idx);
+    sq.classList.add('wrong-flash');
+    setStatus('Wrong! Game over.', 'wrong');
+    setTimeout(() => endGame(), 1000);
+  }
+}
+
+// ── Status ────────────────────────────────────────────────────────────────────
+function setStatus(msg, cls = '') {
+  const el = document.getElementById('status-msg');
+  el.textContent = msg;
+  el.className = 'status-msg' + (cls ? ' '+cls : '');
+}
+
+// ── Level / lifecycle ─────────────────────────────────────────────────────────
+function loadLevel() {
+  extendSequence();
+  const seqLen = sequence.length;
+  document.getElementById('level-num').textContent = level;
+  document.getElementById('seq-len-label').textContent =
+    seqLen + ' square' + (seqLen !== 1 ? 's' : '');
+  playSequence();
+}
+
+function startTest() {
+  sequence = [];
+  userClicks = [];
+  level = 1;
+  buildGrid();
+  showScreen('screen-test');
+  showCountdown(loadLevel);
+}
+
+// ── End game ──────────────────────────────────────────────────────────────────
+function endGame() {
+  const reached = level; // level when they failed
+
+  // Percentile
+  let pct;
+  if (reached >= 12)     pct = 'Top 10%';
+  else if (reached >= 10) pct = 'Top 20%';
+  else if (reached >= 8)  pct = 'Around 50%';
+  else if (reached >= 6)  pct = 'Bottom 30%';
+  else if (reached >= 5)  pct = 'Bottom 20%';
+  else                    pct = 'Bottom 10%';
+
+  // localStorage
+  let data = JSON.parse(localStorage.getItem(LS_KEY) || 'null') || {attempts:0, best:0, history:[]};
+  data.attempts = (data.attempts || 0) + 1;
+  data.history.push(reached);
+  if (reached > data.best) data.best = reached;
+  localStorage.setItem(LS_KEY, JSON.stringify(data));
+
+  document.getElementById('res-score').textContent      = reached;
+  document.getElementById('res-percentile').textContent = pct;
+  document.getElementById('best-line').innerHTML =
+    `Personal best: <span>${data.best}</span> &nbsp;·&nbsp; Attempts: <span>${data.attempts}</span>`;
+
+  setTimeout(() => showScreen('screen-result'), 300);
+}
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// Keyboard support
+document.addEventListener('keydown', e => {
+  if (e.key === ' ' || e.key === 'Enter') {
+    const intro  = document.getElementById('screen-intro');
+    const result = document.getElementById('screen-result');
+    if (intro.classList.contains('active'))  { e.preventDefault(); startTest(); }
+    if (result.classList.contains('active')) { e.preventDefault(); startTest(); }
+  }
+});
+</script>
+</body>
+</html>

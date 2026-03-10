@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multitasking — AverageHuman</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0d0d0d;--card-bg:#1a1a1a;--primary:#00ff9d;--secondary:#ff3366;--text:#fff;--text-dim:#888;--border:#2a2a2a}
+body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+.container{max-width:800px;margin:0 auto;padding:0 2rem;width:100%}
+header{padding:1.25rem 0;border-bottom:1px solid var(--border)}
+.header-content{display:flex;align-items:center;gap:1rem}
+.back-btn{background:none;border:1px solid var(--border);color:var(--text-dim);padding:.5rem .9rem;border-radius:8px;cursor:pointer;font-size:1rem;transition:all .2s;text-decoration:none;font-family:'Manrope',sans-serif}
+.back-btn:hover{border-color:var(--primary);color:var(--primary)}
+.logo{font-size:1.4rem;font-weight:800;letter-spacing:-0.5px}
+.logo span{color:var(--primary)}
+main{flex:1;padding:3rem 0}
+.screen{display:none}.screen.active{display:block}
+.test-title{font-size:2rem;font-weight:800;margin-bottom:.75rem}
+.test-desc{color:var(--text-dim);font-size:1rem;line-height:1.6;margin-bottom:2rem;max-width:560px}
+.btn{background:var(--primary);color:#000;border:none;padding:.85rem 2rem;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Manrope',sans-serif}
+.btn:hover{opacity:.85;transform:translateY(-1px)}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--text-dim);padding:.75rem 1.5rem;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Manrope',sans-serif;text-decoration:none;display:inline-block}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.25rem}
+.stat-card{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:1.25rem;text-align:center}
+.stat-card .label{font-size:.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem}
+.stat-card .value{font-family:'Space Mono',monospace;font-size:1.5rem;font-weight:700;color:var(--primary)}
+.stat-card .value.neutral{color:var(--text)}
+.result-actions{display:flex;gap:1rem;flex-wrap:wrap;margin-top:1.5rem}
+.best-line{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim);margin-bottom:1.5rem}
+.best-line span{color:var(--primary)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .4s ease forwards}
+.feature-list{list-style:none;margin-bottom:2rem;display:flex;flex-direction:column;gap:.6rem}
+.feature-list li{color:var(--text-dim);font-size:.95rem;display:flex;align-items:flex-start;gap:.6rem}
+.feature-list li::before{content:'—';color:var(--primary);flex-shrink:0}
+
+/* ── Task panels ── */
+.task-panel{
+  background:var(--card-bg);border:1px solid var(--border);
+  border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:.75rem;
+}
+.task-header{font-family:'Space Mono',monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:2px;color:var(--text-dim);margin-bottom:1rem}
+.task-header.hl{color:var(--primary)}
+.task-header.hl2{color:#4488ff}
+
+/* Number display */
+.number-display{min-height:100px;display:flex;align-items:center;justify-content:center}
+@keyframes numIn{from{opacity:0;transform:scale(.75)}to{opacity:1;transform:scale(1)}}
+@keyframes numOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(.75)}}
+.num-val{font-family:'Space Mono',monospace;font-size:4.5rem;font-weight:700;color:var(--text)}
+.num-val.in{animation:numIn .12s ease forwards}
+.num-val.out{animation:numOut .15s ease forwards}
+
+/* Shape display */
+.shape-display{min-height:100px;display:flex;align-items:center;justify-content:center;position:relative}
+.shape-obj{
+  width:84px;height:84px;cursor:pointer;position:absolute;
+  transition:filter .08s;
+}
+.shape-obj:hover{filter:brightness(1.3)}
+@keyframes shapeIn{from{opacity:0;transform:scale(.65)}to{opacity:1;transform:scale(1)}}
+.shape-obj{animation:shapeIn .12s ease forwards}
+.shape-circle{border-radius:50%;background:#4488ff}
+.shape-square{border-radius:10px;background:#ffa500}
+.shape-tri{clip-path:polygon(50% 0%,0% 100%,100% 100%);background:#9966ff}
+
+/* Input area */
+.input-area{margin-top:1rem;display:none}
+.input-area.show{display:block}
+.input-prompt{color:var(--text-dim);font-size:.95rem;margin-bottom:.75rem}
+.input-row{display:flex;gap:.75rem;align-items:center}
+.num-input{
+  background:var(--card-bg);border:1px solid var(--border);color:var(--text);
+  padding:.75rem 1rem;border-radius:8px;font-size:1.25rem;
+  font-family:'Space Mono',monospace;width:100px;outline:none;transition:border-color .2s;
+}
+.num-input:focus{border-color:var(--primary)}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield}
+
+/* Progress / status */
+.status-bar{font-family:'Space Mono',monospace;font-size:.8rem;color:var(--text-dim);margin-bottom:.75rem;display:flex;justify-content:space-between;max-width:580px}
+.status-bar span{color:var(--text)}
+.caught-badge{font-family:'Space Mono',monospace;font-size:.8rem;color:var(--primary)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div class="header-content">
+      <a href="index.html" class="back-btn">←</a>
+      <div class="logo">Average<span>Human</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+
+    <!-- INTRO -->
+    <div id="screen-intro" class="screen active fade-in">
+      <div class="test-title">Multitasking</div>
+      <p class="test-desc">Do two things at once and see how well your brain handles it.</p>
+      <ul class="feature-list">
+        <li><strong style="color:var(--text)">Top:</strong> Numbers flash one at a time — count how many are <strong style="color:var(--primary)">odd</strong>.</li>
+        <li><strong style="color:var(--text)">Bottom:</strong> Shapes appear — click every <strong style="color:#4488ff">circle</strong>, ignore squares and triangles.</li>
+        <li>Both tasks run at the same time for 20 seconds.</li>
+        <li>Average person scores 65% when doing both at once.</li>
+      </ul>
+      <button class="btn" onclick="startTest()">Start Test</button>
+    </div>
+
+    <!-- TEST -->
+    <div id="screen-test" class="screen">
+      <div class="status-bar">
+        <span id="num-idx-label">Number <span>0</span>/15</span>
+        <span class="caught-badge">Circles: <span id="caught-live">0</span></span>
+      </div>
+
+      <div class="task-panel">
+        <div class="task-header hl">Counting Task — count the odd numbers</div>
+        <div class="number-display">
+          <div class="num-val" id="num-display"></div>
+        </div>
+      </div>
+
+      <div class="task-panel">
+        <div class="task-header hl2">Shape Task — click every circle</div>
+        <div class="shape-display" id="shape-display"></div>
+      </div>
+
+      <div class="input-area" id="input-area">
+        <p class="input-prompt">How many odd numbers did you count?</p>
+        <div class="input-row">
+          <input type="number" class="num-input" id="odd-guess" placeholder="">
+          <button class="btn" onclick="submitAnswer()">Submit</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULT -->
+    <div id="screen-result" class="screen fade-in">
+      <div class="test-title">Results</div>
+      <div class="result-stats">
+        <div class="stat-card">
+          <div class="label">Counting</div>
+          <div class="value" id="res-count">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Circles Caught</div>
+          <div class="value" id="res-shapes">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Combined</div>
+          <div class="value" id="res-combined">—</div>
+        </div>
+      </div>
+      <div class="result-stats">
+        <div class="stat-card">
+          <div class="label">Human Average</div>
+          <div class="value neutral">65%</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Percentile</div>
+          <div class="value" id="res-percentile">—</div>
+        </div>
+      </div>
+      <div class="best-line" id="best-line"></div>
+      <div class="result-actions">
+        <button class="btn" onclick="startTest()">Try Again</button>
+        <a href="index.html" class="btn-outline">Back to Tests</a>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<div id="cd-overlay" style="display:none;position:fixed;inset:0;background:rgba(13,13,13,0.94);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:.5rem;">
+  <div id="cd-num" style="font-family:'Space Mono',monospace;font-size:9rem;font-weight:700;color:#00ff9d;line-height:1;"></div>
+  <div style="font-family:'Space Mono',monospace;font-size:.9rem;color:#888;letter-spacing:2px;">GET READY</div>
+</div>
+
+<script>
+function showCountdown(cb) {
+  const ov  = document.getElementById('cd-overlay');
+  const num = document.getElementById('cd-num');
+  ov.style.display = 'flex';
+  let c = 3;
+  num.textContent = c;
+  const t = setInterval(() => {
+    c--;
+    if (c > 0) {
+      num.textContent = c;
+    } else {
+      clearInterval(t);
+      ov.style.display = 'none';
+      cb();
+    }
+  }, 1000);
+}
+
+const LS_KEY       = 'ah_multitask2';
+const TOTAL_NUMS   = 15;
+const TOTAL_SHAPES = 13;
+const NUM_SHOW_MS  = 900;
+const NUM_GAP_MS   = 400;   // NUM_CYCLE = 1300ms total
+const SHAPE_SHOW   = 900;
+const SHAPE_GAP    = 400;   // SHAPE_CYCLE = 1300ms total
+const HUMAN_AVG    = 65;
+
+let numbers       = [];   // sequence of 1–9
+let shapes        = [];   // 'circle'|'square'|'tri', 4 circles in 13
+let actualOdds    = 0;
+let circlesTotal  = 4;
+let circlesCaught = 0;
+let allTimers     = [];
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function randInt(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ── Test ──────────────────────────────────────────────────────────────────────
+function startTest() {
+  // Generate sequences
+  numbers = Array.from({length: TOTAL_NUMS}, () => randInt(1, 9));
+  actualOdds = numbers.filter(n => n % 2 !== 0).length;
+  shapes = shuffle([
+    ...Array(4).fill('circle'),
+    ...Array(5).fill('square'),
+    ...Array(4).fill('tri'),
+  ]);
+  circlesCaught = 0;
+  allTimers.forEach(clearTimeout);
+  allTimers = [];
+
+  document.getElementById('caught-live').textContent = 0;
+  document.getElementById('num-display').textContent  = '';
+  document.getElementById('shape-display').innerHTML  = '';
+  document.getElementById('input-area').classList.remove('show');
+  document.getElementById('odd-guess').value = '';
+  updateNumLabel(0);
+  showScreen('screen-test');
+
+  showCountdown(() => {
+    scheduleNumbers();
+    scheduleShapes();
+  });
+}
+
+function scheduleNumbers() {
+  const CYCLE = NUM_SHOW_MS + NUM_GAP_MS;
+  numbers.forEach((n, i) => {
+    const t1 = setTimeout(() => {
+      updateNumLabel(i + 1);
+      const el = document.getElementById('num-display');
+      el.textContent = n;
+      el.className   = 'num-val in';
+    }, i * CYCLE);
+
+    const t2 = setTimeout(() => {
+      const el = document.getElementById('num-display');
+      el.className = 'num-val out';
+    }, i * CYCLE + NUM_SHOW_MS);
+
+    allTimers.push(t1, t2);
+  });
+
+  // After last number, show input
+  const tEnd = setTimeout(() => {
+    document.getElementById('num-display').textContent = '';
+    stopShapes();
+    document.getElementById('input-area').classList.add('show');
+    document.getElementById('odd-guess').focus();
+  }, TOTAL_NUMS * CYCLE + 200);
+  allTimers.push(tEnd);
+}
+
+function scheduleShapes() {
+  const CYCLE = SHAPE_SHOW + SHAPE_GAP;
+  shapes.forEach((type, i) => {
+    const t1 = setTimeout(() => showShape(type, i), i * CYCLE);
+    const t2 = setTimeout(() => {
+      const el = document.querySelector(`.shape-obj[data-idx="${i}"]`);
+      if (el) el.remove();
+    }, i * CYCLE + SHAPE_SHOW);
+    allTimers.push(t1, t2);
+  });
+}
+
+function stopShapes() {
+  allTimers.forEach(clearTimeout);
+  document.getElementById('shape-display').innerHTML = '';
+}
+
+function showShape(type, idx) {
+  const display = document.getElementById('shape-display');
+  display.innerHTML = '';
+  const el = document.createElement('div');
+  el.className = `shape-obj shape-${type}`;
+  el.dataset.idx = idx;
+  el.addEventListener('click', () => {
+    if (type === 'circle') {
+      circlesCaught++;
+      document.getElementById('caught-live').textContent = circlesCaught;
+      el.style.background = 'var(--primary)';
+      el.style.boxShadow  = '0 0 20px rgba(0,255,157,.5)';
+      el.style.pointerEvents = 'none';
+      setTimeout(() => el.remove(), 250);
+    } else {
+      el.style.opacity = '.35';
+      setTimeout(() => { el.style.opacity = ''; }, 180);
+    }
+  });
+  display.appendChild(el);
+}
+
+function updateNumLabel(idx) {
+  document.getElementById('num-idx-label').innerHTML =
+    `Number <span>${idx}/${TOTAL_NUMS}</span>`;
+}
+
+// ── Submit ────────────────────────────────────────────────────────────────────
+function submitAnswer() {
+  const val = parseInt(document.getElementById('odd-guess').value, 10);
+  if (isNaN(val)) return;
+
+  const countAcc  = Math.max(0, Math.round((1 - Math.abs(val - actualOdds) / Math.max(actualOdds, 1)) * 100));
+  const shapeAcc  = Math.round((circlesCaught / circlesTotal) * 100);
+  const combined  = Math.round((countAcc + shapeAcc) / 2);
+
+  let pct;
+  if (combined >= 85)      pct = 'Top 10%';
+  else if (combined >= 75) pct = 'Top 25%';
+  else if (combined >= 65) pct = 'Around 50%';
+  else if (combined >= 50) pct = 'Bottom 30%';
+  else if (combined >= 35) pct = 'Bottom 20%';
+  else                     pct = 'Bottom 10%';
+
+  let data = JSON.parse(localStorage.getItem(LS_KEY) || 'null') || {attempts:0, best:null, history:[]};
+  data.attempts = (data.attempts || 0) + 1;
+  data.history.push(combined);
+  if (data.best === null || combined > data.best) data.best = combined;
+  localStorage.setItem(LS_KEY, JSON.stringify(data));
+
+  document.getElementById('res-count').textContent     = countAcc + '%';
+  document.getElementById('res-shapes').textContent    = `${circlesCaught}/${circlesTotal}`;
+  document.getElementById('res-combined').textContent  = combined + '%';
+  document.getElementById('res-percentile').textContent = pct;
+  document.getElementById('best-line').innerHTML       =
+    `Personal best: <span>${data.best}%</span> &nbsp;·&nbsp; Attempts: <span>${data.attempts}</span>`;
+
+  showScreen('screen-result');
+}
+
+// ── Keyboard ──────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const intro  = document.getElementById('screen-intro');
+    const result = document.getElementById('screen-result');
+    if (intro.classList.contains('active'))  { e.preventDefault(); startTest(); }
+    if (result.classList.contains('active')) { e.preventDefault(); startTest(); }
+  }
+});
+document.getElementById('odd-guess').addEventListener('keydown', e => {
+  if (e.key === 'Enter') submitAnswer();
+});
+</script>
+</body>
+</html>

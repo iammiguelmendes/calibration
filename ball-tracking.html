@@ -161,11 +161,34 @@ canvas.clickable{cursor:crosshair;}
   </div>
 </main>
 
+<div id="cd-overlay" style="display:none;position:fixed;inset:0;background:rgba(13,13,13,0.94);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:.5rem;">
+  <div id="cd-num" style="font-family:'Space Mono',monospace;font-size:9rem;font-weight:700;color:#00ff9d;line-height:1;"></div>
+  <div style="font-family:'Space Mono',monospace;font-size:.9rem;color:#888;letter-spacing:2px;">GET READY</div>
+</div>
+
 <script>
+function showCountdown(cb) {
+  const ov  = document.getElementById('cd-overlay');
+  const num = document.getElementById('cd-num');
+  ov.style.display = 'flex';
+  let c = 3;
+  num.textContent = c;
+  const t = setInterval(() => {
+    c--;
+    if (c > 0) {
+      num.textContent = c;
+    } else {
+      clearInterval(t);
+      ov.style.display = 'none';
+      cb();
+    }
+  }, 1000);
+}
+
 const TOTAL_ROUNDS = 5;
 const BALL_RADIUS   = 22;
-// Round 1→4 balls, Round 5→8 balls; speed also scales per round
-function roundBallCount(r){ return 3 + r; }               // 4,5,6,7,8
+// Round 1→7 balls, Round 5→11 balls; speed also scales per round
+function roundBallCount(r){ return 6 + r; }               // 7,8,9,10,11
 function roundSpeedRange(r){ return [4.0 + r*0.5, 6.5 + r*0.55]; } // faster ramp
 const CANVAS_W      = 620;
 const CANVAS_H      = 400;
@@ -484,7 +507,7 @@ function startTest(){
   setPhaseClass('');
   showScreen('screen-test');
   updateTally();
-  startRound();
+  showCountdown(startRound);
 }
 
 function endTest(){

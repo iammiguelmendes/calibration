@@ -169,7 +169,7 @@
     <div class="screen active fade-in" id="screen-intro">
       <div class="test-title">Tapping Consistency</div>
       <div class="test-desc">
-        Tap the circle (or press <strong style="color:var(--text)">spacebar</strong>) exactly 20 times at a steady rhythm. Each run, the target interval is randomly set to 1s, 1.5s, or 2s. The first 3 beats are guided — tap along with the flashing circle to lock in the tempo. Then continue on your own for 17 more taps.
+        Tap the circle (or press <strong style="color:var(--text)">spacebar</strong>) 20 times at a steady rhythm. The target pace is randomly 1s, 1.5s, or 2s between taps. First, <strong style="color:var(--text)">3 guide beats</strong> will flash — tap along to feel the tempo. Then tap 17 more times on your own, keeping that same pace.
       </div>
       <div class="test-desc">
         Your score is the standard deviation of your inter-tap intervals in milliseconds. Lower is better. The human average is <strong style="color:var(--primary)">120ms</strong> stddev.
@@ -291,7 +291,7 @@
     const intervalLabel = targetInterval === 1000 ? '1s' : targetInterval === 1500 ? '1.5s' : '2s';
     setCircle('idle', '', 'Ready');
     updateTapCount(0);
-    setPhase(`Interval: ${intervalLabel} — watch the circle…`);
+    setPhase(`Tempo: ${intervalLabel} per tap — guide beats coming…`);
 
     // Countdown: 3… 2… 1…
     const countdownEl = document.getElementById('tap-countdown');
@@ -316,31 +316,29 @@
   function beginGuidePhase() {
     phase = 'guide';
     guideBeat = 0;
-    setCircle('idle', '', 'TAP');
-    setPhase('Tap along with the beat');
+    setCircle('idle', '', '');
+    setPhase('3 guide beats — tap along with each flash');
+    document.getElementById('tap-hint').textContent = 'SPACEBAR or CLICK to tap';
 
-    // Fire guide beats at t=0, 1000, 2000ms
     function fireGuideBeat() {
       if (guideBeat >= GUIDE_BEATS) {
-        // Switch to free phase
         beginFreePhase();
         return;
       }
       guideBeat++;
       flashCircle('guide-beat');
-      setCircle('guide-beat', '', 'TAP');
+      setCircle('guide-beat', '', guideBeat + ' / 3');
 
       const flashMs = Math.round(targetInterval * 0.8);
       const gapMs = targetInterval - flashMs;
       const beatTimer = setTimeout(() => {
-        setCircle('idle', '', 'TAP');
+        setCircle('idle', '', guideBeat + ' / 3');
         const nextTimer = setTimeout(fireGuideBeat, gapMs);
         guideBeatTimers.push(nextTimer);
       }, flashMs);
       guideBeatTimers.push(beatTimer);
     }
 
-    // Slight delay then fire first beat
     const startTimer = setTimeout(fireGuideBeat, 100);
     guideBeatTimers.push(startTimer);
   }
@@ -348,9 +346,9 @@
   function beginFreePhase() {
     phase = 'free';
     setCircle('idle', '', 'TAP');
-    setPhase('Continue on your own…');
+    setPhase('Now tap 20 times — keep that same rhythm!');
     const intervalLabel = targetInterval === 1000 ? '1s' : targetInterval === 1500 ? '1.5s' : '2s';
-    document.getElementById('tap-hint').textContent = `Keep the ${intervalLabel} rhythm`;
+    document.getElementById('tap-hint').textContent = `${intervalLabel} between each tap`;
   }
 
   function handleTap() {

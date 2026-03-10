@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visual Memory — AverageHuman</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0d0d0d;--card-bg:#1a1a1a;--primary:#00ff9d;--secondary:#ff3366;--text:#fff;--text-dim:#888;--border:#2a2a2a}
+body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+.container{max-width:800px;margin:0 auto;padding:0 2rem;width:100%}
+header{padding:1.25rem 0;border-bottom:1px solid var(--border)}
+.header-content{display:flex;align-items:center;gap:1rem}
+.back-btn{background:none;border:1px solid var(--border);color:var(--text-dim);padding:.5rem .9rem;border-radius:8px;cursor:pointer;font-size:1rem;transition:all .2s;text-decoration:none;font-family:'Manrope',sans-serif}
+.back-btn:hover{border-color:var(--primary);color:var(--primary)}
+.logo{font-size:1.4rem;font-weight:800;letter-spacing:-0.5px}
+.logo span{color:var(--primary)}
+main{flex:1;padding:3rem 0}
+.screen{display:none}.screen.active{display:block}
+.test-title{font-size:2rem;font-weight:800;margin-bottom:.75rem}
+.test-desc{color:var(--text-dim);font-size:1rem;line-height:1.6;margin-bottom:2rem;max-width:560px}
+.btn{background:var(--primary);color:#000;border:none;padding:.85rem 2rem;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Manrope',sans-serif}
+.btn:hover{opacity:.85;transform:translateY(-1px)}
+.btn:disabled{opacity:.4;cursor:default;transform:none}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--text-dim);padding:.75rem 1.5rem;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Manrope',sans-serif;text-decoration:none;display:inline-block}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
+.stat-card{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:1.25rem;text-align:center}
+.stat-card .label{font-size:.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem}
+.stat-card .value{font-family:'Space Mono',monospace;font-size:1.6rem;font-weight:700;color:var(--primary)}
+.stat-card .value.neutral{color:var(--text)}
+.result-actions{display:flex;gap:1rem;flex-wrap:wrap}
+.best-line{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim);margin-bottom:1.5rem}
+.best-line span{color:var(--primary)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .4s ease forwards}
+.feature-list{list-style:none;margin-bottom:2rem;display:flex;flex-direction:column;gap:.6rem}
+.feature-list li{color:var(--text-dim);font-size:.95rem;display:flex;align-items:flex-start;gap:.6rem}
+.feature-list li::before{content:'—';color:var(--primary);flex-shrink:0}
+
+/* ── Game header ── */
+.game-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;max-width:340px}
+.level-badge{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim)}
+.level-badge span{color:var(--text)}
+.squares-badge{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim)}
+
+.status-msg{
+  font-family:'Space Mono',monospace;font-size:.9rem;
+  min-height:1.4rem;margin-bottom:1.25rem;
+  letter-spacing:.5px;max-width:340px;
+  transition:color .2s;
+  color:var(--text-dim);
+}
+.status-msg.memorize{color:var(--primary)}
+.status-msg.select{color:var(--text)}
+.status-msg.wrong{color:var(--secondary)}
+
+/* timer bar */
+.timer-track{height:3px;background:var(--border);max-width:340px;border-radius:2px;margin-bottom:1.5rem;overflow:hidden}
+.timer-bar{height:100%;background:var(--primary);width:100%;transition:none;transform-origin:left}
+
+/* 4×4 grid */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  width:min(340px, calc(100vw - 4rem));
+}
+.sq{
+  aspect-ratio:1;
+  border-radius:10px;
+  border:2px solid var(--border);
+  background:rgba(255,255,255,0.04);
+  cursor:default;
+  transition:background .18s, border-color .18s, box-shadow .18s;
+}
+.sq.clickable{cursor:pointer}
+.sq.clickable:hover:not(.lit):not(.selected){border-color:rgba(255,255,255,0.18);background:rgba(255,255,255,0.07)}
+.sq.lit{
+  background:var(--primary);
+  border-color:var(--primary);
+  box-shadow:0 0 16px rgba(0,255,157,0.4);
+}
+.sq.selected{
+  background:var(--primary);
+  border-color:var(--primary);
+  box-shadow:0 0 14px rgba(0,255,157,0.3);
+}
+.sq.correct{
+  background:var(--primary);
+  border-color:var(--primary);
+  box-shadow:0 0 14px rgba(0,255,157,0.3);
+}
+.sq.wrong-sel{
+  background:rgba(255,51,102,.25);
+  border-color:var(--secondary);
+  box-shadow:0 0 14px rgba(255,51,102,0.3);
+}
+.sq.missed{
+  background:rgba(255,221,0,.18);
+  border-color:#ffdd00;
+  box-shadow:0 0 12px rgba(255,221,0,0.25);
+}
+
+/* action row */
+.action-row{margin-top:1.25rem;max-width:340px;display:flex;gap:.75rem;align-items:center}
+.sub-label{font-family:'Space Mono',monospace;font-size:.78rem;color:var(--text-dim)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div class="header-content">
+      <a href="index.html" class="back-btn">←</a>
+      <div class="logo">Average<span>Human</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+
+    <!-- INTRO -->
+    <div id="screen-intro" class="screen active fade-in">
+      <div class="test-title">Visual Memory</div>
+      <p class="test-desc">Squares light up briefly — remember which ones, then find them again.</p>
+      <ul class="feature-list">
+        <li>Squares flash green for 2 seconds.</li>
+        <li>After they disappear, click all the squares that were lit.</li>
+        <li>Get them all right to advance to the next level.</li>
+        <li>One wrong answer ends the game.</li>
+      </ul>
+      <button class="btn" onclick="startTest()">Start Test</button>
+    </div>
+
+    <!-- TEST -->
+    <div id="screen-test" class="screen">
+      <div class="game-meta">
+        <div class="level-badge">Level <span id="level-num">1</span></div>
+        <div class="squares-badge" id="sq-count-label">3 squares</div>
+      </div>
+      <div class="status-msg" id="status-msg">Get ready…</div>
+      <div class="timer-track"><div class="timer-bar" id="timer-bar"></div></div>
+      <div class="grid" id="grid"></div>
+      <div class="action-row">
+        <button class="btn" id="submit-btn" onclick="submitAnswer()" disabled>Submit</button>
+        <div class="sub-label" id="sel-count-label"></div>
+      </div>
+    </div>
+
+    <!-- RESULT -->
+    <div id="screen-result" class="screen fade-in">
+      <div class="test-title">Game Over</div>
+      <div class="result-stats">
+        <div class="stat-card">
+          <div class="label">Your Level</div>
+          <div class="value" id="res-score">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Human Average</div>
+          <div class="value neutral">6</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Percentile</div>
+          <div class="value" id="res-percentile">—</div>
+        </div>
+      </div>
+      <div class="best-line" id="best-line">Personal best: <span>—</span></div>
+      <div class="result-actions">
+        <button class="btn" onclick="startTest()">Try Again</button>
+        <a href="index.html" class="btn-outline">Back to Tests</a>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<div id="cd-overlay" style="display:none;position:fixed;inset:0;background:rgba(13,13,13,0.94);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:.5rem;">
+  <div id="cd-num" style="font-family:'Space Mono',monospace;font-size:9rem;font-weight:700;color:#00ff9d;line-height:1;"></div>
+  <div style="font-family:'Space Mono',monospace;font-size:.9rem;color:#888;letter-spacing:2px;">GET READY</div>
+</div>
+
+<script>
+function showCountdown(cb) {
+  const ov  = document.getElementById('cd-overlay');
+  const num = document.getElementById('cd-num');
+  ov.style.display = 'flex';
+  let c = 3;
+  num.textContent = c;
+  const t = setInterval(() => {
+    c--;
+    if (c > 0) {
+      num.textContent = c;
+    } else {
+      clearInterval(t);
+      ov.style.display = 'none';
+      cb();
+    }
+  }, 1000);
+}
+
+const GRID_SIZE   = 16;
+const FLASH_MS    = 2000;
+const HUMAN_AVG   = 6;
+const LS_KEY      = 'ah_vismem';
+
+let level         = 1;
+let targetSquares = [];  // indices that were lit
+let userSelected  = [];  // indices user clicked
+let phase         = 'idle'; // idle | memorize | select | review
+let timerAnim     = null;
+
+// ── Grid ─────────────────────────────────────────────────────────────────────
+function buildGrid() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  for (let i = 0; i < GRID_SIZE; i++) {
+    const sq = document.createElement('div');
+    sq.className = 'sq';
+    sq.dataset.idx = i;
+    sq.addEventListener('click', () => handleClick(i));
+    grid.appendChild(sq);
+  }
+}
+
+function getSquare(idx) { return document.querySelector(`.sq[data-idx="${idx}"]`); }
+
+function resetSquares() {
+  document.querySelectorAll('.sq').forEach(sq => {
+    sq.className = 'sq';
+  });
+}
+
+// ── Timer bar ─────────────────────────────────────────────────────────────────
+function startTimerBar(ms) {
+  const bar = document.getElementById('timer-bar');
+  bar.style.transition = 'none';
+  bar.style.width = '100%';
+  bar.getBoundingClientRect(); // force reflow
+  bar.style.transition = `width ${ms}ms linear`;
+  bar.style.width = '0%';
+}
+
+function stopTimerBar() {
+  const bar = document.getElementById('timer-bar');
+  const w = getComputedStyle(bar).width;
+  bar.style.transition = 'none';
+  bar.style.width = w;
+}
+
+function hideTimerBar() {
+  const bar = document.getElementById('timer-bar');
+  bar.style.transition = 'none';
+  bar.style.width = '0%';
+}
+
+// ── Round flow ────────────────────────────────────────────────────────────────
+function pickTargets(n) {
+  const indices = Array.from({length: GRID_SIZE}, (_, i) => i);
+  // Fisher-Yates
+  for (let i = indices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+  return indices.slice(0, n);
+}
+
+function startLevel() {
+  const sqCount = 2 + level; // level 1 = 3, level 2 = 4, etc.
+  targetSquares = pickTargets(sqCount);
+  userSelected  = [];
+  phase = 'memorize';
+
+  document.getElementById('level-num').textContent    = level;
+  document.getElementById('sq-count-label').textContent = sqCount + ' square' + (sqCount !== 1 ? 's' : '');
+  document.getElementById('submit-btn').disabled = true;
+  document.getElementById('sel-count-label').textContent = '';
+
+  resetSquares();
+  setStatus('Memorize!', 'memorize');
+
+  // Light target squares
+  targetSquares.forEach(i => getSquare(i).classList.add('lit'));
+
+  // Start countdown bar
+  startTimerBar(FLASH_MS);
+
+  timerAnim = setTimeout(() => {
+    // Hide all squares
+    resetSquares();
+    stopTimerBar();
+    hideTimerBar();
+    phase = 'select';
+    setStatus('Which squares were lit?', 'select');
+    document.querySelectorAll('.sq').forEach(sq => sq.classList.add('clickable'));
+    document.getElementById('submit-btn').disabled = false;
+    updateSelCount();
+  }, FLASH_MS);
+}
+
+// ── User interaction ──────────────────────────────────────────────────────────
+function handleClick(idx) {
+  if (phase !== 'select') return;
+
+  const sq = getSquare(idx);
+  const pos = userSelected.indexOf(idx);
+  if (pos === -1) {
+    userSelected.push(idx);
+    sq.classList.add('selected');
+  } else {
+    userSelected.splice(pos, 1);
+    sq.classList.remove('selected');
+  }
+  updateSelCount();
+}
+
+function updateSelCount() {
+  const needed = 2 + level;
+  document.getElementById('sel-count-label').textContent =
+    `${userSelected.length} / ${needed} selected`;
+}
+
+function submitAnswer() {
+  if (phase !== 'select') return;
+  phase = 'review';
+
+  document.querySelectorAll('.sq').forEach(sq => {
+    sq.classList.remove('clickable', 'selected');
+  });
+  document.getElementById('submit-btn').disabled = true;
+
+  // Check
+  const targetSet = new Set(targetSquares);
+  const selectedSet = new Set(userSelected);
+
+  let allCorrect = true;
+
+  targetSquares.forEach(i => {
+    if (selectedSet.has(i)) {
+      getSquare(i).classList.add('correct');
+    } else {
+      getSquare(i).classList.add('missed');
+      allCorrect = false;
+    }
+  });
+
+  userSelected.forEach(i => {
+    if (!targetSet.has(i)) {
+      getSquare(i).classList.add('wrong-sel');
+      allCorrect = false;
+    }
+  });
+
+  if (allCorrect) {
+    setStatus('Perfect!', 'memorize');
+    level++;
+    setTimeout(() => startLevel(), 900);
+  } else {
+    setStatus('Wrong! Game over.', 'wrong');
+    setTimeout(() => endGame(), 1200);
+  }
+}
+
+// ── Status ────────────────────────────────────────────────────────────────────
+function setStatus(msg, cls = '') {
+  const el = document.getElementById('status-msg');
+  el.textContent = msg;
+  el.className = 'status-msg' + (cls ? ' '+cls : '');
+}
+
+// ── Lifecycle ─────────────────────────────────────────────────────────────────
+function startTest() {
+  level = 1;
+  clearTimeout(timerAnim);
+  buildGrid();
+  showScreen('screen-test');
+  showCountdown(startLevel);
+}
+
+function endGame() {
+  const reached = level;
+
+  let pct;
+  if (reached >= 9)      pct = 'Top 15%';
+  else if (reached >= 8)  pct = 'Top 25%';
+  else if (reached >= 6)  pct = 'Around 50%';
+  else if (reached >= 5)  pct = 'Bottom 30%';
+  else if (reached >= 4)  pct = 'Bottom 25%';
+  else                    pct = 'Bottom 10%';
+
+  let data = JSON.parse(localStorage.getItem(LS_KEY) || 'null') || {attempts:0, best:0, history:[]};
+  data.attempts = (data.attempts || 0) + 1;
+  data.history.push(reached);
+  if (reached > data.best) data.best = reached;
+  localStorage.setItem(LS_KEY, JSON.stringify(data));
+
+  document.getElementById('res-score').textContent      = reached;
+  document.getElementById('res-percentile').textContent = pct;
+  document.getElementById('best-line').innerHTML =
+    `Personal best: <span>${data.best}</span> &nbsp;·&nbsp; Attempts: <span>${data.attempts}</span>`;
+
+  setTimeout(() => showScreen('screen-result'), 400);
+}
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === ' ' || e.key === 'Enter') {
+    const intro  = document.getElementById('screen-intro');
+    const result = document.getElementById('screen-result');
+    const test   = document.getElementById('screen-test');
+    if (intro.classList.contains('active'))  { e.preventDefault(); startTest(); }
+    if (result.classList.contains('active')) { e.preventDefault(); startTest(); }
+    if (test.classList.contains('active') && e.key === 'Enter' && phase === 'select') {
+      e.preventDefault(); submitAnswer();
+    }
+  }
+});
+</script>
+</body>
+</html>

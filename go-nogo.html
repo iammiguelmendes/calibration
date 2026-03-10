@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Go/No-Go — AverageHuman</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0d0d0d;--card-bg:#1a1a1a;--primary:#00ff9d;--secondary:#ff3366;--text:#fff;--text-dim:#888;--border:#2a2a2a}
+body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+.container{max-width:800px;margin:0 auto;padding:0 2rem;width:100%}
+header{padding:1.25rem 0;border-bottom:1px solid var(--border)}
+.header-content{display:flex;align-items:center;gap:1rem}
+.back-btn{background:none;border:1px solid var(--border);color:var(--text-dim);padding:.5rem .9rem;border-radius:8px;cursor:pointer;font-size:1rem;transition:all .2s;text-decoration:none;font-family:'Manrope',sans-serif}
+.back-btn:hover{border-color:var(--primary);color:var(--primary)}
+.logo{font-size:1.4rem;font-weight:800;letter-spacing:-0.5px}
+.logo span{color:var(--primary)}
+main{flex:1;padding:3rem 0}
+.screen{display:none}.screen.active{display:block}
+.test-title{font-size:2rem;font-weight:800;margin-bottom:.75rem}
+.test-desc{color:var(--text-dim);font-size:1rem;line-height:1.6;margin-bottom:2rem;max-width:560px}
+.btn{background:var(--primary);color:#000;border:none;padding:.85rem 2rem;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Manrope',sans-serif}
+.btn:hover{opacity:.85;transform:translateY(-1px)}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--text-dim);padding:.75rem 1.5rem;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Manrope',sans-serif;text-decoration:none;display:inline-block}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.25rem}
+.result-stats-2{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
+.stat-card{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:1.25rem;text-align:center}
+.stat-card .label{font-size:.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem}
+.stat-card .value{font-family:'Space Mono',monospace;font-size:1.6rem;font-weight:700;color:var(--primary)}
+.stat-card .value.neutral{color:var(--text)}
+.result-actions{display:flex;gap:1rem;flex-wrap:wrap}
+.best-line{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim);margin-bottom:1.5rem}
+.best-line span{color:var(--primary)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .4s ease forwards}
+.feature-list{list-style:none;margin-bottom:2rem;display:flex;flex-direction:column;gap:.6rem}
+.feature-list li{color:var(--text-dim);font-size:.95rem;display:flex;align-items:flex-start;gap:.6rem}
+.feature-list li::before{content:'—';color:var(--primary);flex-shrink:0}
+
+/* ── Arena ── */
+.game-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;max-width:300px}
+.round-label{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim)}
+.correct-label{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim)}
+.correct-label span{color:var(--text)}
+
+.arena-wrap{position:relative;width:min(300px, calc(100vw - 4rem));height:min(300px, calc(100vw - 4rem))}
+.arena{
+  width:100%;height:100%;
+  border-radius:20px;
+  border:2px solid var(--border);
+  background:var(--card-bg);
+  cursor:pointer;
+  transition:background .04s, border-color .04s, box-shadow .04s;
+  user-select:none;
+  -webkit-user-select:none;
+  display:flex;align-items:center;justify-content:center;
+}
+.arena.go{
+  background:var(--primary);
+  border-color:var(--primary);
+  box-shadow:0 0 64px rgba(0,255,157,.55);
+  cursor:pointer;
+}
+.arena.nogo{
+  background:var(--secondary);
+  border-color:var(--secondary);
+  box-shadow:0 0 64px rgba(255,51,102,.55);
+  cursor:pointer;
+}
+
+/* feedback overlay inside arena */
+.arena-feedback{
+  position:absolute;inset:0;
+  display:none;
+  align-items:center;justify-content:center;
+  font-size:4.5rem;
+  border-radius:20px;
+  pointer-events:none;
+}
+.arena-feedback.show{display:flex}
+.arena-feedback.ok{background:rgba(0,255,157,.15);color:var(--primary)}
+.arena-feedback.err{background:rgba(255,51,102,.2);color:var(--secondary)}
+
+.fb-line{
+  font-family:'Space Mono',monospace;font-size:.85rem;
+  min-height:1.3rem;margin-top:1rem;
+  max-width:300px;
+}
+.fb-line.ok{color:var(--primary)}
+.fb-line.err{color:var(--secondary)}
+.fb-line.dim{color:var(--text-dim)}
+
+.progress-track{width:min(300px,calc(100vw - 4rem));height:3px;background:var(--border);border-radius:2px;margin-top:1.25rem}
+.progress-fill{height:100%;background:var(--primary);border-radius:2px;transition:width .3s}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div class="header-content">
+      <a href="index.html" class="back-btn">←</a>
+      <div class="logo">Average<span>Human</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+
+    <!-- INTRO -->
+    <div id="screen-intro" class="screen active fade-in">
+      <div class="test-title">Go/No-Go</div>
+      <p class="test-desc">Test your impulse control. React fast to green, hold back on red.</p>
+      <ul class="feature-list">
+        <li>A large square appears — green or red.</li>
+        <li><strong style="color:var(--primary)">Green</strong> — click it as fast as you can.</li>
+        <li><strong style="color:var(--secondary)">Red</strong> — do not click. Resist the impulse.</li>
+        <li>30 rounds. Every mistake counts.</li>
+      </ul>
+      <button class="btn" onclick="startTest()">Start Test</button>
+    </div>
+
+    <!-- TEST -->
+    <div id="screen-test" class="screen">
+      <div class="game-meta">
+        <div class="round-label" id="round-label">Round 1 / 30</div>
+        <div class="correct-label">Correct: <span id="correct-count">0</span></div>
+      </div>
+      <div class="arena-wrap">
+        <div class="arena" id="arena" onclick="handleClick()"></div>
+        <div class="arena-feedback" id="arena-feedback"></div>
+      </div>
+      <div class="fb-line" id="fb-line"></div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- RESULT -->
+    <div id="screen-result" class="screen fade-in">
+      <div class="test-title">Results</div>
+      <div class="result-stats">
+        <div class="stat-card">
+          <div class="label">Accuracy</div>
+          <div class="value" id="res-accuracy">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Human Average</div>
+          <div class="value neutral">91%</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Percentile</div>
+          <div class="value" id="res-percentile">—</div>
+        </div>
+      </div>
+      <div class="result-stats-2">
+        <div class="stat-card">
+          <div class="label">Greens Hit</div>
+          <div class="value" id="res-hits">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Red Errors</div>
+          <div class="value" id="res-errors">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Avg Reaction</div>
+          <div class="value" id="res-rt">—</div>
+        </div>
+      </div>
+      <div class="best-line" id="best-line">Personal best: <span>—</span></div>
+      <div class="result-actions">
+        <button class="btn" onclick="startTest()">Try Again</button>
+        <a href="index.html" class="btn-outline">Back to Tests</a>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<div id="cd-overlay" style="display:none;position:fixed;inset:0;background:rgba(13,13,13,0.94);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:.5rem;">
+  <div id="cd-num" style="font-family:'Space Mono',monospace;font-size:9rem;font-weight:700;color:#00ff9d;line-height:1;"></div>
+  <div style="font-family:'Space Mono',monospace;font-size:.9rem;color:#888;letter-spacing:2px;">GET READY</div>
+</div>
+
+<script>
+function showCountdown(cb) {
+  const ov  = document.getElementById('cd-overlay');
+  const num = document.getElementById('cd-num');
+  ov.style.display = 'flex';
+  let c = 3;
+  num.textContent = c;
+  const t = setInterval(() => {
+    c--;
+    if (c > 0) {
+      num.textContent = c;
+    } else {
+      clearInterval(t);
+      ov.style.display = 'none';
+      cb();
+    }
+  }, 1000);
+}
+
+const TOTAL_ROUNDS = 30;
+const SHOW_MS      = 1000;
+const FEEDBACK_MS  = 380;
+const PAUSE_MS     = 520;
+const HUMAN_AVG    = 91;
+const LS_KEY       = 'ah_gonogo';
+
+// 70% green (21), 30% red (9)
+const N_GREEN = 21, N_RED = 9;
+
+let rounds      = [];
+let currentRound = 0;
+let phase       = 'idle'; // idle | showing | feedback | pausing
+let clicked     = false;
+let showStart   = 0;
+let roundTimer  = null;
+
+// Stats
+let greenHits   = 0;
+let greenMisses = 0;
+let redErrors   = 0;
+let redPasses   = 0;
+let reactionTimes = [];
+let correctCount  = 0;
+
+// ── Sequence ─────────────────────────────────────────────────────────────────
+function generateRounds() {
+  const arr = [...Array(N_GREEN).fill('go'), ...Array(N_RED).fill('nogo')];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ── Round flow ────────────────────────────────────────────────────────────────
+function startRound() {
+  const color = rounds[currentRound];
+  phase   = 'showing';
+  clicked = false;
+  showStart = performance.now();
+
+  const arena = document.getElementById('arena');
+  arena.classList.remove('go', 'nogo');
+  arena.classList.add(color);
+
+  document.getElementById('round-label').textContent  = `Round ${currentRound + 1} / ${TOTAL_ROUNDS}`;
+  document.getElementById('correct-count').textContent = correctCount;
+  document.getElementById('fb-line').textContent       = '';
+  document.getElementById('fb-line').className         = 'fb-line';
+  hideFeedback();
+
+  roundTimer = setTimeout(() => {
+    if (phase !== 'showing') return;
+    if (color === 'go') {
+      // missed green
+      greenMisses++;
+      showFeedback(false, '✗ Too slow');
+    } else {
+      // correctly ignored red
+      redPasses++;
+      correctCount++;
+      showFeedback(true, '✓ Held back');
+    }
+  }, SHOW_MS);
+}
+
+function handleClick() {
+  if (phase !== 'showing') return;
+  clearTimeout(roundTimer);
+
+  const color = rounds[currentRound];
+  const rt    = Math.round(performance.now() - showStart);
+
+  if (color === 'go') {
+    greenHits++;
+    correctCount++;
+    reactionTimes.push(rt);
+    showFeedback(true, `✓ ${rt}ms`);
+  } else {
+    redErrors++;
+    showFeedback(false, '✗ Impulse!');
+  }
+}
+
+function showFeedback(correct, msg) {
+  phase = 'feedback';
+
+  const arena = document.getElementById('arena');
+  arena.classList.remove('go', 'nogo');
+
+  const fb = document.getElementById('arena-feedback');
+  fb.textContent = correct ? '✓' : '✗';
+  fb.className   = 'arena-feedback show ' + (correct ? 'ok' : 'err');
+
+  const fbLine = document.getElementById('fb-line');
+  fbLine.textContent = msg;
+  fbLine.className   = 'fb-line ' + (correct ? 'ok' : 'err');
+
+  document.getElementById('correct-count').textContent = correctCount;
+  document.getElementById('progress-fill').style.width =
+    ((currentRound + 1) / TOTAL_ROUNDS * 100) + '%';
+
+  setTimeout(() => {
+    hideFeedback();
+    phase = 'pausing';
+    setTimeout(() => {
+      currentRound++;
+      if (currentRound >= TOTAL_ROUNDS) {
+        endGame();
+      } else {
+        startRound();
+      }
+    }, PAUSE_MS);
+  }, FEEDBACK_MS);
+}
+
+function hideFeedback() {
+  document.getElementById('arena-feedback').className = 'arena-feedback';
+}
+
+// ── Game lifecycle ────────────────────────────────────────────────────────────
+function startTest() {
+  rounds        = generateRounds();
+  currentRound  = 0;
+  phase         = 'idle';
+  greenHits = greenMisses = redErrors = redPasses = correctCount = 0;
+  reactionTimes = [];
+  clearTimeout(roundTimer);
+
+  document.getElementById('progress-fill').style.width = '0%';
+  showScreen('screen-test');
+
+  showCountdown(() => setTimeout(startRound, 400));
+}
+
+function endGame() {
+  const total    = TOTAL_ROUNDS;
+  const accuracy = Math.round((correctCount / total) * 100);
+  const avgRt    = reactionTimes.length
+    ? Math.round(reactionTimes.reduce((a, b) => a + b, 0) / reactionTimes.length)
+    : null;
+
+  let pct;
+  if (accuracy >= 97)     pct = 'Top 10%';
+  else if (accuracy >= 94) pct = 'Top 20%';
+  else if (accuracy >= 91) pct = 'Around 50%';
+  else if (accuracy >= 88) pct = 'Bottom 30%';
+  else if (accuracy >= 85) pct = 'Bottom 25%';
+  else                     pct = 'Bottom 15%';
+
+  let data = JSON.parse(localStorage.getItem(LS_KEY) || 'null') || {attempts:0, best:0, history:[]};
+  data.attempts = (data.attempts || 0) + 1;
+  data.history.push(accuracy);
+  if (accuracy > data.best) data.best = accuracy;
+  localStorage.setItem(LS_KEY, JSON.stringify(data));
+
+  document.getElementById('res-accuracy').textContent  = accuracy + '%';
+  document.getElementById('res-percentile').textContent = pct;
+  document.getElementById('res-hits').textContent       = `${greenHits}/${N_GREEN}`;
+  document.getElementById('res-errors').textContent     = `${redErrors}`;
+  document.getElementById('res-rt').textContent         = avgRt !== null ? avgRt + 'ms' : '—';
+  document.getElementById('best-line').innerHTML        =
+    `Personal best: <span>${data.best}%</span> &nbsp;·&nbsp; Attempts: <span>${data.attempts}</span>`;
+
+  showScreen('screen-result');
+}
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === ' ' || e.key === 'Enter') {
+    const intro  = document.getElementById('screen-intro');
+    const result = document.getElementById('screen-result');
+    if (intro.classList.contains('active'))  { e.preventDefault(); startTest(); }
+    if (result.classList.contains('active')) { e.preventDefault(); startTest(); }
+  }
+  // Space counts as a click during the test
+  if (e.key === ' ') {
+    const test = document.getElementById('screen-test');
+    if (test.classList.contains('active') && phase === 'showing') {
+      e.preventDefault();
+      handleClick();
+    }
+  }
+});
+</script>
+</body>
+</html>

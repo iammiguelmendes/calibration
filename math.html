@@ -23,7 +23,8 @@ main{flex:1;padding:3rem 0}
 .test-desc{color:var(--text-dim);font-size:1rem;line-height:1.6;margin-bottom:2rem;max-width:560px}
 .btn{background:var(--primary);color:#000;border:none;padding:.85rem 2rem;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Manrope',sans-serif}
 .btn:hover{opacity:.85;transform:translateY(-1px)}
-.btn-outline{background:none;border:1px solid var(--border);color:var(--text-dim);padding:.75rem 1.5rem;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Manrope',sans-serif}
+.btn:disabled{opacity:.4;cursor:default;transform:none}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--text-dim);padding:.75rem 1.5rem;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Manrope',sans-serif;text-decoration:none;display:inline-block}
 .btn-outline:hover{border-color:var(--primary);color:var(--primary)}
 .result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
 .stat-card{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:1.25rem;text-align:center}
@@ -35,26 +36,54 @@ main{flex:1;padding:3rem 0}
 .best-line span{color:var(--primary)}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .fade-in{animation:fadeIn .4s ease forwards}
+.feature-list{list-style:none;margin-bottom:2rem;display:flex;flex-direction:column;gap:.6rem}
+.feature-list li{color:var(--text-dim);font-size:.95rem;display:flex;align-items:flex-start;gap:.6rem}
+.feature-list li::before{content:'—';color:var(--primary);flex-shrink:0}
 
-/* Test-specific */
-.round-label{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim);margin-bottom:1rem}
+/* ── Test card ── */
+.round-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;max-width:500px}
+.round-label{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim)}
 
-/* Timer bar */
-.timer-track{width:100%;height:4px;background:var(--border);border-radius:2px;margin-bottom:1.5rem;overflow:hidden}
-.timer-bar{height:100%;background:var(--primary);border-radius:2px;width:100%;transition:width linear,background linear}
+.problem-card{
+  background:var(--card-bg);border:1px solid var(--border);border-radius:16px;
+  padding:2rem 2rem 1.75rem;max-width:500px;margin-bottom:1.25rem;
+}
+
+/* Countdown bar */
+.timer-track{height:4px;background:var(--border);border-radius:2px;margin-bottom:2rem;overflow:hidden}
+.timer-bar{height:100%;background:var(--primary);border-radius:2px;transition:none}
 .timer-bar.urgent{background:var(--secondary)}
 
-.problem-display{font-family:'Space Mono',monospace;font-size:2.8rem;font-weight:700;text-align:center;padding:2.5rem 2rem;background:var(--card-bg);border:1px solid var(--border);border-radius:16px;margin-bottom:.75rem;letter-spacing:2px;position:relative}
-.problem-display .equals{color:var(--text-dim)}
-.timer-num{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim);text-align:right;margin-bottom:1.25rem;transition:color .2s}
-.timer-num.urgent{color:var(--secondary)}
+/* Problem display */
+.problem{
+  font-family:'Space Mono',monospace;font-size:3rem;font-weight:700;
+  color:var(--text);text-align:center;margin-bottom:2rem;letter-spacing:2px;
+  line-height:1.1;
+}
+.problem .op{color:var(--text-dim)}
 
-.guess-row{display:flex;align-items:center;gap:1rem}
-.guess-row input[type=number]{background:var(--card-bg);border:1px solid var(--border);color:var(--text);padding:.75rem 1rem;border-radius:8px;font-family:'Space Mono',monospace;font-size:1.1rem;width:160px;outline:none;transition:border-color .2s}
-.guess-row input[type=number]:focus{border-color:var(--primary)}
-.feedback{font-family:'Space Mono',monospace;font-size:.9rem;margin-top:1rem;min-height:1.4em;color:var(--text-dim)}
-.feedback.good{color:var(--primary)}
-.feedback.miss{color:var(--secondary)}
+/* Input */
+.guess-row{display:flex;gap:.75rem;align-items:center}
+.num-input{
+  background:var(--bg);border:1px solid var(--border);color:var(--text);
+  padding:.75rem 1rem;border-radius:8px;font-size:1.2rem;
+  font-family:'Space Mono',monospace;flex:1;max-width:200px;outline:none;
+  transition:border-color .2s;
+}
+.num-input:focus{border-color:var(--primary)}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield}
+
+/* Per-round feedback */
+.round-fb{font-family:'Space Mono',monospace;font-size:.82rem;min-height:1.2rem;color:var(--text-dim)}
+.round-fb .val{color:var(--text)}
+.round-fb .ok{color:var(--primary)}
+.round-fb .bad{color:var(--secondary)}
+
+/* Timer countdown text */
+.timer-text{font-family:'Space Mono',monospace;font-size:.8rem;color:var(--text-dim);text-align:right;margin-bottom:.35rem}
+.timer-text.urgent{color:var(--secondary)}
 </style>
 </head>
 <body>
@@ -72,45 +101,60 @@ main{flex:1;padding:3rem 0}
   <div class="container">
 
     <!-- INTRO -->
-    <div id="screen-intro" class="screen active">
+    <div id="screen-intro" class="screen active fade-in">
       <div class="test-title">Math Estimation</div>
-      <div class="test-desc">You'll be shown 10 multiplication problems. Estimate as close as you can — you have 5 seconds per round. Rounds 1–5 use two 2-digit numbers; rounds 6–10 mix a 3-digit and a 2-digit number.</div>
+      <p class="test-desc">Estimate multiplication results as fast as you can. Don't calculate — just guess.</p>
+      <ul class="feature-list">
+        <li>A multiplication problem appears (e.g. 47 × 83).</li>
+        <li>You have <strong style="color:var(--text)">5 seconds</strong> to enter your best estimate.</li>
+        <li>No time to work it out — go with your gut feel for the magnitude.</li>
+        <li>10 rounds total. Average person is off by about 15%.</li>
+      </ul>
       <button class="btn" onclick="startTest()">Start Test</button>
     </div>
 
     <!-- TEST -->
     <div id="screen-test" class="screen">
-      <div class="round-label" id="round-label">Round 1 of 10</div>
-      <div class="timer-track"><div class="timer-bar" id="timer-bar"></div></div>
-      <div class="problem-display" id="problem-display">
-        <span id="num-a">—</span> × <span id="num-b">—</span> <span class="equals">=</span> ?
+      <div class="round-meta">
+        <div class="round-label" id="round-label">Round 1 / 10</div>
       </div>
-      <div class="timer-num" id="timer-num">5.0s</div>
-      <div class="guess-row">
-        <input type="number" id="math-input" min="1" placeholder="Your estimate">
-        <button class="btn" id="submit-btn" onclick="submitGuess()">Submit</button>
+
+      <div class="problem-card">
+        <div class="timer-text" id="timer-text">5s</div>
+        <div class="timer-track">
+          <div class="timer-bar" id="timer-bar"></div>
+        </div>
+        <div class="problem" id="problem">
+          <span id="num-a">47</span>
+          <span class="op"> × </span>
+          <span id="num-b">83</span>
+        </div>
+        <div class="guess-row">
+          <input type="number" class="num-input" id="guess-input" placeholder="">
+          <button class="btn" id="submit-btn" onclick="submitGuess()">Submit</button>
+        </div>
       </div>
-      <div class="feedback" id="feedback"></div>
+      <div class="round-fb" id="round-fb"></div>
     </div>
 
     <!-- RESULT -->
-    <div id="screen-result" class="screen">
-      <div class="test-title fade-in">Results</div>
-      <div class="result-stats fade-in">
+    <div id="screen-result" class="screen fade-in">
+      <div class="test-title">Results</div>
+      <div class="result-stats">
         <div class="stat-card">
-          <div class="label">Your Score</div>
+          <div class="label">Your Error</div>
           <div class="value" id="res-score">—</div>
         </div>
         <div class="stat-card">
           <div class="label">Human Average</div>
-          <div class="value neutral">15%</div>
+          <div class="value neutral">±15%</div>
         </div>
         <div class="stat-card">
           <div class="label">Percentile</div>
           <div class="value" id="res-percentile">—</div>
         </div>
       </div>
-      <div class="best-line" id="best-line"></div>
+      <div class="best-line" id="best-line">Personal best: <span>—</span></div>
       <div class="result-actions">
         <button class="btn" onclick="startTest()">Try Again</button>
         <a href="index.html" class="btn-outline">Back to Tests</a>
@@ -120,199 +164,223 @@ main{flex:1;padding:3rem 0}
   </div>
 </main>
 
+<div id="cd-overlay" style="display:none;position:fixed;inset:0;background:rgba(13,13,13,0.94);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:.5rem;">
+  <div id="cd-num" style="font-family:'Space Mono',monospace;font-size:9rem;font-weight:700;color:#00ff9d;line-height:1;"></div>
+  <div style="font-family:'Space Mono',monospace;font-size:.9rem;color:#888;letter-spacing:2px;">GET READY</div>
+</div>
+
 <script>
+function showCountdown(cb) {
+  const ov  = document.getElementById('cd-overlay');
+  const num = document.getElementById('cd-num');
+  ov.style.display = 'flex';
+  let c = 3;
+  num.textContent = c;
+  const t = setInterval(() => {
+    c--;
+    if (c > 0) {
+      num.textContent = c;
+    } else {
+      clearInterval(t);
+      ov.style.display = 'none';
+      cb();
+    }
+  }, 1000);
+}
+
+const LS_KEY       = 'ah_math2';
+const HUMAN_AVG    = 15;
 const TOTAL_ROUNDS = 10;
-const AVG_HUMAN = 15;
-const KEY = 'ah_math';
+const TIMER_S      = 5;
+const FEEDBACK_MS  = 1200;
 
-const TIMER_DURATION = 5000;
+let problems  = [];   // [{a, b, answer}]
+let guesses   = [];   // user's estimates (0 if timed out)
+let round     = 0;
+let countdown = null;
+let timerStart = 0;
+let phase     = 'idle';
 
-let currentRound = 0;
-let numA = 0, numB = 0, actual = 0;
-let pctErrors = [];
-let awaitingNext = false;
-let timerInterval = null;
-let timerStart = null;
+// ── Problem generation ────────────────────────────────────────────────────────
+function randInt(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
 
-function randInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+function generateProblems() {
+  const list = [];
+  for (let i = 0; i < TOTAL_ROUNDS; i++) {
+    let a, b;
+    if (i < 4) {
+      // Easier: both 2-digit, smaller range
+      a = randInt(12, 49);
+      b = randInt(12, 49);
+    } else if (i < 7) {
+      // Medium: 2-digit × 2-digit, full range
+      a = randInt(12, 97);
+      b = randInt(12, 97);
+    } else {
+      // Harder: one operand is 3-digit
+      a = randInt(12, 97);
+      b = randInt(100, 499);
+      if (Math.random() < 0.5) [a, b] = [b, a];
+    }
+    list.push({a, b, answer: a * b});
+  }
+  return list;
 }
 
-function getPercentile(score, avgHuman, lowerIsBetter) {
-  const ratio = lowerIsBetter ? avgHuman / score : score / avgHuman;
-  if (ratio >= 2) return 'Top 5%';
-  if (ratio >= 1.5) return 'Top 15%';
-  if (ratio >= 1.2) return 'Top 30%';
-  if (ratio >= 0.85) return 'Around 50%';
-  if (ratio >= 0.6) return 'Bottom 30%';
-  return 'Bottom 15%';
+// ── Timer bar ─────────────────────────────────────────────────────────────────
+function startTimerBar() {
+  const bar  = document.getElementById('timer-bar');
+  const text = document.getElementById('timer-text');
+  bar.style.transition = 'none';
+  bar.style.width = '100%';
+  bar.className = 'timer-bar';
+  text.className = 'timer-text';
+  text.textContent = TIMER_S + 's';
+  bar.getBoundingClientRect(); // reflow
+  bar.style.transition = `width ${TIMER_S}s linear`;
+  bar.style.width = '0%';
+
+  timerStart = performance.now();
+  let prev = TIMER_S;
+  const tick = setInterval(() => {
+    const elapsed = (performance.now() - timerStart) / 1000;
+    const remain  = Math.max(0, TIMER_S - elapsed);
+    const sText   = Math.ceil(remain) + 's';
+    if (sText !== text.textContent) text.textContent = sText;
+    if (remain <= 2) {
+      bar.className  = 'timer-bar urgent';
+      text.className = 'timer-text urgent';
+    }
+  }, 100);
+
+  countdown = setTimeout(() => {
+    clearInterval(tick);
+    autoSubmit();
+  }, TIMER_S * 1000);
+
+  // Store tick id so we can clear it
+  countdown._tick = tick;
 }
 
+function stopTimerBar() {
+  clearTimeout(countdown);
+  if (countdown && countdown._tick) clearInterval(countdown._tick);
+  const bar = document.getElementById('timer-bar');
+  bar.style.transition = 'none';
+  bar.style.width = getComputedStyle(bar).width;
+}
+
+// ── Round logic ───────────────────────────────────────────────────────────────
+function loadRound() {
+  const p = problems[round];
+  phase = 'active';
+  document.getElementById('round-label').textContent = `Round ${round + 1} / ${TOTAL_ROUNDS}`;
+  document.getElementById('num-a').textContent = p.a.toLocaleString();
+  document.getElementById('num-b').textContent = p.b.toLocaleString();
+  document.getElementById('guess-input').value = '';
+  document.getElementById('guess-input').disabled = false;
+  document.getElementById('submit-btn').disabled  = false;
+  document.getElementById('round-fb').innerHTML   = '';
+  document.getElementById('guess-input').focus();
+  startTimerBar();
+}
+
+function autoSubmit() {
+  if (phase !== 'active') return;
+  submitGuess(true);
+}
+
+function submitGuess(timedOut = false) {
+  if (phase !== 'active') return;
+  phase = 'feedback';
+  stopTimerBar();
+
+  const rawVal = document.getElementById('guess-input').value;
+  const val    = timedOut || rawVal === '' ? 0 : parseInt(rawVal, 10);
+  const guess  = isNaN(val) ? 0 : val;
+
+  guesses.push(guess);
+  document.getElementById('guess-input').disabled  = true;
+  document.getElementById('submit-btn').disabled   = true;
+
+  const p   = problems[round];
+  const err = guess === 0
+    ? 100
+    : Math.round(Math.abs(guess - p.answer) / p.answer * 100);
+
+  const cls = err <= 10 ? 'ok' : err <= 25 ? '' : 'bad';
+  const fb  = document.getElementById('round-fb');
+  fb.innerHTML = timedOut
+    ? `<span class="bad">Time's up!</span> &nbsp; Actual: <span class="val">${p.answer.toLocaleString()}</span>`
+    : `Actual: <span class="val">${p.answer.toLocaleString()}</span> &nbsp;·&nbsp; Error: <span class="${cls}">${err}%</span>`;
+
+  setTimeout(() => {
+    round++;
+    if (round >= TOTAL_ROUNDS) endGame();
+    else loadRound();
+  }, FEEDBACK_MS);
+}
+
+// ── Game lifecycle ────────────────────────────────────────────────────────────
+function startTest() {
+  problems = generateProblems();
+  guesses  = [];
+  round    = 0;
+  phase    = 'idle';
+  clearTimeout(countdown);
+  showScreen('screen-test');
+  showCountdown(loadRound);
+}
+
+function endGame() {
+  // Skip rounds that timed out (guess=0) from avg, or include as 100% error
+  let totalErr = 0;
+  for (let i = 0; i < TOTAL_ROUNDS; i++) {
+    const err = guesses[i] === 0
+      ? 100
+      : Math.abs(guesses[i] - problems[i].answer) / problems[i].answer * 100;
+    totalErr += err;
+  }
+  const score = Math.round(totalErr / TOTAL_ROUNDS);
+
+  let pct;
+  if (score <= 8)       pct = 'Top 10%';
+  else if (score <= 12) pct = 'Top 25%';
+  else if (score <= 18) pct = 'Around 50%';
+  else if (score <= 30) pct = 'Bottom 30%';
+  else if (score <= 45) pct = 'Bottom 20%';
+  else                  pct = 'Bottom 10%';
+
+  let data = JSON.parse(localStorage.getItem(LS_KEY) || 'null') || {attempts:0, best:null, history:[]};
+  data.attempts = (data.attempts || 0) + 1;
+  data.history.push(score);
+  if (data.best === null || score < data.best) data.best = score;
+  localStorage.setItem(LS_KEY, JSON.stringify(data));
+
+  document.getElementById('res-score').textContent      = '±' + score + '%';
+  document.getElementById('res-percentile').textContent = pct;
+  document.getElementById('best-line').innerHTML        =
+    `Personal best: <span>±${data.best}%</span> &nbsp;·&nbsp; Attempts: <span>${data.attempts}</span>`;
+
+  showScreen('screen-result');
+}
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
-function clearTimer() {
-  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-}
-
-function startTimer() {
-  clearTimer();
-  timerStart = performance.now();
-  const bar = document.getElementById('timer-bar');
-  const num = document.getElementById('timer-num');
-  bar.style.transition = 'none';
-  bar.style.width = '100%';
-  bar.className = 'timer-bar';
-  num.className = 'timer-num';
-
-  // Kick off smooth CSS transition
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      bar.style.transition = `width ${TIMER_DURATION}ms linear`;
-      bar.style.width = '0%';
-    });
-  });
-
-  timerInterval = setInterval(() => {
-    const elapsed = performance.now() - timerStart;
-    const remaining = Math.max(0, (TIMER_DURATION - elapsed) / 1000);
-    num.textContent = remaining.toFixed(1) + 's';
-
-    if (remaining <= 2) {
-      bar.className = 'timer-bar urgent';
-      num.className = 'timer-num urgent';
-    }
-
-    if (elapsed >= TIMER_DURATION) {
-      clearTimer();
-      timeUp();
-    }
-  }, 50);
-}
-
-function timeUp() {
-  if (awaitingNext) return;
-  const input = document.getElementById('math-input');
-  const val = parseFloat(input.value);
-
-  // If they typed something, submit it; otherwise count as 100% error
-  if (!isNaN(val) && val >= 1) {
-    submitGuess();
-  } else {
-    pctErrors.push(100);
-    const fb = document.getElementById('feedback');
-    fb.textContent = `Time's up! Actual: ${actual.toLocaleString()} — No answer submitted`;
-    fb.className = 'feedback miss';
-    input.disabled = true;
-    awaitingNext = true;
-    document.getElementById('submit-btn').textContent = currentRound >= TOTAL_ROUNDS ? 'See Results' : 'Next Round';
-    document.getElementById('timer-num').textContent = '0.0s';
+document.addEventListener('keydown', e => {
+  const intro  = document.getElementById('screen-intro');
+  const result = document.getElementById('screen-result');
+  if (e.key === ' ' || e.key === 'Enter') {
+    if (intro.classList.contains('active'))  { e.preventDefault(); startTest(); }
+    if (result.classList.contains('active')) { e.preventDefault(); startTest(); }
   }
-}
-
-function startTest() {
-  currentRound = 0;
-  pctErrors = [];
-  awaitingNext = false;
-  clearTimer();
-  showScreen('screen-test');
-  nextRound();
-}
-
-function nextRound() {
-  awaitingNext = false;
-  currentRound++;
-  document.getElementById('round-label').textContent = `Round ${currentRound} of ${TOTAL_ROUNDS}`;
-  document.getElementById('feedback').textContent = '';
-  document.getElementById('feedback').className = 'feedback';
-  document.getElementById('math-input').value = '';
-  document.getElementById('math-input').disabled = false;
-  document.getElementById('submit-btn').textContent = 'Submit';
-  document.getElementById('math-input').focus();
-  startTimer();
-
-  if (currentRound <= 5) {
-    numA = randInt(11, 99);
-    numB = randInt(11, 99);
-  } else {
-    // one 3-digit, one 2-digit, randomly assign positions
-    if (Math.random() < 0.5) {
-      numA = randInt(100, 999);
-      numB = randInt(11, 99);
-    } else {
-      numA = randInt(11, 99);
-      numB = randInt(100, 999);
-    }
-  }
-  actual = numA * numB;
-
-  document.getElementById('num-a').textContent = numA.toLocaleString();
-  document.getElementById('num-b').textContent = numB.toLocaleString();
-}
-
-function submitGuess() {
-  if (awaitingNext) {
-    if (currentRound >= TOTAL_ROUNDS) {
-      showResult();
-    } else {
-      nextRound();
-    }
-    return;
-  }
-
-  const input = document.getElementById('math-input');
-  const val = parseFloat(input.value);
-  if (isNaN(val) || val < 1) {
-    document.getElementById('feedback').textContent = 'Enter a positive number.';
-    return;
-  }
-
-  clearTimer();
-  const pctErr = (Math.abs(val - actual) / actual) * 100;
-  pctErrors.push(pctErr);
-
-  const fb = document.getElementById('feedback');
-  fb.textContent = `Actual: ${actual.toLocaleString()} — Your guess: ${Math.round(val).toLocaleString()} — Error: ${pctErr.toFixed(1)}%`;
-  fb.className = pctErr <= 5 ? 'feedback good' : 'feedback';
-
-  input.disabled = true;
-  awaitingNext = true;
-
-  if (currentRound >= TOTAL_ROUNDS) {
-    document.getElementById('submit-btn').textContent = 'See Results';
-  } else {
-    document.getElementById('submit-btn').textContent = 'Next Round';
-  }
-}
-
-function showResult() {
-  clearTimer();
-  const meanPctErr = pctErrors.reduce((a, b) => a + b, 0) / pctErrors.length;
-  const scoreStr = meanPctErr.toFixed(1) + '%';
-  const percentile = getPercentile(meanPctErr, AVG_HUMAN, true);
-
-  document.getElementById('res-score').textContent = scoreStr;
-  document.getElementById('res-percentile').textContent = percentile;
-
-  let data = JSON.parse(localStorage.getItem(KEY) || 'null') || { attempts: 0, best: null, history: [] };
-  data.attempts = (data.attempts || 0) + 1;
-  data.history.push(parseFloat(meanPctErr.toFixed(2)));
-  const isNewBest = data.best === null || meanPctErr < data.best;
-  if (isNewBest) data.best = parseFloat(meanPctErr.toFixed(2));
-  localStorage.setItem(KEY, JSON.stringify(data));
-
-  const bestLine = document.getElementById('best-line');
-  bestLine.innerHTML = `Personal best: <span>${data.best.toFixed(1)}%</span> &nbsp;·&nbsp; Attempts: <span>${data.attempts}</span>`;
-
-  showScreen('screen-result');
-}
-
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Enter' && document.getElementById('screen-test').classList.contains('active')) {
-    submitGuess();
-  }
+});
+document.getElementById('guess-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') submitGuess();
 });
 </script>
 </body>

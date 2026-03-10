@@ -23,7 +23,7 @@ main{flex:1;padding:3rem 0}
 .test-desc{color:var(--text-dim);font-size:1rem;line-height:1.6;margin-bottom:2rem;max-width:560px}
 .btn{background:var(--primary);color:#000;border:none;padding:.85rem 2rem;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Manrope',sans-serif}
 .btn:hover{opacity:.85;transform:translateY(-1px)}
-.btn-outline{background:none;border:1px solid var(--border);color:var(--text-dim);padding:.75rem 1.5rem;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Manrope',sans-serif}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--text-dim);padding:.75rem 1.5rem;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Manrope',sans-serif;text-decoration:none;display:inline-block}
 .btn-outline:hover{border-color:var(--primary);color:var(--primary)}
 .result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
 .stat-card{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:1.25rem;text-align:center}
@@ -35,125 +35,82 @@ main{flex:1;padding:3rem 0}
 .best-line span{color:var(--primary)}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .fade-in{animation:fadeIn .4s ease forwards}
+.feature-list{list-style:none;margin-bottom:2rem;display:flex;flex-direction:column;gap:.6rem}
+.feature-list li{color:var(--text-dim);font-size:.95rem;display:flex;align-items:flex-start;gap:.6rem}
+.feature-list li::before{content:'—';color:var(--primary);flex-shrink:0}
 
-/* Round counter */
-.round-progress {
-  font-family: 'Space Mono', monospace;
-  font-size: .85rem;
-  color: var(--text-dim);
-  margin-bottom: 1.5rem;
-}
+/* ── Round meta ── */
+.round-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:.9rem;max-width:500px}
+.round-label{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim)}
+.phase-label{font-family:'Space Mono',monospace;font-size:.78rem;color:var(--text-dim);letter-spacing:.5px}
 
-/* Flash area */
-.flash-area {
-  width: 100%;
-  height: 340px;
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  position: relative;
-  overflow: hidden;
-  margin-bottom: 2rem;
-  transition: border-color .3s ease;
-}
-.flash-area.revealing {
-  border-color: rgba(0,255,157,0.3);
-  box-shadow: 0 0 40px rgba(0,255,157,0.04);
-}
-.flash-area.hiding {
-  border-color: var(--border);
+/* ── Dot arena ── */
+.arena{
+  width:min(500px, calc(100vw - 4rem));
+  height:min(300px, 55vw);
+  background:#0a0a0a;
+  border:1px solid var(--border);
+  border-radius:16px;
+  position:relative;
+  overflow:hidden;
+  margin-bottom:1.25rem;
+  /* subtle grid pattern for depth */
+  background-image:
+    linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+  background-size:32px 32px;
 }
 
-/* Status label inside flash area */
-.flash-status {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-family: 'Space Mono', monospace;
-  font-size: .8rem;
-  color: var(--text-dim);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  opacity: 1;
-  transition: opacity .3s ease;
-  pointer-events: none;
+/* Cover sits on TOP of dots (z-index fix) */
+.dot-cover{
+  position:absolute;inset:0;
+  z-index:10;
+  background:#0a0a0a;
+  border-radius:16px;
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:.5rem;
 }
-.flash-status.hidden { opacity: 0; }
+.dot-cover.off{display:none}
+
+.cover-countdown{
+  font-family:'Space Mono',monospace;font-size:2.5rem;font-weight:700;
+  color:var(--text-dim);line-height:1;
+}
+.cover-label{font-family:'Space Mono',monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:2px;color:var(--border)}
 
 /* Dots */
-@keyframes dotPop {
-  0%   { transform: scale(0); opacity: 0; }
-  60%  { transform: scale(1.3); opacity: 1; }
-  100% { transform: scale(1); opacity: 1; }
+.dot{
+  position:absolute;
+  width:10px;height:10px;
+  border-radius:50%;
+  background:var(--primary);
+  box-shadow:0 0 5px rgba(0,255,157,.45);
 }
-@keyframes dotFade {
-  0%   { opacity: 1; transform: scale(1); }
-  100% { opacity: 0; transform: scale(0.5); }
-}
-.dot {
-  position: absolute;
-  border-radius: 50%;
-  animation: dotPop 0.25s cubic-bezier(.34,1.56,.64,1) forwards;
-  will-change: transform, opacity;
-}
-.dot.fading {
-  animation: dotFade 0.25s ease forwards;
-}
+@keyframes dotsIn{from{opacity:0}to{opacity:1}}
+.arena.flash .dot{animation:dotsIn .06s ease forwards}
 
-/* Guess form */
-.guess-form {
-  display: none;
-  animation: fadeIn .35s ease forwards;
+/* ── Input area ── */
+.guess-section{max-width:500px}
+.guess-prompt{font-size:.95rem;color:var(--text-dim);margin-bottom:.75rem}
+.guess-row{display:flex;gap:.75rem;align-items:center;margin-bottom:.75rem}
+.num-input{
+  background:var(--card-bg);border:1px solid var(--border);color:var(--text);
+  padding:.75rem 1rem;border-radius:8px;font-size:1.2rem;
+  font-family:'Space Mono',monospace;width:120px;outline:none;transition:border-color .2s;
 }
-.guess-form.visible { display: block; }
+.num-input:focus{border-color:var(--primary)}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield}
 
-.guess-label {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
+/* Per-round feedback */
+.round-fb{
+  font-family:'Space Mono',monospace;font-size:.82rem;
+  min-height:1.3rem;color:var(--text-dim);
 }
-.guess-label span {
-  color: var(--text-dim);
-  font-weight: 400;
-  font-size: .95rem;
-}
-
-.guess-input-row { display: flex; gap: .75rem; align-items: center; }
-
-.number-input {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  color: var(--text);
-  padding: .85rem 1.25rem;
-  border-radius: 10px;
-  font-size: 1.4rem;
-  font-family: 'Space Mono', monospace;
-  width: 130px;
-  outline: none;
-  transition: border-color .2s, box-shadow .2s;
-  text-align: center;
-}
-.number-input:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(0,255,157,0.1);
-}
-
-/* Round result flash */
-.round-feedback {
-  display: none;
-  font-family: 'Space Mono', monospace;
-  font-size: .9rem;
-  margin-top: 1rem;
-  padding: .75rem 1rem;
-  border-radius: 8px;
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  animation: fadeIn .25s ease forwards;
-}
-.round-feedback.visible { display: block; }
-.round-feedback .actual { color: var(--primary); }
-.round-feedback .error { color: var(--text-dim); }
+.round-fb .val{color:var(--text)}
+.round-fb .ok{color:var(--primary)}
+.round-fb .bad{color:var(--secondary)}
 </style>
 </head>
 <body>
@@ -170,36 +127,50 @@ main{flex:1;padding:3rem 0}
 <main>
   <div class="container">
 
-    <!-- Intro Screen -->
-    <div id="screen-intro" class="screen active">
-      <h1 class="test-title">Quantity Estimation</h1>
-      <p class="test-desc">A cluster of dots will flash on screen for a brief moment. After they disappear, enter how many you saw. 5 rounds total — trust your gut, no counting.</p>
+    <!-- INTRO -->
+    <div id="screen-intro" class="screen active fade-in">
+      <div class="test-title">Quantity Estimation</div>
+      <p class="test-desc">A cluster of dots will flash briefly. Estimate how many — no counting, just your gut feel.</p>
+      <ul class="feature-list">
+        <li>Dots appear for a moment, then vanish.</li>
+        <li>Enter your best estimate and submit.</li>
+        <li>5 rounds — the count grows each round.</li>
+        <li>Average person is off by about 40%.</li>
+      </ul>
       <button class="btn" onclick="startTest()">Start Test</button>
     </div>
 
-    <!-- Test Screen -->
+    <!-- TEST -->
     <div id="screen-test" class="screen">
-      <div class="round-progress" id="round-progress"></div>
-      <div class="flash-area" id="flash-area">
-        <div class="flash-status" id="flash-status">Get ready…</div>
+      <div class="round-meta">
+        <div class="round-label" id="round-label">Round 1 / 5</div>
+        <div class="phase-label" id="phase-label">Get ready…</div>
       </div>
-      <div class="guess-form" id="guess-form">
-        <p class="guess-label">How many dots did you see? <span>Enter your best guess</span></p>
-        <div class="guess-input-row">
-          <input type="number" class="number-input" id="guess-input" min="0" max="200" placeholder="?">
+
+      <div class="arena" id="arena">
+        <!-- dots injected here by JS -->
+        <div class="dot-cover" id="dot-cover">
+          <div class="cover-countdown" id="cover-countdown"></div>
+          <div class="cover-label" id="cover-label">get ready</div>
+        </div>
+      </div>
+
+      <div id="guess-area" style="display:none" class="guess-section">
+        <p class="guess-prompt">How many dots were there?</p>
+        <div class="guess-row">
+          <input type="number" class="num-input" id="guess-input" placeholder="">
           <button class="btn" onclick="submitGuess()">Submit</button>
         </div>
-        <div class="round-feedback" id="round-feedback"></div>
       </div>
+      <div class="round-fb" id="round-fb"></div>
     </div>
 
-    <!-- Result Screen -->
-    <div id="screen-result" class="screen">
-      <h1 class="test-title fade-in">Test Complete</h1>
-      <p class="test-desc fade-in" style="margin-bottom:1.25rem">Here's how your quantity estimation stacks up.</p>
-      <div class="result-stats fade-in">
+    <!-- RESULT -->
+    <div id="screen-result" class="screen fade-in">
+      <div class="test-title">Results</div>
+      <div class="result-stats">
         <div class="stat-card">
-          <div class="label">Your Score</div>
+          <div class="label">Your Error</div>
           <div class="value" id="res-score">—</div>
         </div>
         <div class="stat-card">
@@ -211,8 +182,8 @@ main{flex:1;padding:3rem 0}
           <div class="value" id="res-percentile">—</div>
         </div>
       </div>
-      <div class="best-line" id="best-line">Personal best: <span id="res-best">—</span></div>
-      <div class="result-actions fade-in">
+      <div class="best-line" id="best-line">Personal best: <span>—</span></div>
+      <div class="result-actions">
         <button class="btn" onclick="startTest()">Try Again</button>
         <a href="index.html" class="btn-outline">Back to Tests</a>
       </div>
@@ -222,46 +193,183 @@ main{flex:1;padding:3rem 0}
 </main>
 
 <script>
-const STORAGE_KEY = 'ah_quantity';
-const HUMAN_AVG = 40;
+const LS_KEY       = 'ah_quantity2';
 const TOTAL_ROUNDS = 5;
-const MAX_DOTS = 32;
+const DOT_D        = 10;   // dot diameter px
+const DOT_R        = DOT_D / 2;
 
-let currentRound = 0;
-let actualCounts = [];
-let guesses = [];
-let accepting = false;
+const CONFIG = [
+  {min: 15,  max: 35,  showMs: 1400},
+  {min: 35,  max: 70,  showMs: 1300},
+  {min: 60,  max: 110, showMs: 1200},
+  {min: 90,  max: 150, showMs: 1100},
+  {min: 130, max: 200, showMs: 1000},
+];
 
-function randInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+let targets   = [];
+let guesses   = [];
+let round     = 0;
+let phase     = 'idle';
+let showTimer = null;
+
+// ── Dot placement ─────────────────────────────────────────────────────────────
+function placeDots(n) {
+  const arena = document.getElementById('arena');
+  // Remove old dots (keep the cover)
+  arena.querySelectorAll('.dot').forEach(d => d.remove());
+
+  const W   = arena.clientWidth  || 500;
+  const H   = arena.clientHeight || 300;
+  const pad = DOT_R + 3;
+
+  const placed = [];
+  let attempts = 0;
+  const minGap = DOT_D * 1.4; // slight minimum gap
+
+  while (placed.length < n && attempts < n * 20) {
+    attempts++;
+    const x = pad + Math.random() * (W - pad * 2);
+    const y = pad + Math.random() * (H - pad * 2);
+    if (!placed.some(p => Math.hypot(p.x - x, p.y - y) < minGap)) {
+      placed.push({x, y});
+    }
+  }
+  // Fill remainder without collision check (dense cases)
+  while (placed.length < n) {
+    placed.push({
+      x: pad + Math.random() * (W - pad * 2),
+      y: pad + Math.random() * (H - pad * 2),
+    });
+  }
+
+  // Insert dots BEFORE the cover in the DOM so cover stays on top
+  const cover = document.getElementById('dot-cover');
+  placed.forEach(p => {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.style.left = (p.x - DOT_R) + 'px';
+    d.style.top  = (p.y - DOT_R) + 'px';
+    arena.insertBefore(d, cover);
+  });
 }
 
-function getPercentile(score, avgHuman, lowerIsBetter) {
-  const ratio = lowerIsBetter ? avgHuman / score : score / avgHuman;
-  if (ratio >= 2) return 'Top 5%';
-  if (ratio >= 1.5) return 'Top 15%';
-  if (ratio >= 1.2) return 'Top 30%';
-  if (ratio >= 0.85) return 'Around 50%';
-  if (ratio >= 0.6) return 'Bottom 30%';
-  return 'Bottom 15%';
+// ── Cover helpers ─────────────────────────────────────────────────────────────
+function coverShow(countdownText, labelText) {
+  const cover = document.getElementById('dot-cover');
+  cover.classList.remove('off');
+  document.getElementById('cover-countdown').textContent = countdownText ?? '';
+  document.getElementById('cover-label').textContent     = labelText ?? '';
 }
 
-function loadStorage() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : { attempts: 0, best: null, history: [] };
-  } catch(e) {
-    return { attempts: 0, best: null, history: [] };
+function coverHide() {
+  document.getElementById('dot-cover').classList.add('off');
+}
+
+// ── Round logic ───────────────────────────────────────────────────────────────
+function loadRound() {
+  const cfg   = CONFIG[round];
+  const count = Math.floor(Math.random() * (cfg.max - cfg.min + 1)) + cfg.min;
+  targets.push(count);
+
+  document.getElementById('round-label').textContent    = `Round ${round + 1} / ${TOTAL_ROUNDS}`;
+  document.getElementById('phase-label').textContent    = 'Get ready…';
+  document.getElementById('guess-area').style.display  = 'none';
+  document.getElementById('round-fb').innerHTML        = '';
+  document.getElementById('guess-input').value         = '';
+
+  // Place dots while cover is still shown
+  placeDots(count);
+  coverShow('', 'get ready');
+
+  // Countdown: 3 → 2 → 1 → flash
+  let cd = 3;
+  coverShow(cd, 'get ready');
+
+  const cdInterval = setInterval(() => {
+    cd--;
+    if (cd > 0) {
+      coverShow(cd, 'get ready');
+    } else {
+      clearInterval(cdInterval);
+      // Flash: hide cover → show dots
+      coverHide();
+      phase = 'showing';
+      document.getElementById('phase-label').textContent = 'Memorize!';
+      document.getElementById('arena').classList.add('flash');
+
+      showTimer = setTimeout(() => {
+        // Cover back → hide dots
+        document.getElementById('arena').classList.remove('flash');
+        coverShow('?', 'how many?');
+        phase = 'guessing';
+        document.getElementById('phase-label').textContent = 'Enter your guess';
+        document.getElementById('guess-area').style.display = 'block';
+        document.getElementById('guess-input').focus();
+      }, cfg.showMs);
+    }
+  }, 700);
+}
+
+function submitGuess() {
+  if (phase !== 'guessing') return;
+  const val = parseInt(document.getElementById('guess-input').value, 10);
+  if (isNaN(val) || val <= 0) return;
+
+  guesses.push(val);
+  const actual = targets[round];
+  const err    = Math.round(Math.abs(val - actual) / actual * 100);
+  const cls    = err <= 20 ? 'ok' : 'bad';
+
+  document.getElementById('round-fb').innerHTML =
+    `Actual: <span class="val">${actual}</span> &nbsp;·&nbsp; ` +
+    `Your guess: <span class="val">${val}</span> &nbsp;·&nbsp; ` +
+    `Error: <span class="${cls}">${err}%</span>`;
+
+  round++;
+  document.getElementById('guess-area').style.display = 'none';
+
+  if (round >= TOTAL_ROUNDS) {
+    setTimeout(endGame, 1200);
+  } else {
+    setTimeout(loadRound, 1200);
   }
 }
 
-function saveStorage(score) {
-  const data = loadStorage();
+// ── Game lifecycle ────────────────────────────────────────────────────────────
+function startTest() {
+  targets = []; guesses = []; round = 0; phase = 'idle';
+  clearTimeout(showTimer);
+  showScreen('screen-test');
+  loadRound();
+}
+
+function endGame() {
+  let totalErr = 0;
+  for (let i = 0; i < TOTAL_ROUNDS; i++) {
+    totalErr += Math.abs(guesses[i] - targets[i]) / targets[i] * 100;
+  }
+  const score = Math.round(totalErr / TOTAL_ROUNDS);
+
+  let pct;
+  if (score <= 15)      pct = 'Top 10%';
+  else if (score <= 25) pct = 'Top 20%';
+  else if (score <= 35) pct = 'Top 30%';
+  else if (score <= 45) pct = 'Around 50%';
+  else if (score <= 60) pct = 'Bottom 30%';
+  else                  pct = 'Bottom 15%';
+
+  let data = JSON.parse(localStorage.getItem(LS_KEY) || 'null') || {attempts:0, best:null, history:[]};
   data.attempts = (data.attempts || 0) + 1;
   data.history.push(score);
   if (data.best === null || score < data.best) data.best = score;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  return data;
+  localStorage.setItem(LS_KEY, JSON.stringify(data));
+
+  document.getElementById('res-score').textContent      = '±' + score + '%';
+  document.getElementById('res-percentile').textContent = pct;
+  document.getElementById('best-line').innerHTML        =
+    `Personal best: <span>±${data.best}%</span> &nbsp;·&nbsp; Attempts: <span>${data.attempts}</span>`;
+
+  showScreen('screen-result');
 }
 
 function showScreen(id) {
@@ -269,155 +377,17 @@ function showScreen(id) {
   document.getElementById(id).classList.add('active');
 }
 
-function buildPips() {
-  document.getElementById('round-progress').textContent = `Round ${currentRound + 1} of ${TOTAL_ROUNDS}`;
-}
-
-function startTest() {
-  currentRound = 0;
-  actualCounts = [];
-  guesses = [];
-  showScreen('screen-test');
-  runRound();
-}
-
-function runRound() {
-  accepting = false;
-  buildPips();
-
-  const count = randInt(1, MAX_DOTS);
-  actualCounts.push(count);
-
-  const guessForm = document.getElementById('guess-form');
-  const feedback = document.getElementById('round-feedback');
-  const flashArea = document.getElementById('flash-area');
-  const statusEl = document.getElementById('flash-status');
-
-  guessForm.classList.remove('visible');
-  feedback.classList.remove('visible');
-  document.getElementById('guess-input').value = '';
-  flashArea.innerHTML = '';
-  flashArea.classList.remove('revealing', 'hiding');
-
-  // Re-add status label
-  const newStatus = document.createElement('div');
-  newStatus.className = 'flash-status';
-  newStatus.id = 'flash-status';
-  newStatus.textContent = 'Get ready…';
-  flashArea.appendChild(newStatus);
-
-  // Short delay then show dots
-  setTimeout(() => {
-    newStatus.classList.add('hidden');
-    flashArea.classList.add('revealing');
-    placeDots(flashArea, count);
-
-    // Hide dots after 1600ms
-    setTimeout(() => {
-      flashArea.classList.remove('revealing');
-      flashArea.classList.add('hiding');
-      flashArea.querySelectorAll('.dot').forEach((d, i) => {
-        setTimeout(() => d.classList.add('fading'), i * 8);
-      });
-
-      // Show input after dots finish fading
-      setTimeout(() => {
-        flashArea.innerHTML = '';
-        guessForm.classList.add('visible');
-        document.getElementById('guess-input').focus();
-        accepting = true;
-      }, 300);
-    }, 1600);
-  }, 500);
-}
-
-function placeDots(container, count) {
-  const W = container.clientWidth || 700;
-  const H = container.clientHeight || 340;
-  const placed = [];
-
-  for (let i = 0; i < count; i++) {
-    const size = randInt(9, 17);
-    const margin = size + 6;
-    let x, y, tries = 0;
-
-    // Simple overlap avoidance
-    do {
-      x = randInt(margin, W - margin - size);
-      y = randInt(margin, H - margin - size);
-      tries++;
-    } while (tries < 30 && placed.some(p => {
-      const dx = p.x - x, dy = p.y - y;
-      return Math.sqrt(dx*dx + dy*dy) < (p.size + size) / 2 + 4;
-    }));
-
-    placed.push({ x, y, size });
-
-    const dot = document.createElement('div');
-    dot.className = 'dot';
-    dot.style.width = size + 'px';
-    dot.style.height = size + 'px';
-    dot.style.left = x + 'px';
-    dot.style.top = y + 'px';
-    dot.style.animationDelay = (i * 12) + 'ms';
-
-    // Color: mostly primary, occasional white or dimmer variant
-    dot.style.background = 'var(--primary)';
-
-    // Subtle glow on some dots
-    if (Math.random() > 0.6) {
-      dot.style.boxShadow = '0 0 6px rgba(0,255,157,0.5)';
-    }
-
-    container.appendChild(dot);
-  }
-}
-
-function submitGuess() {
-  if (!accepting) return;
-  const input = document.getElementById('guess-input');
-  const val = parseInt(input.value, 10);
-  if (isNaN(val) || val < 0) return;
-
-  accepting = false;
-  guesses.push(val);
-
-  // Show per-round feedback
-  const actual = actualCounts[currentRound];
-  const err = Math.round(Math.abs(val - actual) / actual * 100);
-  const feedback = document.getElementById('round-feedback');
-  feedback.innerHTML = `There were <span class="actual">${actual}</span> dots &nbsp;·&nbsp; <span class="error">Your error: ${err}%</span>`;
-  feedback.classList.add('visible');
-
-  currentRound++;
-
-  if (currentRound < TOTAL_ROUNDS) {
-    setTimeout(() => runRound(), 1200);
-  } else {
-    setTimeout(() => finishTest(), 1200);
-  }
-}
-
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Enter' && document.getElementById('screen-test').classList.contains('active')) {
-    submitGuess();
+document.addEventListener('keydown', e => {
+  if (e.key === ' ' || e.key === 'Enter') {
+    const intro  = document.getElementById('screen-intro');
+    const result = document.getElementById('screen-result');
+    if (intro.classList.contains('active'))  { e.preventDefault(); startTest(); }
+    if (result.classList.contains('active')) { e.preventDefault(); startTest(); }
   }
 });
-
-function finishTest() {
-  let totalError = 0;
-  for (let i = 0; i < TOTAL_ROUNDS; i++) {
-    totalError += Math.abs(guesses[i] - actualCounts[i]) / actualCounts[i] * 100;
-  }
-  const score = Math.round(totalError / TOTAL_ROUNDS);
-  const data = saveStorage(score);
-
-  document.getElementById('res-score').textContent = '±' + score + '%';
-  document.getElementById('res-percentile').textContent = getPercentile(score, HUMAN_AVG, true);
-  document.getElementById('res-best').textContent = '±' + data.best + '%';
-
-  showScreen('screen-result');
-}
+document.getElementById('guess-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') submitGuess();
+});
 </script>
 </body>
 </html>

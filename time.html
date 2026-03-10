@@ -87,6 +87,9 @@ main{flex:1;padding:3rem 0}
   transition:border-color .2s;
 }
 .number-input:focus{border-color:var(--primary)}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield}
 </style>
 </head>
 <body>
@@ -118,7 +121,7 @@ main{flex:1;padding:3rem 0}
       </div>
       <div class="guess-form" id="guess-form">
         <div class="guess-input-row">
-          <input type="number" class="number-input" id="guess-input" min="0" max="120" placeholder="0">
+          <input type="number" class="number-input" id="guess-input" min="0" max="120" placeholder="">
           <button class="btn" onclick="submitGuess()">Submit</button>
         </div>
       </div>
@@ -152,7 +155,30 @@ main{flex:1;padding:3rem 0}
   </div>
 </main>
 
+<div id="cd-overlay" style="display:none;position:fixed;inset:0;background:rgba(13,13,13,0.94);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:.5rem;">
+  <div id="cd-num" style="font-family:'Space Mono',monospace;font-size:9rem;font-weight:700;color:#00ff9d;line-height:1;"></div>
+  <div style="font-family:'Space Mono',monospace;font-size:.9rem;color:#888;letter-spacing:2px;">GET READY</div>
+</div>
+
 <script>
+function showCountdown(cb) {
+  const ov  = document.getElementById('cd-overlay');
+  const num = document.getElementById('cd-num');
+  ov.style.display = 'flex';
+  let c = 3;
+  num.textContent = c;
+  const t = setInterval(() => {
+    c--;
+    if (c > 0) {
+      num.textContent = c;
+    } else {
+      clearInterval(t);
+      ov.style.display = 'none';
+      cb();
+    }
+  }, 1000);
+}
+
 const STORAGE_KEY = 'ah_time';
 const HUMAN_AVG = 2.3;
 const DURATIONS = [3, 5, 7, 10, 15];
@@ -210,7 +236,7 @@ function startTest() {
   shuffledDurations = shuffle(DURATIONS);
   guesses = [];
   showScreen('screen-test');
-  runRound();
+  showCountdown(runRound);
 }
 
 function runRound() {

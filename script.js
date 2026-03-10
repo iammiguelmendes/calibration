@@ -1,65 +1,56 @@
-// Animated counter function
-function animateCounter(element) {
-    const target = parseInt(element.getAttribute('data-count'));
-    const duration = 1500;
-    const increment = target / (duration / 16);
-    let current = 0;
-
-    const timer = setInterval(() => {
-        current += increment;
-        if (current >= target) {
-            element.textContent = target.toLocaleString();
-            clearInterval(timer);
-        } else {
-            element.textContent = Math.floor(current).toLocaleString();
-        }
-    }, 16);
-}
-
-// Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
-    // Animate counters
-    const counters = document.querySelectorAll('[data-count]');
-    setTimeout(() => {
-        counters.forEach(counter => animateCounter(counter));
-    }, 300);
-
-    // Card click handlers
-    document.querySelectorAll('.test-card').forEach(card => {
-        card.addEventListener('click', () => {
-            const testId = card.getAttribute('data-test');
-            window.location.href = `${testId}.html`;
-        });
-    });
-
-    // Add keyboard navigation
-    document.addEventListener('keydown', (e) => {
-        const cards = Array.from(document.querySelectorAll('.test-card'));
-        const focusedCard = document.activeElement;
-        const currentIndex = cards.indexOf(focusedCard);
-
-        if (currentIndex === -1) return;
-
-        let nextIndex;
-        switch(e.key) {
-            case 'ArrowRight':
-                nextIndex = (currentIndex + 1) % cards.length;
-                cards[nextIndex].focus();
-                e.preventDefault();
-                break;
-            case 'ArrowLeft':
-                nextIndex = (currentIndex - 1 + cards.length) % cards.length;
-                cards[nextIndex].focus();
-                e.preventDefault();
-                break;
-            case 'Enter':
-                focusedCard.click();
-                break;
-        }
-    });
-
-    // Make cards focusable for keyboard navigation
+    // ── Card navigation ──────────────────────────────────────────────────────
     document.querySelectorAll('.test-card').forEach(card => {
         card.setAttribute('tabindex', '0');
+        card.addEventListener('click', () => {
+            window.location.href = card.getAttribute('data-test') + '.html';
+        });
+        card.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); }
+        });
     });
+    document.addEventListener('keydown', e => {
+        const cards = Array.from(document.querySelectorAll('.test-card'));
+        const idx = cards.indexOf(document.activeElement);
+        if (idx === -1) return;
+        if (e.key === 'ArrowRight') { e.preventDefault(); cards[(idx + 1) % cards.length].focus(); }
+        if (e.key === 'ArrowLeft')  { e.preventDefault(); cards[(idx - 1 + cards.length) % cards.length].focus(); }
+    });
+
+    // ── Mouse parallax on hero visual ───────────────────────────────────────
+    const hero   = document.getElementById('hero');
+    const visual = document.getElementById('heroVisual');
+    const hvCards = visual ? Array.from(visual.querySelectorAll('.hv-card')) : [];
+
+    if (hero && visual && hvCards.length) {
+        hero.addEventListener('mousemove', e => {
+            const r  = visual.getBoundingClientRect();
+            const cx = r.left + r.width  / 2;
+            const cy = r.top  + r.height / 2;
+            const dx = (e.clientX - cx) / (r.width  / 2);
+            const dy = (e.clientY - cy) / (r.height / 2);
+            hvCards.forEach(card => {
+                const d  = parseFloat(card.dataset.d) || 0.5;
+                card.style.setProperty('--px', (dx * d * 18) + 'px');
+                card.style.setProperty('--py', (dy * d * 14) + 'px');
+            });
+        });
+        hero.addEventListener('mouseleave', () => {
+            hvCards.forEach(card => {
+                card.style.setProperty('--px', '0px');
+                card.style.setProperty('--py', '0px');
+            });
+        });
+    }
+
+    // ── Scroll parallax on ambient orbs ─────────────────────────────────────
+    const orbA = document.getElementById('orbA');
+    const orbB = document.getElementById('orbB');
+    if (orbA || orbB) {
+        window.addEventListener('scroll', () => {
+            const y = window.scrollY;
+            if (orbA) orbA.style.transform = `translateY(${y * 0.25}px)`;
+            if (orbB) orbB.style.transform = `translateY(${y * 0.15}px)`;
+        }, { passive: true });
+    }
 });

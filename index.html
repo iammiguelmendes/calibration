@@ -33,18 +33,7 @@
                     <a href="#tests" class="hero-cta">Explore the tests <span class="cta-arrow">↓</span></a>
                 </div>
                 <div class="hero-visual" id="heroVisual">
-                    <div class="hv-rings"></div>
-                    <div class="hv-badge">
-                        <div class="hv-badge-label">benchmark suite</div>
-                        <div class="hv-badge-num">10</div>
-                        <div class="hv-badge-sub">cognitive tests</div>
-                    </div>
-                    <div class="hv-card" data-d="0.55" style="--x:52%;--y:5%;--r:-5deg;--delay:0.5s">🟢 <span>Go / No-Go</span></div>
-                    <div class="hv-card" data-d="0.7"  style="--x:1%;--y:12%;--r:4deg;--delay:0.62s">⏱️ <span>Time Perception</span></div>
-                    <div class="hv-card" data-d="0.4"  style="--x:3%;--y:54%;--r:3deg;--delay:0.74s">🧩 <span>Visual Memory</span></div>
-                    <div class="hv-card" data-d="0.6"  style="--x:56%;--y:58%;--r:-4deg;--delay:0.86s">⚽ <span>Ball Tracking</span></div>
-                    <div class="hv-card" data-d="0.45" style="--x:14%;--y:79%;--r:5deg;--delay:0.98s">🌈 <span>Stroop Test</span></div>
-                    <div class="hv-card" data-d="0.5"  style="--x:53%;--y:79%;--r:-3deg;--delay:1.1s">🔢 <span>Math Est.</span></div>
+                    <canvas id="hvCanvas"></canvas>
                 </div>
             </div>
         </div>
@@ -60,73 +49,73 @@
             </div>
             <div class="tests-grid">
                 <div class="test-card" data-test="go-nogo">
-                    <div class="test-icon">🟢</div>
+                    <div class="test-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
                     <div class="test-info">
                         <div class="test-name">Go / No-Go</div>
-                        <div class="test-average">Avg <strong>91% accuracy</strong></div>
+                        <div class="test-average"><span class="avg-label">avg</span><strong>91% accuracy</strong></div>
                     </div>
                 </div>
                 <div class="test-card" data-test="time">
-                    <div class="test-icon">⏱️</div>
+                    <div class="test-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
                     <div class="test-info">
                         <div class="test-name">Time Perception</div>
-                        <div class="test-average">Avg <strong>±2.3s off</strong></div>
+                        <div class="test-average"><span class="avg-label">avg</span><strong>±2.3s off</strong></div>
                     </div>
                 </div>
                 <div class="test-card" data-test="multitasking">
-                    <div class="test-icon">🔀</div>
+                    <div class="test-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
                     <div class="test-info">
                         <div class="test-name">Multitasking</div>
-                        <div class="test-average">Avg <strong>65% score</strong></div>
+                        <div class="test-average"><span class="avg-label">avg</span><strong>65% score</strong></div>
                     </div>
                 </div>
                 <div class="test-card" data-test="sequence-memory">
-                    <div class="test-icon">🟩</div>
+                    <div class="test-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
                     <div class="test-info">
                         <div class="test-name">Sequence Memory</div>
-                        <div class="test-average">Avg <strong>level 8</strong></div>
+                        <div class="test-average"><span class="avg-label">avg</span><strong>level 8</strong></div>
                     </div>
                 </div>
                 <div class="test-card" data-test="quantity">
-                    <div class="test-icon">⚫</div>
+                    <div class="test-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="8" r="1.8"/><circle cx="17" cy="6" r="1.8"/><circle cx="4" cy="17" r="1.8"/><circle cx="13" cy="16" r="1.8"/><circle cx="19" cy="15" r="1.8"/><circle cx="11" cy="10" r="1.8"/></svg></div>
                     <div class="test-info">
                         <div class="test-name">Quantity Estimation</div>
-                        <div class="test-average">Avg <strong>±40% error</strong></div>
+                        <div class="test-average"><span class="avg-label">avg</span><strong>±40% error</strong></div>
                     </div>
                 </div>
                 <div class="test-card" data-test="math">
-                    <div class="test-icon">🔢</div>
+                    <div class="test-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg></div>
                     <div class="test-info">
                         <div class="test-name">Math Estimation</div>
-                        <div class="test-average">Avg <strong>±15% error</strong></div>
+                        <div class="test-average"><span class="avg-label">avg</span><strong>±15% error</strong></div>
                     </div>
                 </div>
                 <div class="test-card" data-test="visual-memory">
-                    <div class="test-icon">🧩</div>
+                    <div class="test-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
                     <div class="test-info">
                         <div class="test-name">Visual Memory</div>
-                        <div class="test-average">Avg <strong>level 6</strong></div>
+                        <div class="test-average"><span class="avg-label">avg</span><strong>level 6</strong></div>
                     </div>
                 </div>
                 <div class="test-card" data-test="tapping">
-                    <div class="test-icon">⌨️</div>
+                    <div class="test-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
                     <div class="test-info">
                         <div class="test-name">Tapping Consistency</div>
-                        <div class="test-average">Avg <strong>±120ms</strong></div>
+                        <div class="test-average"><span class="avg-label">avg</span><strong>±120ms</strong></div>
                     </div>
                 </div>
                 <div class="test-card" data-test="ball-tracking">
-                    <div class="test-icon">⚽</div>
+                    <div class="test-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg></div>
                     <div class="test-info">
                         <div class="test-name">Ball Tracking</div>
-                        <div class="test-average">Avg <strong>68% correct</strong></div>
+                        <div class="test-average"><span class="avg-label">avg</span><strong>68% correct</strong></div>
                     </div>
                 </div>
                 <div class="test-card" data-test="stroop">
-                    <div class="test-icon">🌈</div>
+                    <div class="test-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg></div>
                     <div class="test-info">
                         <div class="test-name">Stroop Test</div>
-                        <div class="test-average">Avg <strong>65% accuracy</strong></div>
+                        <div class="test-average"><span class="avg-label">avg</span><strong>65% accuracy</strong></div>
                     </div>
                 </div>
             </div>

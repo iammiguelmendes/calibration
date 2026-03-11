@@ -13,6 +13,28 @@
 
 html { scroll-behavior: smooth; overflow-y: scroll; }
 
+/* ── Accessibility ────────────────────────────────── */
+*:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--primary);
+    color: #000;
+    padding: .5rem 1rem;
+    font-weight: 700;
+    font-size: .875rem;
+    z-index: 9999;
+    text-decoration: none;
+    border-radius: 0 0 6px 0;
+    transition: top .2s;
+}
+.skip-link:focus { top: 0; }
+
 body {
     font-family: 'Manrope', sans-serif;
     background: var(--bg);

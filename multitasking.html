@@ -17,7 +17,7 @@ header{padding:1.25rem 0;border-bottom:1px solid transparent;position:sticky;top
 .back-btn:hover{border-color:var(--primary);color:var(--primary)}
 .logo{font-size:1.3rem;font-weight:800;letter-spacing:-0.5px;text-decoration:none;color:var(--text)}
 .logo span{color:var(--primary)}
-main{flex:1;padding:3rem 0}
+main{flex:1;padding:3rem 0}footer{padding:2rem 0;border-top:1px solid var(--border);text-align:center;color:var(--text-dim);font-size:0.82rem;letter-spacing:0.3px}footer a{color:var(--primary);text-decoration:none}
 .screen{display:none}.screen.active{display:block}
 .test-title{font-size:2rem;font-weight:800;margin-bottom:.75rem}
 .test-desc{color:var(--text-dim);font-size:1rem;line-height:1.6;margin-bottom:2rem;max-width:560px}
@@ -33,7 +33,7 @@ main{flex:1;padding:3rem 0}
 .result-actions{display:flex;gap:1rem;flex-wrap:wrap;margin-top:1.5rem}
 .best-line{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim);margin-bottom:1.5rem}
 .best-line span{color:var(--primary)}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media (prefers-reduced-motion:no-preference){@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}}
 .fade-in{animation:fadeIn .4s ease forwards}
 .feature-list{list-style:none;margin-bottom:2rem;display:flex;flex-direction:column;gap:.6rem}
 .feature-list li{color:var(--text-dim);font-size:.95rem;display:flex;align-items:flex-start;gap:.6rem}
@@ -94,10 +94,11 @@ input[type=number]{-moz-appearance:textfield}
 .task-panel{width:100%;max-width:580px}
 .input-area{width:100%;max-width:580px}
 .back-link{display:inline-flex;align-items:center;gap:.4rem;color:var(--text-dim);text-decoration:none;font-size:.85rem;font-weight:600;margin-bottom:1.75rem;transition:color .2s}
-.back-link:hover{color:var(--primary)}
+.back-link:hover{color:var(--primary)}*:focus-visible{outline:2px solid var(--primary);outline-offset:2px}.skip-link{position:absolute;top:-40px;left:0;background:var(--primary);color:#000;padding:.5rem 1rem;font-weight:700;font-size:.875rem;z-index:9999;text-decoration:none;border-radius:0 0 6px 0;transition:top .2s}.skip-link:focus{top:0}
 </style>
 </head>
 <body>
+<a href="#main" class="skip-link">Skip to main content</a>
 
 <header>
   <div class="container">
@@ -105,13 +106,13 @@ input[type=number]{-moz-appearance:textfield}
   </div>
 </header>
 
-<main>
+<main id="main">
   <div class="container">
-    <a href="index.html" class="back-link">← All Tests</a>
+    <a href="index.html" class="back-link" aria-label="Back to all tests">← All Tests</a>
 
     <!-- INTRO -->
     <div id="screen-intro" class="screen active fade-in">
-      <div class="test-title">Multitasking</div>
+      <h1 class="test-title">Multitasking</h1>
       <p class="test-desc">Do two things at once and see how well your brain handles it.</p>
       <ul class="feature-list">
         <li><strong style="color:var(--text)">Top:</strong> Numbers flash one at a time — count how many are <strong style="color:var(--primary)">odd</strong>.</li>
@@ -144,7 +145,7 @@ input[type=number]{-moz-appearance:textfield}
       <div class="input-area" id="input-area">
         <p class="input-prompt">How many odd numbers did you count?</p>
         <div class="input-row">
-          <input type="number" class="num-input" id="odd-guess" placeholder="">
+          <input type="number" class="num-input" id="odd-guess" placeholder="" aria-label="Count of odd numbers">
           <button class="btn" onclick="submitAnswer()">Submit</button>
         </div>
       </div>
@@ -152,7 +153,7 @@ input[type=number]{-moz-appearance:textfield}
 
     <!-- RESULT -->
     <div id="screen-result" class="screen fade-in">
-      <div class="test-title">Results</div>
+      <h2 class="test-title">Results</h2>
       <div class="result-stats">
         <div class="stat-card">
           <div class="label">Counting</div>
@@ -172,10 +173,6 @@ input[type=number]{-moz-appearance:textfield}
           <div class="label">Human Average</div>
           <div class="value neutral">65%</div>
         </div>
-        <div class="stat-card">
-          <div class="label">Percentile</div>
-          <div class="value" id="res-percentile">—</div>
-        </div>
       </div>
       <div class="best-line" id="best-line"></div>
       <div class="result-actions">
@@ -186,9 +183,14 @@ input[type=number]{-moz-appearance:textfield}
 
   </div>
 </main>
+<footer>
+  <div class="container">
+    <p>AverageHuman &mdash; Measuring cognition, one test at a time &nbsp;&middot;&nbsp; <a href="privacy.html">Privacy Policy</a></p>
+  </div>
+</footer>
 
 <div id="cd-overlay" style="display:none;position:fixed;inset:0;background:rgba(13,13,13,0.94);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:.5rem;">
-  <div id="cd-num" style="font-family:'Space Mono',monospace;font-size:9rem;font-weight:700;color:#00ff9d;line-height:1;"></div>
+  <div id="cd-num" aria-live="assertive" aria-atomic="true" style="font-family:'Space Mono',monospace;font-size:9rem;font-weight:700;color:#00ff9d;line-height:1;"></div>
   <div style="font-family:'Space Mono',monospace;font-size:.9rem;color:#888;letter-spacing:2px;">GET READY</div>
 </div>
 
@@ -240,7 +242,7 @@ function shuffle(arr) {
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  document.getElementById(id).classList.add('active'); const _heading = document.getElementById(id).querySelector('h1, h2'); if (_heading) { _heading.setAttribute('tabindex', '-1'); _heading.focus(); }
 }
 
 // ── Test ──────────────────────────────────────────────────────────────────────
@@ -352,14 +354,6 @@ function submitAnswer() {
   const shapeAcc  = Math.round((circlesCaught / circlesTotal) * 100);
   const combined  = Math.round((countAcc + shapeAcc) / 2);
 
-  let pct;
-  if (combined >= 85)      pct = 'Top 10%';
-  else if (combined >= 75) pct = 'Top 25%';
-  else if (combined >= 65) pct = 'Around 50%';
-  else if (combined >= 50) pct = 'Bottom 30%';
-  else if (combined >= 35) pct = 'Bottom 20%';
-  else                     pct = 'Bottom 10%';
-
   let data = JSON.parse(localStorage.getItem(LS_KEY) || 'null') || {attempts:0, best:null, history:[]};
   data.attempts = (data.attempts || 0) + 1;
   data.history.push(combined);
@@ -369,7 +363,6 @@ function submitAnswer() {
   document.getElementById('res-count').textContent     = countAcc + '%';
   document.getElementById('res-shapes').textContent    = `${circlesCaught}/${circlesTotal}`;
   document.getElementById('res-combined').textContent  = combined + '%';
-  document.getElementById('res-percentile').textContent = pct;
   document.getElementById('best-line').innerHTML       =
     `Personal best: <span>${data.best}%</span> &nbsp;·&nbsp; Attempts: <span>${data.attempts}</span>`;
 

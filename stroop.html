@@ -18,7 +18,7 @@ header{padding:1.25rem 0;border-bottom:1px solid transparent;position:sticky;top
 .back-btn:hover{border-color:var(--primary);color:var(--primary)}
 .logo{font-size:1.3rem;font-weight:800;letter-spacing:-0.5px;text-decoration:none;color:var(--text)}
 .logo span{color:var(--primary)}
-main{flex:1;padding:3rem 0}
+main{flex:1;padding:3rem 0}footer{padding:2rem 0;border-top:1px solid var(--border);text-align:center;color:var(--text-dim);font-size:0.82rem;letter-spacing:0.3px}footer a{color:var(--primary);text-decoration:none}
 .screen{display:none}.screen.active{display:block}
 .test-title{font-size:2rem;font-weight:800;margin-bottom:.75rem}
 .test-desc{color:var(--text-dim);font-size:1rem;line-height:1.6;margin-bottom:2rem;max-width:560px}
@@ -34,7 +34,7 @@ main{flex:1;padding:3rem 0}
 .result-actions{display:flex;gap:1rem;flex-wrap:wrap}
 .best-line{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim);margin-bottom:1.5rem}
 .best-line span{color:var(--primary)}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media (prefers-reduced-motion:no-preference){@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}}
 .fade-in{animation:fadeIn .4s ease forwards}
 
 /* ── Stroop-specific ── */
@@ -76,10 +76,11 @@ main{flex:1;padding:3rem 0}
 /* ── center game ── */
 .stroop-wrapper{margin:0 auto}
 .back-link{display:inline-flex;align-items:center;gap:.4rem;color:var(--text-dim);text-decoration:none;font-size:.85rem;font-weight:600;margin-bottom:1.75rem;transition:color .2s}
-.back-link:hover{color:var(--primary)}
+.back-link:hover{color:var(--primary)}*:focus-visible{outline:2px solid var(--primary);outline-offset:2px}.skip-link{position:absolute;top:-40px;left:0;background:var(--primary);color:#000;padding:.5rem 1rem;font-weight:700;font-size:.875rem;z-index:9999;text-decoration:none;border-radius:0 0 6px 0;transition:top .2s}.skip-link:focus{top:0}
 </style>
 </head>
 <body>
+<a href="#main" class="skip-link">Skip to main content</a>
 
 <header>
   <div class="container">
@@ -87,13 +88,13 @@ main{flex:1;padding:3rem 0}
   </div>
 </header>
 
-<main>
+<main id="main">
   <div class="container">
-    <a href="index.html" class="back-link">← All Tests</a>
+    <a href="index.html" class="back-link" aria-label="Back to all tests">← All Tests</a>
 
     <!-- INTRO SCREEN -->
     <div id="screen-intro" class="screen active fade-in">
-      <div class="test-title">Stroop Test</div>
+      <h1 class="test-title">Stroop Test</h1>
       <p class="test-desc">Your brain wants to read the word. Your job is to ignore it.</p>
       <ul class="feature-list">
         <li>A color word appears in a different ink color.</li>
@@ -130,7 +131,7 @@ main{flex:1;padding:3rem 0}
 
     <!-- RESULT SCREEN -->
     <div id="screen-result" class="screen fade-in">
-      <div class="test-title">Results</div>
+      <h2 class="test-title">Results</h2>
       <div class="best-line" id="best-line">Personal best: <span>—</span></div>
       <div class="result-stats">
         <div class="stat-card">
@@ -141,10 +142,6 @@ main{flex:1;padding:3rem 0}
           <div class="label">Human Average</div>
           <div class="value neutral">65%</div>
         </div>
-        <div class="stat-card">
-          <div class="label">Percentile</div>
-          <div class="value" id="res-percentile">—</div>
-        </div>
       </div>
       <div class="result-actions">
         <button class="btn" onclick="startTest()">Try Again</button>
@@ -154,9 +151,14 @@ main{flex:1;padding:3rem 0}
 
   </div>
 </main>
+<footer>
+  <div class="container">
+    <p>AverageHuman &mdash; Measuring cognition, one test at a time &nbsp;&middot;&nbsp; <a href="privacy.html">Privacy Policy</a></p>
+  </div>
+</footer>
 
 <div id="cd-overlay" style="display:none;position:fixed;inset:0;background:rgba(13,13,13,0.94);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:.5rem;">
-  <div id="cd-num" style="font-family:'Space Mono',monospace;font-size:9rem;font-weight:700;color:#00ff9d;line-height:1;"></div>
+  <div id="cd-num" aria-live="assertive" aria-atomic="true" style="font-family:'Space Mono',monospace;font-size:9rem;font-weight:700;color:#00ff9d;line-height:1;"></div>
   <div style="font-family:'Space Mono',monospace;font-size:.9rem;color:#888;letter-spacing:2px;">GET READY</div>
 </div>
 
@@ -213,19 +215,10 @@ function shuffle(arr) {
   return arr;
 }
 
-function getPercentile(score, avgHuman, lowerIsBetter) {
-  const ratio = lowerIsBetter ? avgHuman / score : score / avgHuman;
-  if (ratio >= 2) return 'Top 5%';
-  if (ratio >= 1.5) return 'Top 15%';
-  if (ratio >= 1.2) return 'Top 30%';
-  if (ratio >= 0.85) return 'Around 50%';
-  if (ratio >= 0.6) return 'Bottom 30%';
-  return 'Bottom 15%';
-}
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  document.getElementById(id).classList.add('active'); const _heading = document.getElementById(id).querySelector('h1, h2'); if (_heading) { _heading.setAttribute('tabindex', '-1'); _heading.focus(); }
 }
 
 // ─── Trial generation ─────────────────────────────────────────────────────────
@@ -369,7 +362,6 @@ function showResults(score) {
   const best = data.best !== undefined ? data.best + '%' : score + '%';
 
   document.getElementById('res-score').textContent = score + '%';
-  document.getElementById('res-percentile').textContent = getPercentile(score, HUMAN_AVG, false);
   document.getElementById('best-line').innerHTML = `Personal best: <span>${best}</span>`;
 
   showScreen('screen-result');

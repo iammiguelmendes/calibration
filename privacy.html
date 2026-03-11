@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — AverageHuman</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{--bg:#0d0d0d;--card-bg:#1a1a1a;--primary:#00ff9d;--secondary:#ff3366;--text:#fff;--text-dim:#888;--border:#2a2a2a}
+    body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+    html{overflow-y:scroll}
+    .container{max-width:1100px;margin:0 auto;padding:0 2.5rem;width:100%}
+    header{padding:1.25rem 0;border-bottom:1px solid transparent;position:sticky;top:0;z-index:100;background:transparent;backdrop-filter:blur(0px);-webkit-backdrop-filter:blur(0px);transition:background .4s ease,border-color .4s ease,backdrop-filter .4s ease}
+    header.scrolled{background:rgba(13,13,13,0.88);border-bottom:1px solid var(--border);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+    .logo{font-size:1.3rem;font-weight:800;letter-spacing:-0.5px;text-decoration:none;color:var(--text)}
+    .logo span{color:var(--primary)}
+    main{flex:1;padding:4rem 0 6rem}footer{padding:2rem 0;border-top:1px solid var(--border);text-align:center;color:var(--text-dim);font-size:0.82rem;letter-spacing:0.3px}footer a{color:var(--primary);text-decoration:none}
+    .back-link{display:inline-flex;align-items:center;gap:.4rem;color:var(--text-dim);text-decoration:none;font-size:.85rem;font-weight:600;margin-bottom:2.5rem;transition:color .2s}
+    .back-link:hover{color:var(--primary)}*:focus-visible{outline:2px solid var(--primary);outline-offset:2px}.skip-link{position:absolute;top:-40px;left:0;background:var(--primary);color:#000;padding:.5rem 1rem;font-weight:700;font-size:.875rem;z-index:9999;text-decoration:none;border-radius:0 0 6px 0;transition:top .2s}.skip-link:focus{top:0}
+
+    /* Page layout */
+    .page-header{margin-bottom:3rem}
+    .page-eyebrow{font-family:'Space Mono',monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:2px;color:var(--primary);margin-bottom:1rem}
+    .page-title{font-size:2.6rem;font-weight:800;letter-spacing:-1px;line-height:1.15;margin-bottom:1rem}
+    .page-meta{font-size:.85rem;color:var(--text-dim)}
+
+    /* Content */
+    .content{max-width:720px}
+    .section{margin-bottom:2.75rem}
+    .section-title{font-size:1.05rem;font-weight:800;color:var(--text);margin-bottom:.75rem;display:flex;align-items:center;gap:.6rem}
+    .section-title::before{content:'';display:inline-block;width:3px;height:1em;background:var(--primary);border-radius:2px;flex-shrink:0}
+    .section p{font-size:.95rem;line-height:1.75;color:rgba(255,255,255,0.75);margin-bottom:.75rem}
+    .section p:last-child{margin-bottom:0}
+
+    /* Info cards */
+    .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2.75rem}
+    .info-card{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:1.4rem 1.5rem}
+    .info-card-label{font-family:'Space Mono',monospace;font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim);margin-bottom:.5rem}
+    .info-card-value{font-size:.95rem;font-weight:600;color:var(--text);line-height:1.5}
+    .info-card.positive .info-card-value{color:var(--primary)}
+    .info-card.negative .info-card-value{color:var(--text-dim)}
+
+    /* List */
+    .data-list{list-style:none;display:flex;flex-direction:column;gap:.5rem;margin-top:.5rem}
+    .data-list li{font-size:.9rem;line-height:1.6;color:rgba(255,255,255,0.7);padding-left:1.25rem;position:relative}
+    .data-list li::before{content:'—';position:absolute;left:0;color:var(--primary);font-family:'Space Mono',monospace}
+
+    /* Divider */
+    .divider{border:none;border-top:1px solid var(--border);margin:2.75rem 0}
+
+    /* Footer note */
+    .footer-note{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:1.5rem;font-size:.875rem;line-height:1.7;color:var(--text-dim);margin-top:3rem}
+    .footer-note a{color:var(--primary);text-decoration:none}
+    .footer-note a:hover{text-decoration:underline}
+  </style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <div class="container">
+    <a href="index.html" class="logo">Average<span>Human</span></a>
+  </div>
+</header>
+
+<main id="main">
+  <div class="container">
+    <a href="index.html" class="back-link" aria-label="Back to home">← Back to Home</a>
+
+    <div class="page-header">
+      <div class="page-eyebrow">Legal</div>
+      <h1 class="page-title">Privacy Policy</h1>
+      <p class="page-meta">Last updated: March 2026</p>
+    </div>
+
+    <div class="content">
+
+      <!-- At a glance cards -->
+      <div class="info-grid">
+        <div class="info-card positive">
+          <div class="info-card-label">Data collected</div>
+          <div class="info-card-value">Your test scores, locally in your browser</div>
+        </div>
+        <div class="info-card negative">
+          <div class="info-card-label">Data sent to servers</div>
+          <div class="info-card-value">Nothing. Zero.</div>
+        </div>
+        <div class="info-card negative">
+          <div class="info-card-label">Accounts required</div>
+          <div class="info-card-value">None</div>
+        </div>
+        <div class="info-card negative">
+          <div class="info-card-label">Cookies &amp; tracking</div>
+          <div class="info-card-value">None</div>
+        </div>
+      </div>
+
+      <!-- Overview -->
+      <div class="section">
+        <div class="section-title">Overview</div>
+        <p>AverageHuman is a collection of browser-based cognitive benchmarks. All tests run entirely in your browser — no data is ever transmitted to a server, stored in a database, or shared with any third party.</p>
+        <p>This page explains in plain language what information the site touches, where it stays, and how you can remove it at any time.</p>
+      </div>
+
+      <hr class="divider">
+
+      <!-- What we store -->
+      <div class="section">
+        <div class="section-title">What is stored on your device</div>
+        <p>To show you your personal best and attempt history on each test, AverageHuman writes a small record to your browser's <strong>localStorage</strong> — a storage area that lives only on your device and is never sent anywhere.</p>
+        <p>For each test you complete, the following is saved locally:</p>
+        <ul class="data-list">
+          <li>Your score or performance metric for that attempt</li>
+          <li>Your personal best across all attempts</li>
+          <li>Total number of attempts</li>
+          <li>A short history of recent results (used to display trends)</li>
+        </ul>
+        <p style="margin-top:.75rem">This data has no identifying information attached. It is a plain number — indistinguishable from any other user's result if it were ever seen by anyone, which it is not.</p>
+      </div>
+
+      <!-- What we do NOT collect -->
+      <div class="section">
+        <div class="section-title">What we do not collect</div>
+        <ul class="data-list">
+          <li>Your name, email address, or any account information</li>
+          <li>Your IP address or approximate location</li>
+          <li>Device identifiers, browser fingerprints, or hardware specs</li>
+          <li>Behavioral tracking or click/scroll heatmaps</li>
+          <li>Advertising identifiers of any kind</li>
+          <li>Any information about who you are</li>
+        </ul>
+      </div>
+
+      <hr class="divider">
+
+      <!-- localStorage -->
+      <div class="section">
+        <div class="section-title">localStorage in detail</div>
+        <p>localStorage is a standard browser feature. Data written there stays on your computer, in your browser profile. It does not expire on its own, it is not a cookie, and it is not shared between different browsers or devices.</p>
+        <p>The keys AverageHuman writes follow the pattern <code style="font-family:'Space Mono',monospace;font-size:.82rem;color:var(--primary);background:rgba(0,255,157,0.07);padding:.1rem .35rem;border-radius:4px">ah_&lt;test-name&gt;</code> (for example, <code style="font-family:'Space Mono',monospace;font-size:.82rem;color:var(--primary);background:rgba(0,255,157,0.07);padding:.1rem .35rem;border-radius:4px">ah_tapping</code>). You can inspect, modify, or delete them at any time through your browser's developer tools.</p>
+        <p>To clear all AverageHuman data: open DevTools → Application → Local Storage → select this site → delete the relevant keys, or simply clear your browser's site data for this domain.</p>
+      </div>
+
+      <!-- Third-party -->
+      <div class="section">
+        <div class="section-title">Third-party services</div>
+        <p>AverageHuman loads fonts from <strong>Google Fonts</strong> via a standard stylesheet request. This means your browser makes a network request to Google's servers to download the font files. Google may log this request as they would any web request to their CDN. Refer to <a href="https://policies.google.com/privacy" target="_blank" rel="noopener" style="color:var(--primary);text-decoration:none">Google's Privacy Policy</a> for details on how they handle font requests.</p>
+        <p>No other third-party scripts, SDKs, analytics tools, or ad networks are loaded or embedded anywhere on this site.</p>
+      </div>
+
+      <hr class="divider">
+
+      <!-- Children -->
+      <div class="section">
+        <div class="section-title">Children</div>
+        <p>AverageHuman does not collect personal data from anyone, including children. Because no personal information is collected at all, there are no special restrictions based on age.</p>
+      </div>
+
+      <!-- Changes -->
+      <div class="section">
+        <div class="section-title">Changes to this policy</div>
+        <p>If the privacy practices of this site ever change in a meaningful way — for example, if server-side features were added — this page will be updated and the "Last updated" date at the top will reflect that change. The core principle will remain: collect the minimum necessary, keep it local, share nothing.</p>
+      </div>
+
+      <!-- Contact -->
+      <div class="footer-note">
+        Questions about this policy? The project is open and transparent by design. You can inspect every line of code that runs on this site directly in your browser's developer tools — no build step, no obfuscation.
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    <p>AverageHuman &mdash; Measuring cognition, one test at a time &nbsp;&middot;&nbsp; <a href="privacy.html">Privacy Policy</a></p>
+  </div>
+</footer>
+
+<script>
+  const _hdr = document.querySelector('header');
+  if (_hdr) {
+    _hdr.classList.add('scrolled');
+    const _s = () => _hdr.classList.toggle('scrolled', window.scrollY > 40);
+    window.addEventListener('scroll', _s, {passive: true});
+  }
+</script>
+
+</body>
+</html>

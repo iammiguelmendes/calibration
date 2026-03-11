@@ -155,9 +155,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             t += 0.008;
-            requestAnimationFrame(draw);
+            if (!prefersReducedMotion) requestAnimationFrame(draw);
         }
-        draw();
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!prefersReducedMotion) draw();
     }
 
     // ── Sticky header scroll animation ──────────────────────────────────────

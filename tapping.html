@@ -12,12 +12,9 @@
     body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
     html{overflow-y:scroll}.container{max-width:1100px;margin:0 auto;padding:0 2.5rem;width:100%}
     header{padding:1.25rem 0;border-bottom:1px solid transparent;position:sticky;top:0;z-index:100;background:transparent;backdrop-filter:blur(0px);-webkit-backdrop-filter:blur(0px);transition:background .4s ease,border-color .4s ease,backdrop-filter .4s ease}header.scrolled{background:rgba(13,13,13,0.88);border-bottom:1px solid var(--border);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
-    .header-content{display:flex;align-items:center;gap:1rem}
-    .back-btn{background:none;border:1px solid var(--border);color:var(--text-dim);padding:.5rem .9rem;border-radius:8px;cursor:pointer;font-size:1rem;transition:all .2s;text-decoration:none;font-family:'Manrope',sans-serif}
-    .back-btn:hover{border-color:var(--primary);color:var(--primary)}
-    .logo{font-size:1.3rem;font-weight:800;letter-spacing:-0.5px;text-decoration:none;color:var(--text)}
+.logo{font-size:1.3rem;font-weight:800;letter-spacing:-0.5px;text-decoration:none;color:var(--text)}
     .logo span{color:var(--primary)}
-    main{flex:1;padding:3rem 0}
+    main{flex:1;padding:3rem 0}footer{padding:2rem 0;border-top:1px solid var(--border);text-align:center;color:var(--text-dim);font-size:0.82rem;letter-spacing:0.3px}footer a{color:var(--primary);text-decoration:none}
     .screen{display:none}.screen.active{display:block}
     .test-title{font-size:2rem;font-weight:800;margin-bottom:.75rem}
     .test-desc{color:var(--text-dim);font-size:1rem;line-height:1.6;margin-bottom:2rem;max-width:560px}
@@ -33,7 +30,7 @@
     .result-actions{display:flex;gap:1rem;flex-wrap:wrap}
     .best-line{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim);margin-bottom:1.5rem}
     .best-line span{color:var(--primary)}
-    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    @media (prefers-reduced-motion:no-preference){@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}}
     .fade-in{animation:fadeIn .4s ease forwards}
 
     /* Tapping specific */
@@ -150,27 +147,25 @@
       animation:ripple .5s ease-out forwards;
     }
   .back-link{display:inline-flex;align-items:center;gap:.4rem;color:var(--text-dim);text-decoration:none;font-size:.85rem;font-weight:600;margin-bottom:1.75rem;transition:color .2s}
-.back-link:hover{color:var(--primary)}
+.back-link:hover{color:var(--primary)}*:focus-visible{outline:2px solid var(--primary);outline-offset:2px}.skip-link{position:absolute;top:-40px;left:0;background:var(--primary);color:#000;padding:.5rem 1rem;font-weight:700;font-size:.875rem;z-index:9999;text-decoration:none;border-radius:0 0 6px 0;transition:top .2s}.skip-link:focus{top:0}
 </style>
 </head>
 <body>
+<a href="#main" class="skip-link">Skip to main content</a>
 
 <header>
   <div class="container">
-    <div class="header-content">
-      <a class="back-btn" href="index.html">←</a>
-      <a href="index.html" class="logo">Average<span>Human</span></a>
-    </div>
+    <a href="index.html" class="logo">Average<span>Human</span></a>
   </div>
 </header>
 
-<main>
+<main id="main">
   <div class="container">
-    <a href="index.html" class="back-link">← All Tests</a>
+    <a href="index.html" class="back-link" aria-label="Back to all tests">← All Tests</a>
 
     <!-- INTRO -->
     <div class="screen active fade-in" id="screen-intro">
-      <div class="test-title">Tapping Consistency</div>
+      <h1 class="test-title">Tapping Consistency</h1>
       <div class="test-desc">
         Tap the circle (or press <strong style="color:var(--text)">spacebar</strong>) 20 times at a steady rhythm. The target pace is randomly 1s, 1.5s, or 2s between taps. First, <strong style="color:var(--text)">3 guide beats</strong> will flash — tap along to feel the tempo. Then tap 17 more times on your own, keeping that same pace.
       </div>
@@ -200,7 +195,7 @@
 
     <!-- RESULT -->
     <div class="screen" id="screen-result">
-      <div class="test-title fade-in">Test Complete</div>
+      <h2 class="test-title fade-in">Test Complete</h2>
       <div class="test-desc fade-in" id="result-desc" style="margin-bottom:1.5rem;"></div>
 
       <div class="result-stats fade-in">
@@ -214,10 +209,6 @@
           <div class="value neutral">120</div>
           <div style="font-size:.75rem;color:var(--text-dim);margin-top:.25rem;">ms stddev</div>
         </div>
-        <div class="stat-card">
-          <div class="label">Percentile</div>
-          <div class="value" id="res-percentile">—</div>
-        </div>
       </div>
 
       <div class="best-line" id="best-line"></div>
@@ -230,6 +221,11 @@
 
   </div>
 </main>
+<footer>
+  <div class="container">
+    <p>AverageHuman &mdash; Measuring cognition, one test at a time &nbsp;&middot;&nbsp; <a href="privacy.html">Privacy Policy</a></p>
+  </div>
+</footer>
 
 <script>
   const STORAGE_KEY = 'ah_tapping';
@@ -249,7 +245,7 @@
 
   function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
+    document.getElementById(id).classList.add('active'); const _heading = document.getElementById(id).querySelector('h1, h2'); if (_heading) { _heading.setAttribute('tabindex', '-1'); _heading.focus(); }
   }
 
   function getStorage() {
@@ -265,15 +261,6 @@
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch {}
   }
 
-  function getPercentile(score, avgHuman, lowerIsBetter) {
-    const ratio = lowerIsBetter ? avgHuman / score : score / avgHuman;
-    if (ratio >= 2) return 'Top 5%';
-    if (ratio >= 1.5) return 'Top 15%';
-    if (ratio >= 1.2) return 'Top 30%';
-    if (ratio >= 0.85) return 'Around 50%';
-    if (ratio >= 0.6) return 'Bottom 30%';
-    return 'Bottom 15%';
-  }
 
   function clearAllTimers() {
     guideBeatTimers.forEach(t => clearTimeout(t));
@@ -437,8 +424,6 @@
     showScreen('screen-result');
 
     document.getElementById('res-score').textContent = stddev;
-    document.getElementById('res-percentile').textContent =
-      getPercentile(stddev, AVG_HUMAN, true);
 
     const best = store.best;
     const bl = document.getElementById('best-line');

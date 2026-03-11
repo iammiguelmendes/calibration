@@ -72,21 +72,6 @@ canvas.clickable{cursor:crosshair;}
 }
 .click-shield.off{display:none;}
 
-/* Feedback overlay */
-.feedback-overlay{
-  position:absolute;
-  top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  font-family:'Space Mono',monospace;
-  font-size:3rem;font-weight:700;
-  pointer-events:none;
-  opacity:0;
-  transition:opacity .15s;
-  z-index:10;
-}
-.feedback-overlay.correct{color:var(--primary)}
-.feedback-overlay.wrong{color:var(--secondary)}
-.feedback-overlay.show{opacity:1}
 
 /* Intro list */
 .feature-list{list-style:none;margin-bottom:2rem;display:flex;flex-direction:column;gap:.6rem}
@@ -129,7 +114,6 @@ canvas.clickable{cursor:crosshair;}
         <div class="canvas-wrap" id="canvas-wrap">
           <canvas id="game-canvas" width="620" height="400" role="img" aria-label="Ball tracking game canvas — track the highlighted balls with your mouse"></canvas>
           <div class="click-shield" id="click-shield"></div>
-          <div class="feedback-overlay" id="feedback-overlay"></div>
         </div>
         <div class="phase-label" id="phase-label">Memorize the glowing ball…</div>
         <div class="score-tally" id="score-tally">Score: <span>0</span> / 0</div>
@@ -242,14 +226,6 @@ function setClickable(on){
   }
 }
 
-function showFeedback(correct){
-  const el = document.getElementById('feedback-overlay');
-  el.textContent = correct ? '✓' : '✗';
-  el.className = 'feedback-overlay '+(correct?'correct':'wrong')+' show';
-}
-function hideFeedback(){
-  document.getElementById('feedback-overlay').className = 'feedback-overlay';
-}
 
 // ── ball generation ───────────────────────────────────────────────────────────
 function createBalls(){
@@ -449,7 +425,6 @@ function animLoop(ts){
 // ── round logic ───────────────────────────────────────────────────────────────
 function startRound(){
   round++;
-  hideFeedback();
   setClickable(false);
   setPhaseClass('');
   document.getElementById('round-counter').textContent =
@@ -505,11 +480,9 @@ canvas.addEventListener('click', e => {
 
   if(isCorrect){
     drawScene('reveal', targetIndex);
-    showFeedback(true);
     setLabel('Correct!');
   } else {
     drawScene('reveal', targetIndex, clicked);
-    showFeedback(false);
     setLabel('Wrong — the green ball is revealed.');
   }
 

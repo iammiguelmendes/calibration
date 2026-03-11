@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mental Rotation — AverageHuman</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0d0d0d;--card-bg:#1a1a1a;--primary:#00ff9d;--secondary:#ff3366;--text:#fff;--text-dim:#888;--border:#2a2a2a}
+body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+html{overflow-y:scroll}.container{max-width:1100px;margin:0 auto;padding:0 2.5rem;width:100%}
+header{padding:1.25rem 0;border-bottom:1px solid transparent;position:sticky;top:0;z-index:100;background:transparent;backdrop-filter:blur(0px);-webkit-backdrop-filter:blur(0px);transition:background .4s ease,border-color .4s ease,backdrop-filter .4s ease}header.scrolled{background:rgba(13,13,13,0.88);border-bottom:1px solid var(--border);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.logo{font-size:1.3rem;font-weight:800;letter-spacing:-0.5px;text-decoration:none;color:var(--text)}.logo span{color:var(--primary)}
+main{flex:1;padding:3rem 0}footer{padding:2rem 0;border-top:1px solid var(--border);text-align:center;color:var(--text-dim);font-size:0.82rem}footer a{color:var(--primary);text-decoration:none}
+.screen{display:none}.screen.active{display:block}
+.test-title{font-size:2rem;font-weight:800;margin-bottom:.75rem}
+.test-desc{color:var(--text-dim);font-size:1rem;line-height:1.6;margin-bottom:2rem;max-width:560px}
+.btn{background:var(--primary);color:#000;border:none;padding:.85rem 2rem;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Manrope',sans-serif}
+.btn:hover{opacity:.85;transform:translateY(-1px)}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--text-dim);padding:.75rem 1.5rem;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Manrope',sans-serif}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.result-actions{display:flex;gap:1rem;flex-wrap:wrap}
+.best-line{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim);margin-bottom:1.5rem}.best-line span{color:var(--primary)}
+@media(prefers-reduced-motion:no-preference){@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}}
+.fade-in{animation:fadeIn .4s ease forwards}
+.feature-list{list-style:none;margin-bottom:2rem;display:flex;flex-direction:column;gap:.6rem}
+.feature-list li{color:var(--text-dim);font-size:.95rem;display:flex;align-items:flex-start;gap:.6rem}
+.feature-list li::before{content:'—';color:var(--primary);flex-shrink:0}
+
+/* ── Test specific ── */
+.round-label{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim);margin-bottom:1.25rem;letter-spacing:1px}
+.shapes-area{
+  display:flex;align-items:center;justify-content:center;gap:1.5rem;
+  margin-bottom:1.75rem;flex-wrap:wrap;
+}
+.shape-box{
+  background:var(--card-bg);border:1px solid var(--border);border-radius:14px;
+  overflow:hidden;display:flex;align-items:center;justify-content:center;
+  transition:border-color .2s;
+}
+.shape-box canvas{display:block}
+.shape-sep{
+  font-family:'Space Mono',monospace;font-size:1.8rem;color:var(--text-dim);
+  font-weight:700;user-select:none;flex-shrink:0;
+}
+.answer-area{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.answer-btn{
+  background:none;border:2px solid var(--border);color:var(--text-dim);
+  padding:.9rem 2.2rem;border-radius:10px;font-size:1rem;font-weight:700;
+  cursor:pointer;transition:all .2s;font-family:'Manrope',sans-serif;
+  display:flex;flex-direction:column;align-items:center;gap:.3rem;
+}
+.answer-btn:hover{border-color:var(--primary);color:var(--primary)}
+.answer-btn:disabled{opacity:.4;cursor:default;transform:none}
+.answer-btn .hint{font-size:.7rem;color:var(--text-dim);font-weight:400;font-family:'Space Mono',monospace;letter-spacing:.5px}
+.feedback-msg{
+  text-align:center;font-family:'Space Mono',monospace;font-size:1rem;
+  font-weight:700;min-height:1.4em;margin-top:1rem;transition:opacity .15s;
+}
+.feedback-msg.correct{color:var(--primary)}
+.feedback-msg.wrong{color:var(--secondary)}
+
+/* ── Result layout ── */
+.result-layout{display:flex;gap:2rem;align-items:flex-start}
+.result-sidebar{display:flex;flex-direction:column;gap:.75rem;flex-shrink:0;min-width:150px;padding-top:.25rem}
+@media(max-width:560px){.result-layout{flex-direction:column-reverse}.result-sidebar{flex-direction:row;flex-wrap:wrap}}
+.rounds-board{flex:1;border:1px solid var(--border);border-radius:12px;overflow:hidden;max-height:420px;display:flex;flex-direction:column}
+.board-header{display:grid;grid-template-columns:.5fr 1fr 1fr;padding:.6rem 1rem;background:var(--card-bg);flex-shrink:0}
+.board-header span{font-family:'Space Mono',monospace;font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim)}
+.board-body{overflow-y:auto;flex:1}
+.board-row{display:grid;grid-template-columns:.5fr 1fr 1fr;padding:.65rem 1rem;border-top:1px solid var(--border);align-items:center}
+.board-row:nth-child(even){background:rgba(255,255,255,0.02)}
+.bc{font-family:'Space Mono',monospace;font-size:.85rem}
+.bc.dim{color:var(--text-dim)}
+.bc.ok{color:var(--primary)}
+.bc.bad{color:var(--secondary)}
+.bc.neutral{color:var(--text)}
+
+.back-link{display:inline-flex;align-items:center;gap:.4rem;color:var(--text-dim);text-decoration:none;font-size:.85rem;font-weight:600;margin-bottom:1.75rem;transition:color .2s}
+.back-link:hover{color:var(--primary)}
+*:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--primary);color:#000;padding:.5rem 1rem;font-weight:700;font-size:.875rem;z-index:9999;text-decoration:none;border-radius:0 0 6px 0;transition:top .2s}.skip-link:focus{top:0}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<header>
+  <div class="container">
+    <a href="index.html" class="logo">Average<span>Human</span></a>
+  </div>
+</header>
+
+<main id="main">
+  <div class="container">
+    <a href="index.html" class="back-link">← All Tests</a>
+
+    <!-- INTRO -->
+    <div id="screen-intro" class="screen active fade-in">
+      <h1 class="test-title">Mental Rotation</h1>
+      <p class="test-desc">Can your mind rotate objects in 3D space?</p>
+      <ul class="feature-list">
+        <li>Two shapes appear side by side.</li>
+        <li>Decide if the right shape is the <strong style="color:var(--text)">same shape rotated</strong> or a <strong style="color:var(--text)">mirror image</strong>.</li>
+        <li>Shapes get rotated further as rounds progress.</li>
+        <li>12 rounds total. Take your time — accuracy counts.</li>
+      </ul>
+      <button class="btn" onclick="startTest()">Start Test</button>
+    </div>
+
+    <!-- TEST -->
+    <div id="screen-test" class="screen">
+      <div class="round-label" id="round-label">Round 1 / 12</div>
+      <div class="shapes-area">
+        <div class="shape-box"><canvas id="canvas-a" width="240" height="240"></canvas></div>
+        <div class="shape-sep">vs</div>
+        <div class="shape-box"><canvas id="canvas-b" width="240" height="240"></canvas></div>
+      </div>
+      <div class="answer-area">
+        <button class="answer-btn" id="btn-same" onclick="handleAnswer('same')">
+          Same Shape
+          <span class="hint">rotated</span>
+        </button>
+        <button class="answer-btn" id="btn-mirror" onclick="handleAnswer('mirror')">
+          Mirror Image
+          <span class="hint">flipped</span>
+        </button>
+      </div>
+      <div class="feedback-msg" id="feedback-msg"></div>
+    </div>
+
+    <!-- RESULT -->
+    <div id="screen-result" class="screen fade-in">
+      <h2 class="test-title">Results</h2>
+      <div class="result-layout">
+        <div class="result-sidebar">
+          <div class="best-line" id="best-line"></div>
+          <button class="btn" onclick="startTest()">Try Again</button>
+          <a href="index.html" class="btn-outline">Back to Tests</a>
+        </div>
+        <div class="rounds-board">
+          <div class="board-header">
+            <span>#</span>
+            <span>Your Answer</span>
+            <span>Correct</span>
+          </div>
+          <div class="board-body" id="board-body"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+<footer>
+  <div class="container">
+    <p>AverageHuman &mdash; Measuring cognition, one test at a time &nbsp;&middot;&nbsp; <a href="privacy.html">Privacy Policy</a></p>
+  </div>
+</footer>
+
+<script>
+const TOTAL_ROUNDS = 12;
+const FEEDBACK_MS  = 600;
+const LS_KEY       = 'ah_mental-rotation';
+const CELL         = 34;
+const GAP          = 3;
+
+// Asymmetric shapes (pentominoes / hexominoes — none have mirror symmetry)
+const SHAPES = [
+  [[1,0],[2,0],[0,1],[1,1],[1,2]],             // F pentomino
+  [[0,0],[0,1],[0,2],[0,3],[1,1],[2,1]],        // + extended
+  [[0,0],[1,0],[1,1],[2,1],[2,2],[3,2]],        // staircase
+  [[0,0],[1,0],[2,0],[0,1],[0,2],[1,2]],        // C-hook
+  [[0,0],[0,1],[1,1],[1,2],[1,3],[2,3]],        // Z-long
+  [[0,0],[0,1],[0,2],[1,2],[2,2],[2,1]],        // L-elbow
+  [[0,2],[1,2],[1,1],[1,0],[2,0],[3,0]],        // reverse hook
+  [[0,0],[1,0],[1,1],[2,1],[2,2],[2,3]],        // snake
+  [[0,0],[0,1],[0,2],[1,0],[2,0],[2,1]],        // small C
+  [[0,3],[0,2],[1,2],[1,1],[2,1],[2,0]],        // reverse Z-long
+];
+
+// Rotation angle ranges per difficulty tier
+function angleForRound(r) {
+  // r is 0-based
+  const ranges = [
+    [20, 55],   // rounds 0-2
+    [50, 95],   // rounds 3-5
+    [90, 135],  // rounds 6-8
+    [130, 168], // rounds 9-11
+  ];
+  const tier = Math.min(3, Math.floor(r / 3));
+  const [lo, hi] = ranges[tier];
+  return lo + Math.random() * (hi - lo);
+}
+
+let rounds       = [];  // [{shape, angle, isMirror}]
+let roundResults = [];  // [{chosen, correct}]
+let current      = 0;
+let phase        = 'idle';
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const h = document.getElementById(id).querySelector('h1,h2');
+  if (h) { h.setAttribute('tabindex','-1'); h.focus(); }
+}
+
+// Draw a shape on a canvas.
+// cells: [[col,row],...], rotDeg: rotation angle, mirror: flip horizontally
+function drawShape(canvasId, cells, rotDeg, mirror) {
+  const canvas = document.getElementById(canvasId);
+  const ctx    = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Background
+  ctx.fillStyle = '#111';
+  ctx.fillRect(0, 0, W, H);
+
+  // Compute bounding box
+  const cols = cells.map(c => c[0]);
+  const rows = cells.map(c => c[1]);
+  const minC = Math.min(...cols), maxC = Math.max(...cols);
+  const minR = Math.min(...rows), maxR = Math.max(...rows);
+  const shapeW = (maxC - minC + 1) * CELL;
+  const shapeH = (maxR - minR + 1) * CELL;
+
+  ctx.save();
+  ctx.translate(W / 2, H / 2);
+  if (mirror) ctx.scale(-1, 1);
+  ctx.rotate(rotDeg * Math.PI / 180);
+
+  cells.forEach(([col, row]) => {
+    const x = (col - minC) * CELL - shapeW / 2;
+    const y = (row - minR) * CELL - shapeH / 2;
+    const rx = x + GAP, ry = y + GAP;
+    const rw = CELL - GAP * 2, rh = CELL - GAP * 2;
+    const r  = 5;
+
+    // Fill
+    ctx.fillStyle = 'rgba(220,220,235,0.92)';
+    ctx.beginPath();
+    ctx.moveTo(rx + r, ry);
+    ctx.lineTo(rx + rw - r, ry);
+    ctx.arcTo(rx + rw, ry, rx + rw, ry + r, r);
+    ctx.lineTo(rx + rw, ry + rh - r);
+    ctx.arcTo(rx + rw, ry + rh, rx + rw - r, ry + rh, r);
+    ctx.lineTo(rx + r, ry + rh);
+    ctx.arcTo(rx, ry + rh, rx, ry + rh - r, r);
+    ctx.lineTo(rx, ry + r);
+    ctx.arcTo(rx, ry, rx + r, ry, r);
+    ctx.closePath();
+    ctx.fill();
+
+    // Subtle top highlight
+    ctx.fillStyle = 'rgba(255,255,255,0.18)';
+    ctx.fillRect(rx + GAP, ry + GAP, rw - GAP * 2, 3);
+  });
+
+  ctx.restore();
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function generateRounds() {
+  // No shape repeats: cycle through all 10 shapes, pick 12 without consecutive repeats
+  const shapePool = shuffle([...SHAPES.keys()]);  // shuffled indices 0-9
+  // Extend to 12 by adding 2 more distinct from last used
+  while (shapePool.length < TOTAL_ROUNDS) {
+    const last = shapePool[shapePool.length - 1];
+    const candidates = SHAPES.map((_, i) => i).filter(i => i !== last && !shapePool.slice(-3).includes(i));
+    shapePool.push(candidates[Math.floor(Math.random() * candidates.length)]);
+  }
+
+  // Random same/mirror, but guarantee at least 2 of each
+  let mirrors = Array.from({length: TOTAL_ROUNDS}, () => Math.random() < 0.5);
+  const mirrorCount = mirrors.filter(Boolean).length;
+  if (mirrorCount < 2) { mirrors[0] = true; mirrors[1] = true; }
+  else if (mirrorCount > TOTAL_ROUNDS - 2) { mirrors[0] = false; mirrors[1] = false; }
+  mirrors = shuffle(mirrors);
+
+  return shapePool.slice(0, TOTAL_ROUNDS).map((si, i) => ({
+    shape:    SHAPES[si],
+    angle:    angleForRound(i),
+    isMirror: mirrors[i],
+  }));
+}
+
+function showRound() {
+  phase = 'active';
+  const r = rounds[current];
+  document.getElementById('round-label').textContent = `Round ${current + 1} / ${TOTAL_ROUNDS}`;
+  document.getElementById('feedback-msg').textContent = '';
+  document.getElementById('feedback-msg').className   = 'feedback-msg';
+  document.getElementById('btn-same').disabled   = false;
+  document.getElementById('btn-mirror').disabled = false;
+
+  // Shape A: always upright (angle 0, no mirror)
+  drawShape('canvas-a', r.shape, 0, false);
+  // Shape B: rotated; mirrored if isMirror
+  drawShape('canvas-b', r.shape, r.angle, r.isMirror);
+}
+
+function handleAnswer(chosen) {
+  if (phase !== 'active') return;
+  phase = 'feedback';
+
+  document.getElementById('btn-same').disabled   = true;
+  document.getElementById('btn-mirror').disabled = true;
+
+  const correct = rounds[current].isMirror ? 'mirror' : 'same';
+  const isRight = chosen === correct;
+
+  roundResults.push({ chosen, correct });
+
+  const msg = document.getElementById('feedback-msg');
+  msg.textContent = isRight ? 'Correct!' : `Wrong — it was ${correct === 'same' ? 'the same shape rotated' : 'a mirror image'}.`;
+  msg.className   = 'feedback-msg ' + (isRight ? 'correct' : 'wrong');
+
+  setTimeout(() => {
+    current++;
+    if (current >= TOTAL_ROUNDS) endGame();
+    else showRound();
+  }, FEEDBACK_MS);
+}
+
+function startTest() {
+  rounds       = generateRounds();
+  roundResults = [];
+  current      = 0;
+  phase        = 'idle';
+  showScreen('screen-test');
+  showRound();
+}
+
+function endGame() {
+  const correct = roundResults.filter(r => r.chosen === r.correct).length;
+
+  let data = JSON.parse(localStorage.getItem(LS_KEY) || 'null') || { attempts: 0, best: null, history: [] };
+  data.attempts = (data.attempts || 0) + 1;
+  data.history.push(correct);
+  if (data.best === null || correct > data.best) data.best = correct;
+  localStorage.setItem(LS_KEY, JSON.stringify(data));
+
+  document.getElementById('best-line').innerHTML =
+    `Best: <span>${data.best} / ${TOTAL_ROUNDS}</span>  &nbsp;·&nbsp; Attempts: <span>${data.attempts}</span>`;
+
+  const body = document.getElementById('board-body');
+  body.innerHTML = '';
+  roundResults.forEach(({ chosen, correct }, i) => {
+    const isRight = chosen === correct;
+    const row = document.createElement('div');
+    row.className = 'board-row';
+    row.innerHTML =
+      `<span class="bc dim">${i + 1}</span>` +
+      `<span class="bc ${isRight ? 'ok' : 'bad'}">${chosen === 'same' ? 'Same' : 'Mirror'}</span>` +
+      `<span class="bc neutral">${correct === 'same' ? 'Same' : 'Mirror'}</span>`;
+    body.appendChild(row);
+  });
+
+  showScreen('screen-result');
+}
+
+const _hdr = document.querySelector('header');
+if (_hdr) { _hdr.classList.add('scrolled'); const _s = () => _hdr.classList.toggle('scrolled', window.scrollY > 40); window.addEventListener('scroll', _s, {passive:true}); }
+</script>
+</body>
+</html>

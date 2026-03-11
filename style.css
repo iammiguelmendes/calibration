@@ -406,46 +406,11 @@ header.scrolled {
 .test-info { margin-top: auto; }
 
 .test-name {
-    font-size: 0.9rem;
-    font-weight: 700;
-    margin-bottom: 0.35rem;
-    line-height: 1.2;
-    letter-spacing: -0.2px;
-}
-.test-average {
-    display: flex;
-    flex-direction: column;
-    gap: 0.1rem;
-}
-.avg-label {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.62rem;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    opacity: 0.6;
-}
-.test-average strong {
-    font-family: 'Space Mono', monospace;
-    color: var(--primary);
     font-size: 1rem;
     font-weight: 700;
-    display: block;
-    line-height: 1.1;
-    text-shadow: 0 0 12px rgba(0,255,157,0.25);
-}
-
-/* Number flicker on card hover */
-@keyframes numFlicker {
-    0%   { opacity: 1;   text-shadow: 0 0 12px rgba(0,255,157,0.25); }
-    15%  { opacity: 0.25; text-shadow: 0 0 20px rgba(0,255,157,0.95); }
-    30%  { opacity: 1;   text-shadow: 0 0 16px rgba(0,255,157,0.75); }
-    55%  { opacity: 0.6; text-shadow: 0 0 10px rgba(0,255,157,0.45); }
-    75%  { opacity: 1;   text-shadow: 0 0 18px rgba(0,255,157,0.8); }
-    100% { opacity: 1;   text-shadow: 0 0 10px rgba(0,255,157,0.35); }
-}
-.test-card:hover .test-average strong {
-    animation: numFlicker 0.5s ease 0.08s both;
+    line-height: 1.25;
+    letter-spacing: -0.2px;
+    color: var(--text);
 }
 
 /* ── Footer ──────────────────────────────────── */
@@ -463,7 +428,6 @@ footer {
     .test-card { transition: background 0.2s ease, border-color 0.2s ease; }
     .test-card:hover { transform: none; }
     .test-card:hover::before { animation: none; }
-    .test-card:hover .test-average strong { animation: none; }
     .hero-cta:hover { transform: none; }
 }
 

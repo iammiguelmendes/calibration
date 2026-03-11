@@ -25,11 +25,12 @@ main{flex:1;padding:3rem 0}footer{padding:2rem 0;border-top:1px solid var(--bord
 .btn:hover{opacity:.85;transform:translateY(-1px)}
 .btn-outline{background:none;border:1px solid var(--border);color:var(--text-dim);padding:.75rem 1.5rem;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Manrope',sans-serif;text-decoration:none;display:inline-block}
 .btn-outline:hover{border-color:var(--primary);color:var(--primary)}
-.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.25rem}
+.result-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.25rem}
 .stat-card{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:1.25rem;text-align:center}
 .stat-card .label{font-size:.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem}
 .stat-card .value{font-family:'Space Mono',monospace;font-size:1.5rem;font-weight:700;color:var(--primary)}
 .stat-card .value.neutral{color:var(--text)}
+.stat-card .value.danger{color:var(--secondary)}
 .result-actions{display:flex;gap:1rem;flex-wrap:wrap;margin-top:1.5rem}
 .best-line{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim);margin-bottom:1.5rem}
 .best-line span{color:var(--primary)}
@@ -156,12 +157,16 @@ input[type=number]{-moz-appearance:textfield}
       <h2 class="test-title">Results</h2>
       <div class="result-stats">
         <div class="stat-card">
-          <div class="label">Counting</div>
+          <div class="label">Odd Count (you / actual)</div>
           <div class="value" id="res-count">—</div>
         </div>
         <div class="stat-card">
           <div class="label">Circles Caught</div>
           <div class="value" id="res-shapes">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Wrong Shapes</div>
+          <div class="value" id="res-wrong">—</div>
         </div>
         <div class="stat-card">
           <div class="label">Combined</div>
@@ -215,7 +220,7 @@ function showCountdown(cb) {
 
 const LS_KEY       = 'ah_multitask2';
 const TOTAL_NUMS   = 15;
-const TOTAL_SHAPES = 13;
+const TOTAL_SHAPES = 15;
 const NUM_SHOW_MS  = 900;
 const NUM_GAP_MS   = 400;   // NUM_CYCLE = 1300ms total
 const SHAPE_SHOW   = 900;
@@ -225,8 +230,9 @@ const HUMAN_AVG    = 65;
 let numbers       = [];   // sequence of 1–9
 let shapes        = [];   // 'circle'|'square'|'tri', 4 circles in 13
 let actualOdds    = 0;
-let circlesTotal  = 4;
+let circlesTotal  = 0;
 let circlesCaught = 0;
+let wrongClicks   = 0;
 let allTimers     = [];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -250,12 +256,16 @@ function startTest() {
   // Generate sequences
   numbers = Array.from({length: TOTAL_NUMS}, () => randInt(1, 9));
   actualOdds = numbers.filter(n => n % 2 !== 0).length;
+  circlesTotal = randInt(2, 7);
+  const nSquares = randInt(1, TOTAL_SHAPES - circlesTotal - 1);
+  const nTri = TOTAL_SHAPES - circlesTotal - nSquares;
   shapes = shuffle([
-    ...Array(4).fill('circle'),
-    ...Array(5).fill('square'),
-    ...Array(4).fill('tri'),
+    ...Array(circlesTotal).fill('circle'),
+    ...Array(nSquares).fill('square'),
+    ...Array(nTri).fill('tri'),
   ]);
   circlesCaught = 0;
+  wrongClicks = 0;
   allTimers.forEach(clearTimeout);
   allTimers = [];
 
@@ -333,6 +343,7 @@ function showShape(type, idx) {
       el.style.pointerEvents = 'none';
       setTimeout(() => el.remove(), 250);
     } else {
+      wrongClicks++;
       el.style.opacity = '.35';
       setTimeout(() => { el.style.opacity = ''; }, 180);
     }
@@ -360,8 +371,15 @@ function submitAnswer() {
   if (data.best === null || combined > data.best) data.best = combined;
   localStorage.setItem(LS_KEY, JSON.stringify(data));
 
-  document.getElementById('res-count').textContent     = countAcc + '%';
-  document.getElementById('res-shapes').textContent    = `${circlesCaught}/${circlesTotal}`;
+  const countEl = document.getElementById('res-count');
+  countEl.textContent = `${val} / ${actualOdds}`;
+  countEl.className   = 'value ' + (val === actualOdds ? '' : 'danger');
+  const shapesEl = document.getElementById('res-shapes');
+  shapesEl.textContent = `${circlesCaught}/${circlesTotal}`;
+  shapesEl.className   = 'value ' + (circlesCaught === circlesTotal ? '' : 'danger');
+  const wrongEl = document.getElementById('res-wrong');
+  wrongEl.textContent = wrongClicks;
+  wrongEl.className   = 'value ' + (wrongClicks === 0 ? '' : 'danger');
   document.getElementById('res-combined').textContent  = combined + '%';
   document.getElementById('best-line').innerHTML       =
     `Personal best: <span>${data.best}%</span> &nbsp;·&nbsp; Attempts: <span>${data.attempts}</span>`;
@@ -379,7 +397,7 @@ document.addEventListener('keydown', e => {
   }
 });
 document.getElementById('odd-guess').addEventListener('keydown', e => {
-  if (e.key === 'Enter') submitAnswer();
+  if (e.key === 'Enter') { e.stopPropagation(); submitAnswer(); }
 });
 
 const _hdr = document.querySelector('header');

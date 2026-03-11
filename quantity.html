@@ -384,7 +384,7 @@ document.addEventListener('keydown', e => {
   }
 });
 document.getElementById('guess-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') submitGuess();
+  if (e.key === 'Enter') { e.stopPropagation(); submitGuess(); }
 });
 
 const _hdr = document.querySelector('header');

@@ -13,9 +13,6 @@
 body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
 html{overflow-y:scroll}.container{max-width:1100px;margin:0 auto;padding:0 2.5rem;width:100%}
 header{padding:1.25rem 0;border-bottom:1px solid transparent;position:sticky;top:0;z-index:100;background:transparent;backdrop-filter:blur(0px);-webkit-backdrop-filter:blur(0px);transition:background .4s ease,border-color .4s ease,backdrop-filter .4s ease}header.scrolled{background:rgba(13,13,13,0.88);border-bottom:1px solid var(--border);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
-.header-content{display:flex;align-items:center;gap:1rem}
-.back-btn{background:none;border:1px solid var(--border);color:var(--text-dim);padding:.5rem .9rem;border-radius:8px;cursor:pointer;font-size:1rem;transition:all .2s;text-decoration:none;font-family:'Manrope',sans-serif}
-.back-btn:hover{border-color:var(--primary);color:var(--primary)}
 .logo{font-size:1.3rem;font-weight:800;letter-spacing:-0.5px;text-decoration:none;color:var(--text)}
 .logo span{color:var(--primary)}
 main{flex:1;padding:3rem 0}footer{padding:2rem 0;border-top:1px solid var(--border);text-align:center;color:var(--text-dim);font-size:0.82rem;letter-spacing:0.3px}footer a{color:var(--primary);text-decoration:none}
@@ -26,36 +23,26 @@ main{flex:1;padding:3rem 0}footer{padding:2rem 0;border-top:1px solid var(--bord
 .btn:hover{opacity:.85;transform:translateY(-1px)}
 .btn-outline{background:none;border:1px solid var(--border);color:var(--text-dim);padding:.75rem 1.5rem;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Manrope',sans-serif}
 .btn-outline:hover{border-color:var(--primary);color:var(--primary)}
-.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
-.stat-card{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:1.25rem;text-align:center}
-.stat-card .label{font-size:.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem}
-.stat-card .value{font-family:'Space Mono',monospace;font-size:1.6rem;font-weight:700;color:var(--primary)}
-.stat-card .value.neutral{color:var(--text)}
 .result-actions{display:flex;gap:1rem;flex-wrap:wrap}
 .best-line{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim);margin-bottom:1.5rem}
 .best-line span{color:var(--primary)}
 @media (prefers-reduced-motion:no-preference){@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}}
 .fade-in{animation:fadeIn .4s ease forwards}
+.feature-list{list-style:none;margin-bottom:2rem;display:flex;flex-direction:column;gap:.6rem}
+.feature-list li{color:var(--text-dim);font-size:.95rem;display:flex;align-items:flex-start;gap:.6rem}
+.feature-list li::before{content:'—';color:var(--primary);flex-shrink:0}
 
 /* ── Stroop-specific ── */
-.stroop-wrapper{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;overflow:hidden;max-width:560px}
-
-/* Timer bar */
+.stroop-wrapper{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;overflow:hidden;max-width:560px;margin:0 auto}
 .timer-track{height:4px;background:var(--border);position:relative}
 .timer-bar{height:100%;background:var(--primary);width:100%;transform-origin:left;transition:none}
-
-/* Main area */
 .stroop-body{padding:2.5rem 2rem 2rem}
 .round-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem}
 .round-counter{font-family:'Space Mono',monospace;font-size:.8rem;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase}
 .score-counter{font-family:'Space Mono',monospace;font-size:.8rem;color:var(--text-dim)}
 .score-counter span{color:var(--text)}
-
-/* Word display */
 .word-area{text-align:center;min-height:120px;display:flex;align-items:center;justify-content:center;margin-bottom:2.5rem}
 .color-word{font-family:'Space Mono',monospace;font-size:5rem;font-weight:700;letter-spacing:2px;transition:color .05s;line-height:1}
-
-/* Color buttons */
 .color-buttons{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
 .color-btn{padding:1rem;border-radius:10px;background:transparent;font-family:'Space Mono',monospace;font-size:1rem;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .15s;border:2px solid;text-transform:uppercase}
 .color-btn:hover{opacity:.85;transform:translateY(-1px)}
@@ -64,17 +51,22 @@ main{flex:1;padding:3rem 0}footer{padding:2rem 0;border-top:1px solid var(--bord
 .color-btn[data-color="Blue"]{border-color:#4488ff;color:#4488ff}
 .color-btn[data-color="Green"]{border-color:#00ff9d;color:#00ff9d}
 .color-btn[data-color="Yellow"]{border-color:#ffdd00;color:#ffdd00}
-
-/* Feedback flash states */
 .color-btn.flash-correct{background:rgba(0,255,157,0.15);border-color:#00ff9d !important;color:#00ff9d !important}
 .color-btn.flash-wrong{background:rgba(255,51,102,0.15);border-color:#ff3366 !important;color:#ff3366 !important}
 
-/* Intro feature list */
-.feature-list{list-style:none;margin-bottom:2rem;display:flex;flex-direction:column;gap:.6rem}
-.feature-list li{color:var(--text-dim);font-size:.95rem;display:flex;align-items:flex-start;gap:.6rem}
-.feature-list li::before{content:'—';color:var(--primary);flex-shrink:0}
-/* ── center game ── */
-.stroop-wrapper{margin:0 auto}
+/* ── Result layout ── */
+.result-layout{display:flex;gap:2rem;align-items:flex-start}
+.result-sidebar{display:flex;flex-direction:column;gap:.75rem;flex-shrink:0;min-width:150px;padding-top:.25rem}
+@media(max-width:560px){.result-layout{flex-direction:column-reverse}.result-sidebar{flex-direction:row;flex-wrap:wrap}}
+/* ── Board ── */
+.rounds-board{flex:1;border:1px solid var(--border);border-radius:12px;overflow:hidden;max-height:400px;display:flex;flex-direction:column}
+.board-header{display:grid;grid-template-columns:1fr 1fr;padding:.6rem 1rem;background:var(--card-bg);flex-shrink:0}
+.board-header span{font-family:'Space Mono',monospace;font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim)}
+.board-body{overflow-y:auto;flex:1}
+.board-row{display:grid;grid-template-columns:1fr 1fr;padding:.65rem 1rem;border-top:1px solid var(--border);align-items:center}
+.board-row:nth-child(even){background:rgba(255,255,255,0.02)}
+.bc{font-family:'Space Mono',monospace;font-size:.88rem;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+
 .back-link{display:inline-flex;align-items:center;gap:.4rem;color:var(--text-dim);text-decoration:none;font-size:.85rem;font-weight:600;margin-bottom:1.75rem;transition:color .2s}
 .back-link:hover{color:var(--primary)}*:focus-visible{outline:2px solid var(--primary);outline-offset:2px}.skip-link{position:absolute;top:-40px;left:0;background:var(--primary);color:#000;padding:.5rem 1rem;font-weight:700;font-size:.875rem;z-index:9999;text-decoration:none;border-radius:0 0 6px 0;transition:top .2s}.skip-link:focus{top:0}
 </style>
@@ -132,20 +124,19 @@ main{flex:1;padding:3rem 0}footer{padding:2rem 0;border-top:1px solid var(--bord
     <!-- RESULT SCREEN -->
     <div id="screen-result" class="screen fade-in">
       <h2 class="test-title">Results</h2>
-      <div class="best-line" id="best-line">Personal best: <span>—</span></div>
-      <div class="result-stats">
-        <div class="stat-card">
-          <div class="label">Your Score</div>
-          <div class="value" id="res-score">—</div>
+      <div class="result-layout">
+        <div class="result-sidebar">
+          <div class="best-line" id="best-line"></div>
+          <button class="btn" onclick="startTest()">Try Again</button>
+          <a href="index.html" class="btn-outline">Back to Tests</a>
         </div>
-        <div class="stat-card">
-          <div class="label">Human Average</div>
-          <div class="value neutral">65%</div>
+        <div class="rounds-board">
+          <div class="board-header">
+            <span>Your Answer</span>
+            <span>Correct</span>
+          </div>
+          <div class="board-body" id="board-body"></div>
         </div>
-      </div>
-      <div class="result-actions">
-        <button class="btn" onclick="startTest()">Try Again</button>
-        <a href="index.html" class="btn-outline">Back to Tests</a>
       </div>
     </div>
 
@@ -183,10 +174,9 @@ function showCountdown(cb) {
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 const TOTAL_ROUNDS = 10;
-const ROUND_MS = 2000;
-const FEEDBACK_MS = 400;
-const HUMAN_AVG = 65;
-const LS_KEY = 'ah_stroop';
+const ROUND_MS     = 2000;
+const FEEDBACK_MS  = 400;
+const LS_KEY       = 'ah_stroop';
 
 const WORDS = ['RED', 'BLUE', 'GREEN', 'YELLOW'];
 const COLOR_MAP = {
@@ -195,53 +185,34 @@ const COLOR_MAP = {
   GREEN:  '#00ff9d',
   YELLOW: '#ffdd00'
 };
-// Button order is always fixed: Red, Blue, Green, Yellow
-const BUTTON_ORDER = ['Red', 'Blue', 'Green', 'Yellow'];
 
 // ─── State ────────────────────────────────────────────────────────────────────
-let trials = [];       // [{word, inkColor}]
-let currentRound = 0;  // 0-based index into trials
+let trials       = [];
+let roundResults = [];   // [{chosen, correct}] per round
+let currentRound = 0;
 let correctCount = 0;
-let roundTimer = null;
-let timerAnim = null;
-let answered = false;
+let roundTimer   = null;
+let answered     = false;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-
-
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active'); const _heading = document.getElementById(id).querySelector('h1, h2'); if (_heading) { _heading.setAttribute('tabindex', '-1'); _heading.focus(); }
+  document.getElementById(id).classList.add('active');
+  const _h = document.getElementById(id).querySelector('h1, h2');
+  if (_h) { _h.setAttribute('tabindex', '-1'); _h.focus(); }
 }
 
-// ─── Trial generation ─────────────────────────────────────────────────────────
-// 5 congruent + 15 incongruent, shuffled
+// ─── Trial generation — fully random ─────────────────────────────────────────
 function generateTrials() {
   const list = [];
-
-  // 5 congruent
-  for (let i = 0; i < 5; i++) {
-    const w = WORDS[i % WORDS.length];
-    list.push({ word: w, inkColor: w });
-  }
-
-  // 15 incongruent
-  while (list.length < TOTAL_ROUNDS) {
+  for (let i = 0; i < TOTAL_ROUNDS; i++) {
     const word = WORDS[Math.floor(Math.random() * WORDS.length)];
-    // Pick a different ink color
+    // Always pick a different ink color so it's always incongruent (true Stroop)
     const others = WORDS.filter(c => c !== word);
-    const ink = others[Math.floor(Math.random() * others.length)];
-    list.push({ word, inkColor: ink });
+    const inkColor = others[Math.floor(Math.random() * others.length)];
+    list.push({ word, inkColor });
   }
-
-  return shuffle(list);
+  return list;
 }
 
 // ─── Timer bar ────────────────────────────────────────────────────────────────
@@ -249,7 +220,6 @@ function startTimerBar() {
   const bar = document.getElementById('timer-bar');
   bar.style.transition = 'none';
   bar.style.width = '100%';
-  // Force reflow so transition resets
   bar.getBoundingClientRect();
   bar.style.transition = `width ${ROUND_MS}ms linear`;
   bar.style.width = '0%';
@@ -257,9 +227,8 @@ function startTimerBar() {
 
 function stopTimerBar() {
   const bar = document.getElementById('timer-bar');
-  const computed = getComputedStyle(bar).width;
   bar.style.transition = 'none';
-  bar.style.width = computed;
+  bar.style.width = getComputedStyle(bar).width;
 }
 
 // ─── Round logic ──────────────────────────────────────────────────────────────
@@ -274,7 +243,6 @@ function showRound() {
   wordEl.textContent = trial.word;
   wordEl.style.color = COLOR_MAP[trial.inkColor];
 
-  // Enable all buttons, clear feedback classes
   document.querySelectorAll('.color-btn').forEach(btn => {
     btn.disabled = false;
     btn.classList.remove('flash-correct', 'flash-wrong');
@@ -282,11 +250,8 @@ function showRound() {
 
   startTimerBar();
 
-  // Auto-advance after 3 seconds (timeout = wrong)
   roundTimer = setTimeout(() => {
-    if (!answered) {
-      handleAnswer(null); // no answer
-    }
+    if (!answered) handleAnswer(null);
   }, ROUND_MS);
 }
 
@@ -297,25 +262,21 @@ function handleAnswer(chosen) {
   clearTimeout(roundTimer);
   stopTimerBar();
 
-  // Disable all buttons during feedback
   document.querySelectorAll('.color-btn').forEach(btn => btn.disabled = true);
 
   const trial = trials[currentRound];
-  const correct = chosen === trial.inkColor.charAt(0).toUpperCase() + trial.inkColor.slice(1).toLowerCase();
-
-  // Normalize: trial.inkColor is like "RED", button data-color is like "Red"
+  // inkColor is uppercase like "RED"; normalize to title case like "Red"
   const correctAnswer = trial.inkColor.charAt(0) + trial.inkColor.slice(1).toLowerCase();
+  const correct = chosen === correctAnswer;
 
   if (correct) correctCount++;
 
-  // Flash feedback on buttons
+  roundResults.push({ chosen, correctAnswer });
+
   if (chosen) {
     const chosenBtn = document.querySelector(`.color-btn[data-color="${chosen}"]`);
-    if (chosenBtn) {
-      chosenBtn.classList.add(correct ? 'flash-correct' : 'flash-wrong');
-    }
+    if (chosenBtn) chosenBtn.classList.add(correct ? 'flash-correct' : 'flash-wrong');
   }
-  // Always highlight the correct answer
   if (!correct) {
     const correctBtn = document.querySelector(`.color-btn[data-color="${correctAnswer}"]`);
     if (correctBtn) correctBtn.classList.add('flash-correct');
@@ -325,17 +286,15 @@ function handleAnswer(chosen) {
 
   setTimeout(() => {
     currentRound++;
-    if (currentRound >= TOTAL_ROUNDS) {
-      endTest();
-    } else {
-      showRound();
-    }
+    if (currentRound >= TOTAL_ROUNDS) endTest();
+    else showRound();
   }, FEEDBACK_MS);
 }
 
 // ─── Test lifecycle ───────────────────────────────────────────────────────────
 function startTest() {
-  trials = generateTrials();
+  trials       = generateTrials();
+  roundResults = [];
   currentRound = 0;
   correctCount = 0;
   clearTimeout(roundTimer);
@@ -344,28 +303,32 @@ function startTest() {
 }
 
 function endTest() {
-  const pct = Math.round((correctCount / TOTAL_ROUNDS) * 100);
-  saveResult(pct);
-  showResults(pct);
-}
-
-function saveResult(score) {
-  let data = JSON.parse(localStorage.getItem(LS_KEY) || 'null') || { attempts: 0, best: null, history: [] };
+  let data = JSON.parse(localStorage.getItem(LS_KEY) || 'null') || { attempts: 0, history: [] };
   data.attempts = (data.attempts || 0) + 1;
-  data.history.push({ score, ts: Date.now() });
-  if (data.best === null || score > data.best) data.best = score;
+  data.history.push({ score: correctCount, ts: Date.now() });
   localStorage.setItem(LS_KEY, JSON.stringify(data));
-}
 
-function showResults(score) {
-  const data = JSON.parse(localStorage.getItem(LS_KEY) || 'null') || {};
-  const best = data.best !== undefined ? data.best + '%' : score + '%';
+  document.getElementById('best-line').innerHTML =
+    `Attempts: <span>${data.attempts}</span>`;
 
-  document.getElementById('res-score').textContent = score + '%';
-  document.getElementById('best-line').innerHTML = `Personal best: <span>${best}</span>`;
+  // Build board
+  const body = document.getElementById('board-body');
+  body.innerHTML = '';
+  roundResults.forEach(({ chosen, correctAnswer }) => {
+    const isCorrect = chosen === correctAnswer;
+    const chosenColor  = chosen ? COLOR_MAP[chosen.toUpperCase()] : '#888';
+    const correctColor = COLOR_MAP[correctAnswer.toUpperCase()];
+    const chosenLabel  = chosen ? chosen.toUpperCase() : '—';
+
+    const row = document.createElement('div');
+    row.className = 'board-row';
+    row.innerHTML =
+      `<span class="bc" style="color:${isCorrect ? chosenColor : '#ff3366'}">${chosenLabel}</span>` +
+      `<span class="bc" style="color:${correctColor}">${correctAnswer.toUpperCase()}</span>`;
+    body.appendChild(row);
+  });
 
   showScreen('screen-result');
-  document.getElementById('screen-result').classList.add('fade-in');
 }
 
 const _hdr = document.querySelector('header');

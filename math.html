@@ -75,12 +75,6 @@ input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 input[type=number]{-moz-appearance:textfield}
 
-/* Per-round feedback */
-.round-fb{font-family:'Space Mono',monospace;font-size:.82rem;min-height:1.2rem;color:var(--text-dim)}
-.round-fb .val{color:var(--text)}
-.round-fb .ok{color:var(--primary)}
-.round-fb .bad{color:var(--secondary)}
-
 /* Timer countdown text */
 .timer-text{font-family:'Space Mono',monospace;font-size:.8rem;color:var(--text-dim);text-align:right;margin-bottom:.35rem}
 .timer-text.urgent{color:var(--secondary)}
@@ -88,7 +82,24 @@ input[type=number]{-moz-appearance:textfield}
 #screen-test.active{display:flex;flex-direction:column;align-items:center}
 .round-meta{width:100%;max-width:500px}
 .problem-card{width:100%;max-width:500px}
-.round-fb{width:100%;max-width:500px}
+/* ── Result layout ── */
+.result-layout{display:flex;gap:2rem;align-items:flex-start}
+.result-sidebar{display:flex;flex-direction:column;gap:.75rem;flex-shrink:0;min-width:150px;padding-top:.25rem}
+.best-line{font-family:'Space Mono',monospace;font-size:.8rem;color:var(--text-dim);line-height:1.6}
+.best-line span{color:var(--primary)}
+@media(max-width:560px){.result-layout{flex-direction:column-reverse}.result-sidebar{flex-direction:row;flex-wrap:wrap}}
+/* ── Rounds board ── */
+.rounds-board{flex:1;border:1px solid var(--border);border-radius:12px;overflow:hidden;max-height:360px;display:flex;flex-direction:column}
+.board-header{display:grid;grid-template-columns:1.4fr 1fr 1fr;padding:.6rem 1rem;background:var(--card-bg);position:sticky;top:0;z-index:1;flex-shrink:0}
+.board-header span{font-family:'Space Mono',monospace;font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim)}
+.board-body{overflow-y:auto;flex:1}
+.board-row{display:grid;grid-template-columns:1.4fr 1fr 1fr;padding:.65rem 1rem;border-top:1px solid var(--border);align-items:center}
+.board-row:nth-child(even){background:rgba(255,255,255,0.02)}
+.bc{font-family:'Space Mono',monospace;font-size:.88rem}
+.bc.problem{color:var(--text-dim)}
+.bc.ok{color:var(--primary)}
+.bc.bad{color:var(--secondary)}
+.bc.actual{color:var(--text)}
 .back-link{display:inline-flex;align-items:center;gap:.4rem;color:var(--text-dim);text-decoration:none;font-size:.85rem;font-weight:600;margin-bottom:1.75rem;transition:color .2s}
 .back-link:hover{color:var(--primary)}*:focus-visible{outline:2px solid var(--primary);outline-offset:2px}.skip-link{position:absolute;top:-40px;left:0;background:var(--primary);color:#000;padding:.5rem 1rem;font-weight:700;font-size:.875rem;z-index:9999;text-decoration:none;border-radius:0 0 6px 0;transition:top .2s}.skip-link:focus{top:0}
 </style>
@@ -140,26 +151,25 @@ input[type=number]{-moz-appearance:textfield}
           <button class="btn" id="submit-btn" onclick="submitGuess()">Submit</button>
         </div>
       </div>
-      <div class="round-fb" id="round-fb"></div>
     </div>
 
     <!-- RESULT -->
     <div id="screen-result" class="screen fade-in">
       <h2 class="test-title">Results</h2>
-      <div class="result-stats">
-        <div class="stat-card">
-          <div class="label">Your Error</div>
-          <div class="value" id="res-score">—</div>
+      <div class="result-layout">
+        <div class="result-sidebar">
+          <div class="best-line" id="best-line"></div>
+          <button class="btn" onclick="startTest()">Try Again</button>
+          <a href="index.html" class="btn-outline">Back to Tests</a>
         </div>
-        <div class="stat-card">
-          <div class="label">Human Average</div>
-          <div class="value neutral">±15%</div>
+        <div class="rounds-board" id="rounds-board">
+          <div class="board-header">
+            <span>Problem</span>
+            <span>Your Guess</span>
+            <span>Actual</span>
+          </div>
+          <div class="board-body" id="board-body"></div>
         </div>
-      </div>
-      <div class="best-line" id="best-line">Personal best: <span>—</span></div>
-      <div class="result-actions">
-        <button class="btn" onclick="startTest()">Try Again</button>
-        <a href="index.html" class="btn-outline">Back to Tests</a>
       </div>
     </div>
 
@@ -199,14 +209,14 @@ const LS_KEY       = 'ah_math2';
 const HUMAN_AVG    = 15;
 const TOTAL_ROUNDS = 10;
 const TIMER_S      = 5;
-const FEEDBACK_MS  = 1200;
 
-let problems  = [];   // [{a, b, answer}]
-let guesses   = [];   // user's estimates (0 if timed out)
-let round     = 0;
-let countdown = null;
+let problems   = [];   // [{a, b, answer}]
+let guesses    = [];   // user's estimates (0 if timed out)
+let round      = 0;
+let countdown  = null;
+let timerTick  = null;
 let timerStart = 0;
-let phase     = 'idle';
+let phase      = 'idle';
 
 // ── Problem generation ────────────────────────────────────────────────────────
 function randInt(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
@@ -260,18 +270,16 @@ function startTimerBar() {
     }
   }, 100);
 
+  timerTick = tick;
   countdown = setTimeout(() => {
-    clearInterval(tick);
+    clearInterval(timerTick);
     autoSubmit();
   }, TIMER_S * 1000);
-
-  // Store tick id so we can clear it
-  countdown._tick = tick;
 }
 
 function stopTimerBar() {
   clearTimeout(countdown);
-  if (countdown && countdown._tick) clearInterval(countdown._tick);
+  clearInterval(timerTick);
   const bar = document.getElementById('timer-bar');
   bar.style.transition = 'none';
   bar.style.width = getComputedStyle(bar).width;
@@ -287,7 +295,6 @@ function loadRound() {
   document.getElementById('guess-input').value = '';
   document.getElementById('guess-input').disabled = false;
   document.getElementById('submit-btn').disabled  = false;
-  document.getElementById('round-fb').innerHTML   = '';
   document.getElementById('guess-input').focus();
   startTimerBar();
 }
@@ -310,22 +317,9 @@ function submitGuess(timedOut = false) {
   document.getElementById('guess-input').disabled  = true;
   document.getElementById('submit-btn').disabled   = true;
 
-  const p   = problems[round];
-  const err = guess === 0
-    ? 100
-    : Math.round(Math.abs(guess - p.answer) / p.answer * 100);
-
-  const cls = err <= 10 ? 'ok' : err <= 25 ? '' : 'bad';
-  const fb  = document.getElementById('round-fb');
-  fb.innerHTML = timedOut
-    ? `<span class="bad">Time's up!</span> &nbsp; Actual: <span class="val">${p.answer.toLocaleString()}</span>`
-    : `Actual: <span class="val">${p.answer.toLocaleString()}</span> &nbsp;·&nbsp; Error: <span class="${cls}">${err}%</span>`;
-
-  setTimeout(() => {
-    round++;
-    if (round >= TOTAL_ROUNDS) endGame();
-    else loadRound();
-  }, FEEDBACK_MS);
+  round++;
+  if (round >= TOTAL_ROUNDS) endGame();
+  else loadRound();
 }
 
 // ── Game lifecycle ────────────────────────────────────────────────────────────
@@ -340,7 +334,6 @@ function startTest() {
 }
 
 function endGame() {
-  // Skip rounds that timed out (guess=0) from avg, or include as 100% error
   let totalErr = 0;
   for (let i = 0; i < TOTAL_ROUNDS; i++) {
     const err = guesses[i] === 0
@@ -356,9 +349,26 @@ function endGame() {
   if (data.best === null || score < data.best) data.best = score;
   localStorage.setItem(LS_KEY, JSON.stringify(data));
 
-  document.getElementById('res-score').textContent      = '±' + score + '%';
-  document.getElementById('best-line').innerHTML        =
-    `Personal best: <span>±${data.best}%</span> &nbsp;·&nbsp; Attempts: <span>${data.attempts}</span>`;
+  document.getElementById('best-line').innerHTML =
+    `Attempts: <span>${data.attempts}</span>`;
+
+  // Build per-round board
+  const body = document.getElementById('board-body');
+  body.innerHTML = '';
+  for (let i = 0; i < TOTAL_ROUNDS; i++) {
+    const p   = problems[i];
+    const g   = guesses[i];
+    const err = g === 0 ? 100 : Math.abs(g - p.answer) / p.answer * 100;
+    const ok  = err <= 15;
+    const gText = g === 0 ? 'no answer' : g.toLocaleString();
+    const row = document.createElement('div');
+    row.className = 'board-row';
+    row.innerHTML =
+      `<span class="bc problem">${p.a.toLocaleString()} × ${p.b.toLocaleString()}</span>` +
+      `<span class="bc ${ok ? 'ok' : 'bad'}">${gText}</span>` +
+      `<span class="bc actual">${p.answer.toLocaleString()}</span>`;
+    body.appendChild(row);
+  }
 
   showScreen('screen-result');
 }
@@ -378,7 +388,7 @@ document.addEventListener('keydown', e => {
   }
 });
 document.getElementById('guess-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') submitGuess();
+  if (e.key === 'Enter') { e.stopPropagation(); submitGuess(); }
 });
 
 const _hdr = document.querySelector('header');

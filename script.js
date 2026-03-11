@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // ── Card navigation ──────────────────────────────────────────────────────
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     document.querySelectorAll('.test-card').forEach(card => {
         card.setAttribute('tabindex', '0');
         card.addEventListener('click', () => {
@@ -8,6 +10,21 @@ document.addEventListener('DOMContentLoaded', () => {
         card.addEventListener('keydown', e => {
             if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); }
         });
+
+        // 3D perspective tilt
+        if (!reducedMotion) {
+            card.addEventListener('mousemove', e => {
+                const r = card.getBoundingClientRect();
+                const x = (e.clientX - r.left) / r.width  - 0.5;
+                const y = (e.clientY - r.top)  / r.height - 0.5;
+                card.style.transition = 'background 0.2s ease-out, border-color 0.2s ease-out, box-shadow 0.2s ease-out';
+                card.style.transform  = `translateY(-4px) scale(1.02) rotateX(${-y * 8}deg) rotateY(${x * 8}deg)`;
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transition = '';
+                card.style.transform  = '';
+            });
+        }
     });
     document.addEventListener('keydown', e => {
         const cards = Array.from(document.querySelectorAll('.test-card'));

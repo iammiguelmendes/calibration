@@ -31,6 +31,7 @@ main{flex:1;padding:3rem 0}footer{padding:2rem 0;border-top:1px solid var(--bord
 .stat-card .label{font-size:.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem}
 .stat-card .value{font-family:'Space Mono',monospace;font-size:1.6rem;font-weight:700;color:var(--primary)}
 .stat-card .value.neutral{color:var(--text)}
+.stat-card .value.wrong{color:var(--secondary)}
 .result-actions{display:flex;gap:1rem;flex-wrap:wrap}
 .best-line{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim);margin-bottom:1.5rem}
 .best-line span{color:var(--primary)}
@@ -138,15 +139,11 @@ canvas.clickable{cursor:crosshair;}
     <!-- RESULT -->
     <div id="screen-result" class="screen fade-in">
       <h2 class="test-title">Results</h2>
-      <div class="best-line" id="best-line">Personal best: <span>—</span></div>
-      <div class="result-stats">
+      <div class="best-line" id="best-line"></div>
+      <div class="result-stats" style="grid-template-columns:1fr;max-width:220px">
         <div class="stat-card">
-          <div class="label">Your Score</div>
+          <div class="label">Rounds Correct</div>
           <div class="value" id="res-score">—</div>
-        </div>
-        <div class="stat-card">
-          <div class="label">Human Average</div>
-          <div class="value neutral">68%</div>
         </div>
       </div>
       <div class="result-actions">
@@ -189,13 +186,13 @@ function showCountdown(cb) {
 
 const TOTAL_ROUNDS = 5;
 const BALL_RADIUS   = 22;
-// Round 1→7 balls, Round 5→11 balls; speed also scales per round
+// Round 1→7 balls, Round 5→11 balls; speed and duration scale per round
 function roundBallCount(r){ return 6 + r; }               // 7,8,9,10,11
-function roundSpeedRange(r){ return [4.0 + r*0.5, 6.5 + r*0.55]; } // faster ramp
+function roundSpeedRange(r){ return [3.5 + r*1.1, 5.5 + r*1.2]; } // r1:[4.6,6.7] r5:[9.0,11.5]
+function roundBounceMs(r)  { return Math.max(5000, 9000 - r*700); } // r1:8300 r5:5500
 const CANVAS_W      = 620;
 const CANVAS_H      = 400;
 const MEMORIZE_MS   = 1800;
-const BOUNCE_MS     = 8000;
 const FEEDBACK_MS   = 900;
 const HUMAN_AVG     = 68;
 const LS_KEY        = 'ah_ball-tracking';
@@ -374,7 +371,7 @@ function drawScene(mode, highlightIdx=-1, missIdx=-1){
   // Countdown timer during bounce
   if(mode === 'bouncing'){
     const elapsed   = performance.now() - bounceStart;
-    const remaining = Math.max(0, BOUNCE_MS - elapsed);
+    const remaining = Math.max(0, roundBounceMs(round) - elapsed);
     const secs      = Math.ceil(remaining/1000);
     ctx.fillStyle = 'rgba(255,255,255,0.16)';
     ctx.font = "700 20px 'Space Mono', monospace";
@@ -384,22 +381,56 @@ function drawScene(mode, highlightIdx=-1, missIdx=-1){
   }
 }
 
+// ── ball-to-ball collision ────────────────────────────────────────────────────
+function resolveBallCollisions(){
+  const minDist = BALL_RADIUS * 2;
+  for(let i = 0; i < balls.length; i++){
+    for(let j = i + 1; j < balls.length; j++){
+      const dx   = balls[j].x - balls[i].x;
+      const dy   = balls[j].y - balls[i].y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if(dist < minDist && dist > 0){
+        // Push apart to eliminate overlap
+        const nx = dx / dist;
+        const ny = dy / dist;
+        const overlap = (minDist - dist) * 0.5;
+        balls[i].x -= nx * overlap;
+        balls[i].y -= ny * overlap;
+        balls[j].x += nx * overlap;
+        balls[j].y += ny * overlap;
+
+        // Equal-mass elastic: exchange velocity along collision normal
+        const dvn = (balls[j].vx - balls[i].vx)*nx + (balls[j].vy - balls[i].vy)*ny;
+        if(dvn < 0){
+          balls[i].vx += dvn * nx;
+          balls[i].vy += dvn * ny;
+          balls[j].vx -= dvn * nx;
+          balls[j].vy -= dvn * ny;
+        }
+      }
+    }
+  }
+}
+
 // ── animation loop ────────────────────────────────────────────────────────────
 function animLoop(ts){
   if(phase !== 'bouncing') return;
 
   const elapsed   = ts - bounceStart;
-  const remaining = BOUNCE_MS - elapsed;
+  const remaining = roundBounceMs(round) - elapsed;
 
-  // Move & bounce
+  // Move
   balls.forEach(b => {
     b.x += b.vx;
     b.y += b.vy;
-    if(b.x - BALL_RADIUS < 0)        { b.x = BALL_RADIUS;        b.vx =  Math.abs(b.vx); }
+    if(b.x - BALL_RADIUS < 0)        { b.x = BALL_RADIUS;          b.vx =  Math.abs(b.vx); }
     if(b.x + BALL_RADIUS > CANVAS_W) { b.x = CANVAS_W-BALL_RADIUS; b.vx = -Math.abs(b.vx); }
-    if(b.y - BALL_RADIUS < 0)        { b.y = BALL_RADIUS;        b.vy =  Math.abs(b.vy); }
+    if(b.y - BALL_RADIUS < 0)        { b.y = BALL_RADIUS;          b.vy =  Math.abs(b.vy); }
     if(b.y + BALL_RADIUS > CANVAS_H) { b.y = CANVAS_H-BALL_RADIUS; b.vy = -Math.abs(b.vy); }
   });
+
+  // Ball-to-ball collisions
+  resolveBallCollisions();
 
   drawScene('bouncing');
 
@@ -462,14 +493,17 @@ canvas.addEventListener('click', e => {
     if(Math.sqrt(dx*dx + dy*dy) <= BALL_RADIUS + 4){ clicked = i; break; }
   }
 
+  // Ignore clicks on empty space
+  if(clicked === -1){ phase = 'waiting'; setClickable(true); return; }
+
+  phase = 'feedback';
+  setClickable(false);
+  setPhaseClass('');
+
   const isCorrect = clicked === targetIndex;
   if(isCorrect) correctCount++;
 
-  if(clicked === -1){
-    drawScene('reveal', targetIndex);
-    showFeedback(false);
-    setLabel('Missed — the green ball is revealed.');
-  } else if(isCorrect){
+  if(isCorrect){
     drawScene('reveal', targetIndex);
     showFeedback(true);
     setLabel('Correct!');
@@ -504,16 +538,18 @@ function startTest(){
 }
 
 function endTest(){
-  const pct = Math.round((correctCount / TOTAL_ROUNDS) * 100);
+  const score = correctCount;
   let data = JSON.parse(localStorage.getItem(LS_KEY)||'null') || {attempts:0,best:null,history:[]};
   data.attempts = (data.attempts||0) + 1;
-  data.history.push({score:pct, ts:Date.now()});
-  if(data.best === null || pct > data.best) data.best = pct;
+  data.history.push({score, ts:Date.now()});
+  if(data.best === null || score > data.best) data.best = score;
   localStorage.setItem(LS_KEY, JSON.stringify(data));
 
-  document.getElementById('res-score').textContent      = pct + '%';
-  document.getElementById('best-line').innerHTML        =
-    `Personal best: <span>${data.best}%</span> &nbsp;·&nbsp; Attempts: <span>${data.attempts}</span>`;
+  const resEl = document.getElementById('res-score');
+  resEl.textContent = score + ' / ' + TOTAL_ROUNDS;
+  resEl.className = 'value ' + (score === TOTAL_ROUNDS ? '' : 'wrong');
+  document.getElementById('best-line').innerHTML   =
+    `Attempts: <span>${data.attempts}</span>`;
 
   showScreen('screen-result');
 }

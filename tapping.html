@@ -146,6 +146,25 @@
       pointer-events:none;
       animation:ripple .5s ease-out forwards;
     }
+  /* ── Result layout ── */
+  .result-layout{display:flex;gap:2rem;align-items:flex-start}
+  .result-sidebar{display:flex;flex-direction:column;gap:.75rem;flex-shrink:0;min-width:150px;padding-top:.25rem}
+  .res-stat-label{font-family:'Space Mono',monospace;font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim);margin-bottom:.15rem}
+  .res-stat-val{font-family:'Space Mono',monospace;font-size:1.4rem;font-weight:700;color:var(--primary);margin-bottom:.75rem}
+  .res-stat-val.neutral{color:var(--text)}
+  @media(max-width:520px){.result-layout{flex-direction:column-reverse}.result-sidebar{flex-direction:row;flex-wrap:wrap}}
+  /* ── Intervals board ── */
+  .intervals-board{flex:1;border:1px solid var(--border);border-radius:12px;overflow:hidden;max-height:360px;display:flex;flex-direction:column}
+  .board-header{display:grid;grid-template-columns:.6fr 1fr;padding:.6rem 1rem;background:var(--card-bg);flex-shrink:0}
+  .board-header span{font-family:'Space Mono',monospace;font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim)}
+  .board-body{overflow-y:auto;flex:1}
+  .board-row{display:grid;grid-template-columns:.6fr 1fr;padding:.6rem 1rem;border-top:1px solid var(--border);align-items:center}
+  .board-row:nth-child(even){background:rgba(255,255,255,0.02)}
+  .bc{font-family:'Space Mono',monospace;font-size:.88rem}
+  .bc.dim{color:var(--text-dim)}
+  .bc.ok{color:var(--primary)}
+  .bc.bad{color:var(--secondary)}
+  .bc.neutral{color:var(--text)}
   .back-link{display:inline-flex;align-items:center;gap:.4rem;color:var(--text-dim);text-decoration:none;font-size:.85rem;font-weight:600;margin-bottom:1.75rem;transition:color .2s}
 .back-link:hover{color:var(--primary)}*:focus-visible{outline:2px solid var(--primary);outline-offset:2px}.skip-link{position:absolute;top:-40px;left:0;background:var(--primary);color:#000;padding:.5rem 1rem;font-weight:700;font-size:.875rem;z-index:9999;text-decoration:none;border-radius:0 0 6px 0;transition:top .2s}.skip-link:focus{top:0}
 </style>
@@ -167,10 +186,7 @@
     <div class="screen active fade-in" id="screen-intro">
       <h1 class="test-title">Tapping Consistency</h1>
       <div class="test-desc">
-        Tap the circle (or press <strong style="color:var(--text)">spacebar</strong>) 20 times at a steady rhythm. The target pace is randomly 1s, 1.5s, or 2s between taps. First, <strong style="color:var(--text)">3 guide beats</strong> will flash — tap along to feel the tempo. Then tap 17 more times on your own, keeping that same pace.
-      </div>
-      <div class="test-desc">
-        Your score is the standard deviation of your inter-tap intervals in milliseconds. Lower is better. The human average is <strong style="color:var(--primary)">120ms</strong> stddev.
+        Tap the circle (or press <strong style="color:var(--text)">spacebar</strong>) 20 times at whatever steady rhythm feels natural. Your score is the standard deviation of your inter-tap intervals in milliseconds — lower means more consistent. The human average is <strong style="color:var(--primary)">120ms</strong> stddev.
       </div>
       <button class="btn" onclick="startTest()">Start Test</button>
     </div>
@@ -180,7 +196,6 @@
       <div class="tap-arena">
         <div class="tap-circle-wrap">
           <div class="tap-circle" id="tap-circle" onclick="handleTap()">
-            <div class="tap-countdown" id="tap-countdown"></div>
             <div class="tap-circle-label" id="tap-circle-label">Ready</div>
           </div>
         </div>
@@ -194,28 +209,21 @@
     </div>
 
     <!-- RESULT -->
-    <div class="screen" id="screen-result">
-      <h2 class="test-title fade-in">Test Complete</h2>
-      <div class="test-desc fade-in" id="result-desc" style="margin-bottom:1.5rem;"></div>
-
-      <div class="result-stats fade-in">
-        <div class="stat-card">
-          <div class="label">Your Score</div>
-          <div class="value" id="res-score">—</div>
-          <div style="font-size:.75rem;color:var(--text-dim);margin-top:.25rem;">ms stddev</div>
+    <div class="screen fade-in" id="screen-result">
+      <h2 class="test-title">Results</h2>
+      <div class="result-layout">
+        <div class="result-sidebar">
+          <div class="best-line" id="best-line"></div>
+          <button class="btn" onclick="startTest()">Try Again</button>
+          <a class="btn-outline" href="index.html">Back to Tests</a>
         </div>
-        <div class="stat-card">
-          <div class="label">Human Average</div>
-          <div class="value neutral">120</div>
-          <div style="font-size:.75rem;color:var(--text-dim);margin-top:.25rem;">ms stddev</div>
+        <div class="intervals-board">
+          <div class="board-header">
+            <span>Tap</span>
+            <span>Time between taps</span>
+          </div>
+          <div class="board-body" id="board-body"></div>
         </div>
-      </div>
-
-      <div class="best-line" id="best-line"></div>
-
-      <div class="result-actions fade-in">
-        <button class="btn" onclick="startTest()">Try Again</button>
-        <a class="btn-outline" href="index.html">Back to Tests</a>
       </div>
     </div>
 
@@ -231,17 +239,10 @@
   const STORAGE_KEY = 'ah_tapping';
   const AVG_HUMAN = 120;
   const TOTAL_TAPS = 20;
-  const GUIDE_BEATS = 3;
-  const INTERVALS = [1000, 1500, 2000];
 
-  let targetInterval = 1000;
   let tapTimestamps = [];
   let tapCount = 0;
-  let phase = 'idle'; // 'countdown' | 'guide' | 'free' | 'done'
-  let guideBeatTimers = [];
-  let guideInterval = null;
-  let guideBeat = 0;
-  let guideStartTime = 0;
+  let phase = 'idle'; // 'idle' | 'waiting' | 'tapping' | 'done'
 
   function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -261,93 +262,30 @@
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch {}
   }
 
-
-  function clearAllTimers() {
-    guideBeatTimers.forEach(t => clearTimeout(t));
-    guideBeatTimers = [];
-    if (guideInterval) { clearInterval(guideInterval); guideInterval = null; }
-  }
-
   function startTest() {
-    clearAllTimers();
-    targetInterval = INTERVALS[Math.floor(Math.random() * INTERVALS.length)];
     tapTimestamps = [];
     tapCount = 0;
-    guideBeat = 0;
-    phase = 'countdown';
+    phase = 'waiting';
 
     showScreen('screen-test');
-
-    const intervalLabel = targetInterval === 1000 ? '1s' : targetInterval === 1500 ? '1.5s' : '2s';
-    setCircle('idle', '', 'Ready');
-    updateTapCount(0);
-    setPhase(`Tempo: ${intervalLabel} per tap — guide beats coming…`);
-
-    // Countdown: 3… 2… 1…
-    const countdownEl = document.getElementById('tap-countdown');
-
-    let c = 3;
-    countdownEl.textContent = c;
-
-    const tick = setInterval(() => {
-      c--;
-      if (c > 0) {
-        countdownEl.textContent = c;
-      } else {
-        clearInterval(tick);
-        countdownEl.textContent = '';
-        beginGuidePhase();
-      }
-    }, 1000);
-
-    guideBeatTimers.push(tick); // track for cleanup
-  }
-
-  function beginGuidePhase() {
-    phase = 'guide';
-    guideBeat = 0;
-    setCircle('idle', '', '');
-    setPhase('3 guide beats — tap along with each flash');
-    document.getElementById('tap-hint').textContent = 'SPACEBAR or CLICK to tap';
-
-    function fireGuideBeat() {
-      if (guideBeat >= GUIDE_BEATS) {
-        beginFreePhase();
-        return;
-      }
-      guideBeat++;
-      flashCircle('guide-beat');
-      setCircle('guide-beat', '', guideBeat + ' / 3');
-
-      const flashMs = Math.round(targetInterval * 0.8);
-      const gapMs = targetInterval - flashMs;
-      const beatTimer = setTimeout(() => {
-        setCircle('idle', '', guideBeat + ' / 3');
-        const nextTimer = setTimeout(fireGuideBeat, gapMs);
-        guideBeatTimers.push(nextTimer);
-      }, flashMs);
-      guideBeatTimers.push(beatTimer);
-    }
-
-    const startTimer = setTimeout(fireGuideBeat, 100);
-    guideBeatTimers.push(startTimer);
-  }
-
-  function beginFreePhase() {
-    phase = 'free';
     setCircle('idle', '', 'TAP');
-    setPhase('Now tap 20 times — keep that same rhythm!');
-    const intervalLabel = targetInterval === 1000 ? '1s' : targetInterval === 1500 ? '1.5s' : '2s';
-    document.getElementById('tap-hint').textContent = `${intervalLabel} between each tap`;
+    updateTapCount(0);
+    setPhase('Tap 20 times at a steady rhythm');
+    document.getElementById('tap-hint').textContent = 'SPACEBAR or CLICK to start';
   }
 
   function handleTap() {
-    if (phase !== 'guide' && phase !== 'free') return;
+    if (phase !== 'waiting' && phase !== 'tapping') return;
     if (tapCount >= TOTAL_TAPS) return;
 
     const now = performance.now();
     tapTimestamps.push(now);
     tapCount++;
+
+    if (phase === 'waiting') {
+      phase = 'tapping';
+      document.getElementById('tap-hint').textContent = 'Keep going…';
+    }
 
     updateTapCount(tapCount);
     flashCircle('user-tap');
@@ -377,13 +315,11 @@
     }, 200);
   }
 
-  function setCircle(state, countdown, label) {
+  function setCircle(state, _unused, label) {
     const circle = document.getElementById('tap-circle');
-    const countdownEl = document.getElementById('tap-countdown');
     const labelEl = document.getElementById('tap-circle-label');
     circle.classList.remove('guide-beat', 'user-tap');
     if (state) circle.classList.add(state);
-    countdownEl.textContent = countdown || '';
     labelEl.textContent = label || '';
   }
 
@@ -408,46 +344,47 @@
   }
 
   function showResult() {
-    clearAllTimers();
-
+    // Compute intervals between consecutive taps
+    const intervals = [];
+    for (let i = 1; i < tapTimestamps.length; i++) {
+      intervals.push(Math.round(tapTimestamps[i] - tapTimestamps[i - 1]));
+    }
     const stddev = computeStdDev(tapTimestamps);
+    const mean   = intervals.length
+      ? intervals.reduce((a, b) => a + b, 0) / intervals.length
+      : 0;
 
     const store = getStorage();
     store.attempts = (store.attempts || 0) + 1;
-    const prevBest = store.best;
-    // lower is better
-    if (prevBest === null || stddev < prevBest) store.best = stddev;
+    if (store.best === null || stddev < store.best) store.best = stddev;
     store.history = store.history || [];
     store.history.push(stddev);
     saveStorage(store);
 
-    showScreen('screen-result');
-
-    document.getElementById('res-score').textContent = stddev;
-
-    const best = store.best;
     const bl = document.getElementById('best-line');
-    if (store.attempts > 1) {
-      bl.innerHTML = `Personal best: <span>${best} ms</span> — Attempt #${store.attempts}`;
-    } else {
-      bl.innerHTML = `First attempt! Personal best: <span>${best} ms</span>`;
-    }
+    bl.innerHTML = `Score: <span>${stddev} ms</span><br>Best: <span>${store.best} ms</span><br>Attempts: <span>${store.attempts}</span>`;
 
-    const desc = document.getElementById('result-desc');
-    if (stddev <= 50) {
-      desc.textContent = `Extraordinary consistency at ${stddev}ms stddev. You have near-mechanical timing precision.`;
-    } else if (stddev < AVG_HUMAN) {
-      desc.textContent = `Great rhythm! Your timing stddev of ${stddev}ms is better than the human average of ${AVG_HUMAN}ms.`;
-    } else if (stddev === AVG_HUMAN) {
-      desc.textContent = `You matched the human average of ${AVG_HUMAN}ms stddev exactly.`;
-    } else {
-      desc.textContent = `Your timing stddev was ${stddev}ms. The human average is ${AVG_HUMAN}ms — try to keep a steadier rhythm.`;
-    }
+    // Build interval board
+    const body = document.getElementById('board-body');
+    body.innerHTML = '';
+    intervals.forEach((iv, i) => {
+      const prev = i === 0 ? intervals[1] : intervals[i - 1];
+      const diff = prev !== undefined ? Math.abs(iv - prev) : 0;
+      const cls  = diff <= 10 ? 'ok' : diff > 50 ? 'bad' : 'neutral';
+      const row  = document.createElement('div');
+      row.className = 'board-row';
+      row.innerHTML =
+        `<span class="bc dim">${i + 1}-${i + 2}</span>` +
+        `<span class="bc ${cls}">${iv} ms</span>`;
+      body.appendChild(row);
+    });
+
+    showScreen('screen-result');
   }
 
   // Spacebar listener — only active on test screen
   document.addEventListener('keydown', e => {
-    if (e.code === 'Space' && phase !== 'idle' && phase !== 'countdown' && phase !== 'done') {
+    if (e.code === 'Space' && (phase === 'waiting' || phase === 'tapping')) {
       e.preventDefault();
       handleTap();
     }

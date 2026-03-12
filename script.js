@@ -15,12 +15,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!reducedMotion) {
             card.addEventListener('mousemove', e => {
                 const r = card.getBoundingClientRect();
-                const x = (e.clientX - r.left) / r.width  - 0.5;
-                const y = (e.clientY - r.top)  / r.height - 0.5;
+                const px = (e.clientX - r.left) / r.width;
+                const py = (e.clientY - r.top)  / r.height;
+                card.style.setProperty('--spot-x', `${px * 100}%`);
+                card.style.setProperty('--spot-y', `${py * 100}%`);
                 card.style.transition = 'background 0.2s ease-out, border-color 0.2s ease-out, box-shadow 0.2s ease-out';
-                card.style.transform  = `translateY(-4px) scale(1.02) rotateX(${-y * 8}deg) rotateY(${x * 8}deg)`;
+                card.style.transform  = `translateY(-4px) scale(1.02) rotateX(${-(py - 0.5) * 8}deg) rotateY(${(px - 0.5) * 8}deg)`;
             });
             card.addEventListener('mouseleave', () => {
+                card.style.removeProperty('--spot-x');
+                card.style.removeProperty('--spot-y');
                 card.style.transition = '';
                 card.style.transform  = '';
             });
@@ -38,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('hvCanvas');
     if (canvas) {
         const ctx = canvas.getContext('2d');
-        const C = '#00ff9d';
+        const C = '#00e887';
 
         // [startAngle, pulsePhase] per node
         const orbitals = [

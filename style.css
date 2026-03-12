@@ -2,7 +2,7 @@
     --bg: #0d0d0d;
     --card-bg: #161616;
     --card-hover: #1e1e1e;
-    --primary: #00ff9d;
+    --primary: #00e887;
     --secondary: #ff3366;
     --text: #ffffff;
     --text-dim: #777;
@@ -52,7 +52,7 @@ body::after {
     inset: 0;
     pointer-events: none;
     z-index: 9998;
-    opacity: 0.022;
+    opacity: 0.032;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     background-size: 160px 160px;
 }
@@ -183,7 +183,7 @@ header.scrolled {
     display: inline-flex;
     align-items: center;
     gap: 0.6rem;
-    background: linear-gradient(135deg, #00ff9d 0%, #00df88 100%);
+    background: linear-gradient(135deg, #00e887 0%, #00cc77 100%);
     color: #000;
     font-family: 'Manrope', sans-serif;
     font-weight: 700;
@@ -198,7 +198,7 @@ header.scrolled {
 .hero-cta:hover {
     filter: brightness(1.1);
     transform: translateY(-3px);
-    box-shadow: 0 10px 36px rgba(0,255,157,0.38);
+    box-shadow: 0 10px 36px rgba(0,232,135,0.32);
 }
 
 .cta-arrow {
@@ -215,6 +215,8 @@ header.scrolled {
     z-index: 10;
     user-select: none;
     overflow: visible;
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 22%, black 100%);
+    mask-image: linear-gradient(to right, transparent 0%, black 22%, black 100%);
 }
 .hero-visual::before {
     content: '';
@@ -295,8 +297,11 @@ header.scrolled {
 
 .test-card {
     aspect-ratio: 1;
-    background: var(--card-bg);
-    border: 1px solid var(--border);
+    background:
+        radial-gradient(circle at var(--spot-x, 50%) var(--spot-y, -20%), rgba(0,232,135,0.06) 0%, transparent 55%) padding-box,
+        linear-gradient(var(--card-bg), var(--card-bg)) padding-box,
+        linear-gradient(145deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.01) 55%, rgba(0,232,135,0.05) 100%) border-box;
+    border: 1px solid transparent;
     border-radius: 12px;
     padding: 1.1rem;
     display: flex;
@@ -380,10 +385,13 @@ header.scrolled {
 }
 
 .test-card:hover {
-    background: var(--card-hover);
-    border-color: rgba(0,255,157,0.4);
+    background:
+        radial-gradient(circle at var(--spot-x, 50%) var(--spot-y, 50%), rgba(0,232,135,0.1) 0%, transparent 55%) padding-box,
+        linear-gradient(var(--card-hover), var(--card-hover)) padding-box,
+        linear-gradient(145deg, rgba(0,232,135,0.5) 0%, rgba(0,232,135,0.12) 50%, rgba(0,232,135,0.28) 100%) border-box;
+    border-color: transparent;
     transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,255,157,0.18), 0 0 28px rgba(0,255,157,0.07);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 30px rgba(0,232,135,0.08);
 }
 .test-card:hover::after { opacity: 1; }
 

@@ -186,7 +186,7 @@
     <div class="screen active fade-in" id="screen-intro">
       <h1 class="test-title">Tap Consistency</h1>
       <div class="test-desc">
-        Tap the circle (or press <strong style="color:var(--text)">spacebar</strong>) 20 times at whatever steady rhythm feels natural. Your score is the standard deviation of your inter-tap intervals in milliseconds — lower means more consistent. The human average is <strong style="color:var(--primary)">120ms</strong> stddev.
+        Tap the circle (or press <strong style="color:var(--text)">spacebar</strong>) 20 times at whatever steady rhythm feels natural. Your score is the standard deviation of your inter-tap intervals in milliseconds — lower means more consistent.
       </div>
       <button class="btn" onclick="startTest()">Start Test</button>
     </div>
@@ -216,6 +216,7 @@
           <div class="best-line" id="best-line"></div>
           <button class="btn" onclick="startTest()">Try Again</button>
           <a class="btn-outline" href="index.html">Back to Tests</a>
+          <button class="btn-outline" onclick="shareScore()">Share Score</button>
         </div>
         <div class="intervals-board">
           <div class="board-header">
@@ -379,6 +380,8 @@
       body.appendChild(row);
     });
 
+    document.getElementById('screen-result').dataset.shareScore = stddev + ' ms';
+    document.getElementById('screen-result').dataset.shareLabel = 'Std Dev';
     showScreen('screen-result');
   }
 
@@ -393,5 +396,6 @@
 const _hdr = document.querySelector('header');
 if (_hdr) { _hdr.classList.add('scrolled'); const _s = () => _hdr.classList.toggle('scrolled', window.scrollY > 40); window.addEventListener('scroll', _s, {passive:true}); }
 </script>
+<script src="share.js"></script>
 </body>
 </html>

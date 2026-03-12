@@ -174,20 +174,17 @@ input[type=number]{-moz-appearance:textfield}
     <!-- RESULT -->
     <div id="screen-result" class="screen fade-in">
       <h2 class="test-title">Results</h2>
-      <div class="result-stats">
+      <div class="result-stats" style="grid-template-columns:1fr;max-width:220px">
         <div class="stat-card">
           <div class="label">Your Error</div>
           <div class="value" id="res-score">—</div>
-        </div>
-        <div class="stat-card">
-          <div class="label">Human Average</div>
-          <div class="value neutral">±40%</div>
         </div>
       </div>
       <div class="best-line" id="best-line">Personal best: <span>—</span></div>
       <div class="result-actions">
         <button class="btn" onclick="startTest()">Try Again</button>
         <a href="index.html" class="btn-outline">Back to Tests</a>
+        <button class="btn-outline" onclick="shareScore()">Share Score</button>
       </div>
     </div>
 
@@ -367,6 +364,8 @@ function endGame() {
   document.getElementById('best-line').innerHTML        =
     `Personal best: <span>±${data.best}%</span> &nbsp;·&nbsp; Attempts: <span>${data.attempts}</span>`;
 
+  document.getElementById('screen-result').dataset.shareScore = '±' + score + '%';
+  document.getElementById('screen-result').dataset.shareLabel = 'Avg Error';
   showScreen('screen-result');
 }
 
@@ -390,5 +389,6 @@ document.getElementById('guess-input').addEventListener('keydown', e => {
 const _hdr = document.querySelector('header');
 if (_hdr) { _hdr.classList.add('scrolled'); const _s = () => _hdr.classList.toggle('scrolled', window.scrollY > 40); window.addEventListener('scroll', _s, {passive:true}); }
 </script>
+<script src="share.js"></script>
 </body>
 </html>

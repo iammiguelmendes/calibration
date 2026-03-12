@@ -129,6 +129,7 @@ main{flex:1;padding:3rem 0}footer{padding:2rem 0;border-top:1px solid var(--bord
           <div class="best-line" id="best-line"></div>
           <button class="btn" onclick="startTest()">Try Again</button>
           <a href="index.html" class="btn-outline">Back to Tests</a>
+          <button class="btn-outline" onclick="shareScore()">Share Score</button>
         </div>
         <div class="rounds-board">
           <div class="board-header">
@@ -328,11 +329,14 @@ function endTest() {
     body.appendChild(row);
   });
 
+  document.getElementById('screen-result').dataset.shareScore = correctCount + ' / ' + TOTAL_ROUNDS;
+  document.getElementById('screen-result').dataset.shareLabel = 'Correct';
   showScreen('screen-result');
 }
 
 const _hdr = document.querySelector('header');
 if (_hdr) { _hdr.classList.add('scrolled'); const _s = () => _hdr.classList.toggle('scrolled', window.scrollY > 40); window.addEventListener('scroll', _s, {passive:true}); }
 </script>
+<script src="share.js"></script>
 </body>
 </html>

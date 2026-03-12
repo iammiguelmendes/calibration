@@ -173,16 +173,11 @@ input[type=number]{-moz-appearance:textfield}
           <div class="value" id="res-combined">—</div>
         </div>
       </div>
-      <div class="result-stats">
-        <div class="stat-card">
-          <div class="label">Human Average</div>
-          <div class="value neutral">65%</div>
-        </div>
-      </div>
       <div class="best-line" id="best-line"></div>
       <div class="result-actions">
         <button class="btn" onclick="startTest()">Try Again</button>
         <a href="index.html" class="btn-outline">Back to Tests</a>
+        <button class="btn-outline" onclick="shareScore()">Share Score</button>
       </div>
     </div>
 
@@ -225,7 +220,6 @@ const NUM_SHOW_MS  = 900;
 const NUM_GAP_MS   = 400;   // NUM_CYCLE = 1300ms total
 const SHAPE_SHOW   = 900;
 const SHAPE_GAP    = 400;   // SHAPE_CYCLE = 1300ms total
-const HUMAN_AVG    = 65;
 
 let numbers       = [];   // sequence of 1–9
 let shapes        = [];   // 'circle'|'square'|'tri', 4 circles in 13
@@ -384,6 +378,8 @@ function submitAnswer() {
   document.getElementById('best-line').innerHTML       =
     `Personal best: <span>${data.best}%</span> &nbsp;·&nbsp; Attempts: <span>${data.attempts}</span>`;
 
+  document.getElementById('screen-result').dataset.shareScore = combined + '%';
+  document.getElementById('screen-result').dataset.shareLabel = 'Combined';
   showScreen('screen-result');
 }
 
@@ -403,5 +399,6 @@ document.getElementById('odd-guess').addEventListener('keydown', e => {
 const _hdr = document.querySelector('header');
 if (_hdr) { _hdr.classList.add('scrolled'); const _s = () => _hdr.classList.toggle('scrolled', window.scrollY > 40); window.addEventListener('scroll', _s, {passive:true}); }
 </script>
+<script src="share.js"></script>
 </body>
 </html>

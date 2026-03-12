@@ -25,7 +25,7 @@ main{flex:1;padding:3rem 0}footer{padding:2rem 0;border-top:1px solid var(--bord
 .btn:hover{opacity:.85;transform:translateY(-1px)}
 .btn-outline{background:none;border:1px solid var(--border);color:var(--text-dim);padding:.75rem 1.5rem;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Manrope',sans-serif;text-decoration:none;display:inline-block}
 .btn-outline:hover{border-color:var(--primary);color:var(--primary)}
-.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.25rem}
+.result-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-bottom:1.25rem}
 .result-stats-2{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
 .stat-card{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:1.25rem;text-align:center}
 .stat-card .label{font-size:.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem}
@@ -153,10 +153,6 @@ main{flex:1;padding:3rem 0}footer{padding:2rem 0;border-top:1px solid var(--bord
           <div class="label">Score</div>
           <div class="value" id="res-score">—</div>
         </div>
-        <div class="stat-card">
-          <div class="label">Human Average</div>
-          <div class="value neutral">91%</div>
-        </div>
       </div>
       <div class="result-stats-2">
         <div class="stat-card">
@@ -180,6 +176,7 @@ main{flex:1;padding:3rem 0}footer{padding:2rem 0;border-top:1px solid var(--bord
       <div class="result-actions">
         <button class="btn" onclick="startTest()">Try Again</button>
         <a href="index.html" class="btn-outline">Back to Tests</a>
+        <button class="btn-outline" onclick="shareScore()">Share Score</button>
       </div>
     </div>
 
@@ -220,7 +217,6 @@ const SHOW_MS      = 600;   // minimum card display time
 const SHOW_JITTER  = 900;   // +0–900 ms random extra (total: 600–1500 ms)
 const PAUSE_MS     = 900;  // base inter-round pause
 const PAUSE_JITTER = 800;  // +0–800 ms random extra
-const HUMAN_AVG    = 91;
 const LS_KEY       = 'ah_gonogo';
 
 // 70% green (14), 30% red (6)
@@ -405,5 +401,6 @@ document.addEventListener('keydown', e => {
 const _hdr = document.querySelector('header');
 if (_hdr) { _hdr.classList.add('scrolled'); const _s = () => _hdr.classList.toggle('scrolled', window.scrollY > 40); window.addEventListener('scroll', _s, {passive:true}); }
 </script>
+<script src="share.js"></script>
 </body>
 </html>

@@ -161,6 +161,7 @@ input[type=number]{-moz-appearance:textfield}
           <div class="best-line" id="best-line"></div>
           <button class="btn" onclick="startTest()">Try Again</button>
           <a href="index.html" class="btn-outline">Back to Tests</a>
+          <button class="btn-outline" onclick="shareScore()">Share Score</button>
         </div>
         <div class="rounds-board" id="rounds-board">
           <div class="board-header">
@@ -206,7 +207,6 @@ function showCountdown(cb) {
 }
 
 const LS_KEY       = 'ah_math2';
-const HUMAN_AVG    = 15;
 const TOTAL_ROUNDS = 10;
 const TIMER_S      = 5;
 
@@ -370,6 +370,8 @@ function endGame() {
     body.appendChild(row);
   }
 
+  document.getElementById('screen-result').dataset.shareScore = '±' + score + '%';
+  document.getElementById('screen-result').dataset.shareLabel = 'Avg Error';
   showScreen('screen-result');
 }
 
@@ -394,5 +396,6 @@ document.getElementById('guess-input').addEventListener('keydown', e => {
 const _hdr = document.querySelector('header');
 if (_hdr) { _hdr.classList.add('scrolled'); const _s = () => _hdr.classList.toggle('scrolled', window.scrollY > 40); window.addEventListener('scroll', _s, {passive:true}); }
 </script>
+<script src="share.js"></script>
 </body>
 </html>

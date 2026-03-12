@@ -134,20 +134,17 @@ main{flex:1;padding:3rem 0}footer{padding:2rem 0;border-top:1px solid var(--bord
     <!-- RESULT -->
     <div id="screen-result" class="screen fade-in">
       <h2 class="test-title">Game Over</h2>
-      <div class="result-stats">
+      <div class="result-stats" style="grid-template-columns:1fr;max-width:220px">
         <div class="stat-card">
           <div class="label">Your Level</div>
           <div class="value" id="res-score">—</div>
-        </div>
-        <div class="stat-card">
-          <div class="label">Human Average</div>
-          <div class="value neutral">8</div>
         </div>
       </div>
       <div class="best-line" id="best-line">Personal best: <span>—</span></div>
       <div class="result-actions">
         <button class="btn" onclick="startTest()">Try Again</button>
         <a href="index.html" class="btn-outline">Back to Tests</a>
+        <button class="btn-outline" onclick="shareScore()">Share Score</button>
       </div>
     </div>
 
@@ -187,7 +184,6 @@ const GRID_SIZE     = 9;
 const LIGHT_MS      = 400;
 const PAUSE_MS      = 800;  // gap between each square (includes light time)
 const POST_SEQ_MS   = 500;  // pause after sequence before user turn
-const HUMAN_AVG     = 8;
 const LS_KEY        = 'ah_seqmem';
 
 let sequence     = [];
@@ -348,6 +344,8 @@ function endGame() {
   document.getElementById('best-line').innerHTML =
     `Personal best: <span>${data.best}</span> &nbsp;·&nbsp; Attempts: <span>${data.attempts}</span>`;
 
+  document.getElementById('screen-result').dataset.shareScore = reached;
+  document.getElementById('screen-result').dataset.shareLabel = 'Level';
   setTimeout(() => showScreen('screen-result'), 300);
 }
 
@@ -370,5 +368,6 @@ document.addEventListener('keydown', e => {
 const _hdr = document.querySelector('header');
 if (_hdr) { _hdr.classList.add('scrolled'); const _s = () => _hdr.classList.toggle('scrolled', window.scrollY > 40); window.addEventListener('scroll', _s, {passive:true}); }
 </script>
+<script src="share.js"></script>
 </body>
 </html>

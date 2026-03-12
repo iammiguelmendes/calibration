@@ -36,6 +36,22 @@ main{flex:1;padding:3rem 0}footer{padding:2rem 0;border-top:1px solid var(--bord
 @media (prefers-reduced-motion:no-preference){@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}}
 .fade-in{animation:fadeIn .4s ease forwards}
 
+/* Result board layout */
+.result-layout{display:flex;gap:2rem;align-items:flex-start}
+.result-sidebar{display:flex;flex-direction:column;gap:.75rem;flex-shrink:0;min-width:150px;padding-top:.25rem}
+@media(max-width:520px){.result-layout{flex-direction:column-reverse}.result-sidebar{flex-direction:row;flex-wrap:wrap}}
+.rounds-board{flex:1;border:1px solid var(--border);border-radius:12px;overflow:hidden;max-height:360px;display:flex;flex-direction:column}
+.board-header{display:grid;grid-template-columns:.5fr 1fr 1fr;padding:.6rem 1rem;background:var(--card-bg);flex-shrink:0}
+.board-header span{font-family:'Space Mono',monospace;font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim)}
+.board-body{overflow-y:auto;flex:1}
+.board-row{display:grid;grid-template-columns:.5fr 1fr 1fr;padding:.65rem 1rem;border-top:1px solid var(--border);align-items:center}
+.board-row:nth-child(even){background:rgba(255,255,255,0.02)}
+.bc{font-family:'Space Mono',monospace;font-size:.88rem}
+.bc.dim{color:var(--text-dim)}
+.bc.ok{color:var(--primary)}
+.bc.bad{color:var(--secondary)}
+.bc.neutral{color:var(--text)}
+
 /* Test-specific styles */
 .round-counter{font-family:'Space Mono',monospace;font-size:.9rem;color:var(--text-dim);margin-bottom:2rem}
 .timer-display{
@@ -134,23 +150,23 @@ input[type=number]{-moz-appearance:textfield}
     </div>
 
     <!-- Result Screen -->
-    <div id="screen-result" class="screen">
-      <h1 class="test-title fade-in">Test Complete</h1>
-      <p class="test-desc fade-in" style="margin-bottom:1.25rem">Here's how your time perception compares.</p>
-      <div class="result-stats fade-in">
-        <div class="stat-card">
-          <div class="label">Your Score</div>
-          <div class="value" id="res-score">—</div>
+    <div id="screen-result" class="screen fade-in">
+      <h2 class="test-title">Results</h2>
+      <div class="result-layout">
+        <div class="result-sidebar">
+          <div class="best-line" id="best-line"></div>
+          <button class="btn" onclick="startTest()">Try Again</button>
+          <a href="index.html" class="btn-outline">Back to Tests</a>
+          <button class="btn-outline" onclick="shareScore()">Share Score</button>
         </div>
-        <div class="stat-card">
-          <div class="label">Human Average</div>
-          <div class="value neutral">2.3s</div>
+        <div class="rounds-board">
+          <div class="board-header">
+            <span>Round</span>
+            <span>Your Guess</span>
+            <span>Actual</span>
+          </div>
+          <div class="board-body" id="board-body"></div>
         </div>
-      </div>
-      <div class="best-line" id="best-line">Personal best: <span id="res-best">—</span></div>
-      <div class="result-actions fade-in">
-        <button class="btn" onclick="startTest()">Try Again</button>
-        <a href="index.html" class="btn-outline">Back to Tests</a>
       </div>
     </div>
 
@@ -187,7 +203,6 @@ function showCountdown(cb) {
 }
 
 const STORAGE_KEY = 'ah_time';
-const HUMAN_AVG = 2.3;
 const DURATIONS = [3, 5, 7, 10, 15];
 const TOTAL_ROUNDS = 5;
 
@@ -230,6 +245,7 @@ function showScreen(id) {
 }
 
 function startTest() {
+  clearTimeout(roundTimer);
   currentRound = 0;
   shuffledDurations = shuffle(DURATIONS);
   guesses = [];
@@ -278,6 +294,7 @@ document.getElementById('guess-input').addEventListener('keydown', function(e) {
 });
 
 function finishTest() {
+  clearTimeout(roundTimer);
   let totalError = 0;
   for (const r of guesses) {
     totalError += Math.abs(r.guess - r.actual);
@@ -286,8 +303,22 @@ function finishTest() {
 
   const data = saveStorage(score);
 
-  document.getElementById('res-score').textContent = score + 's';
-  document.getElementById('res-best').textContent = data.best + 's';
+  document.getElementById('best-line').innerHTML =
+    `Avg error: <span>${score}s</span><br>Best: <span>${data.best}s</span><br>Attempts: <span>${data.attempts}</span>`;
+
+  const body = document.getElementById('board-body');
+  body.innerHTML = '';
+  guesses.forEach((r, i) => {
+    const err = Math.abs(r.guess - r.actual);
+    const cls = err <= 1 ? 'ok' : err > 3 ? 'bad' : 'neutral';
+    const row = document.createElement('div');
+    row.className = 'board-row';
+    row.innerHTML =
+      `<span class="bc dim">${i + 1}</span>` +
+      `<span class="bc ${cls}">${r.guess}s</span>` +
+      `<span class="bc neutral">${r.actual}s</span>`;
+    body.appendChild(row);
+  });
 
   showScreen('screen-result');
 }
@@ -295,5 +326,6 @@ function finishTest() {
 const _hdr = document.querySelector('header');
 if (_hdr) { _hdr.classList.add('scrolled'); const _s = () => _hdr.classList.toggle('scrolled', window.scrollY > 40); window.addEventListener('scroll', _s, {passive:true}); }
 </script>
+<script src="share.js"></script>
 </body>
 </html>

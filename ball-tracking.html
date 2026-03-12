@@ -133,6 +133,7 @@ canvas.clickable{cursor:crosshair;}
       <div class="result-actions">
         <button class="btn" onclick="startTest()">Try Again</button>
         <a href="index.html" class="btn-outline">Back to Tests</a>
+        <button class="btn-outline" onclick="shareScore()">Share Score</button>
       </div>
     </div>
 
@@ -178,7 +179,6 @@ const CANVAS_W      = 620;
 const CANVAS_H      = 400;
 const MEMORIZE_MS   = 1800;
 const FEEDBACK_MS   = 900;
-const HUMAN_AVG     = 68;
 const LS_KEY        = 'ah_ball-tracking';
 
 let round        = 0;
@@ -524,11 +524,14 @@ function endTest(){
   document.getElementById('best-line').innerHTML   =
     `Attempts: <span>${data.attempts}</span>`;
 
+  document.getElementById('screen-result').dataset.shareScore = score + ' / ' + TOTAL_ROUNDS;
+  document.getElementById('screen-result').dataset.shareLabel = 'Correct';
   showScreen('screen-result');
 }
 
 const _hdr = document.querySelector('header');
 if (_hdr) { _hdr.classList.add('scrolled'); const _s = () => _hdr.classList.toggle('scrolled', window.scrollY > 40); window.addEventListener('scroll', _s, {passive:true}); }
 </script>
+<script src="share.js"></script>
 </body>
 </html>

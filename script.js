@@ -182,6 +182,38 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!prefersReducedMotion) draw();
     }
 
+    // ── Personal best on cards ───────────────────────────────────────────────
+    const TEST_META = {
+        'go-nogo':         { key: 'ah_gonogo',           fmt: v => v + '%'      },
+        'time':            { key: 'ah_time',              fmt: v => v + 's'      },
+        'multitasking':    { key: 'ah_multitask2',        fmt: v => v + '%'      },
+        'sequence-memory': { key: 'ah_seqmem',            fmt: v => 'lv ' + v    },
+        'mental-rotation': { key: 'ah_mental-rotation',   fmt: v => v + ' / 12'  },
+        'math':            { key: 'ah_math2',             fmt: v => '±' + v + '%' },
+        'visual-memory':   { key: 'ah_vismem',            fmt: v => 'lv ' + v    },
+        'tapping':         { key: 'ah_tapping',           fmt: v => v + ' ms'    },
+        'ball-tracking':   { key: 'ah_ball-tracking',     fmt: v => v + ' / 5'   },
+        'stroop':          { key: 'ah_stroop',            fmt: v => v + ' / 10'  },
+    };
+    document.querySelectorAll('.test-card').forEach(card => {
+        const meta = TEST_META[card.dataset.test];
+        if (!meta) return;
+        try {
+            const raw = localStorage.getItem(meta.key);
+            if (!raw) return;
+            const data = JSON.parse(raw);
+            if (data.attempts) {
+                card.classList.add('done');
+                if (data.best != null) {
+                    const best = document.createElement('div');
+                    best.className = 'test-best';
+                    best.textContent = 'Best: ' + meta.fmt(data.best);
+                    card.querySelector('.test-info').appendChild(best);
+                }
+            }
+        } catch(e) {}
+    });
+
     // ── Sticky header scroll animation ──────────────────────────────────────
     const header = document.querySelector('header');
     if (header) {

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404 — AverageHuman</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta name="theme-color" content="#0d0d0d">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0d0d0d;--card-bg:#1a1a1a;--primary:#00e887;--text:#fff;--text-dim:#777;--border:#222}
+body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+html{overflow-y:scroll}
+.container{max-width:1100px;margin:0 auto;padding:0 2.5rem;width:100%}
+header{padding:1.25rem 0;border-bottom:1px solid var(--border);background:rgba(13,13,13,0.88)}
+.logo{font-size:1.3rem;font-weight:800;letter-spacing:-0.5px;text-decoration:none;color:var(--text)}
+.logo span{color:var(--primary)}
+main{flex:1;display:flex;align-items:center;justify-content:center}
+.error-wrap{text-align:center;padding:4rem 0}
+.error-code{font-family:'Space Mono',monospace;font-size:7rem;font-weight:700;color:var(--primary);line-height:1;opacity:0.18;margin-bottom:-.5rem}
+.error-title{font-size:2rem;font-weight:800;letter-spacing:-0.5px;margin-bottom:.75rem}
+.error-desc{color:var(--text-dim);font-size:1rem;line-height:1.6;margin-bottom:2rem;max-width:400px;margin-left:auto;margin-right:auto}
+.btn{display:inline-block;background:var(--primary);color:#000;border:none;padding:.85rem 2rem;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Manrope',sans-serif;text-decoration:none}
+.btn:hover{opacity:.85;transform:translateY(-1px)}
+footer{padding:2rem 0;border-top:1px solid var(--border);text-align:center;color:var(--text-dim);font-size:0.82rem}
+footer a{color:var(--primary);text-decoration:none}
+*:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+</style>
+</head>
+<body>
+<header>
+  <div class="container">
+    <a href="index.html" class="logo">Average<span>Human</span></a>
+  </div>
+</header>
+<main>
+  <div class="container">
+    <div class="error-wrap">
+      <div class="error-code">404</div>
+      <h1 class="error-title">Page not found</h1>
+      <p class="error-desc">That test doesn't exist — or maybe you're just bad at typing. Either way, the real tests are back home.</p>
+      <a href="index.html" class="btn">Back to Tests</a>
+    </div>
+  </div>
+</main>
+<footer>
+  <div class="container">
+    <p>AverageHuman &mdash; Measuring cognition, one test at a time &nbsp;&middot;&nbsp; <a href="privacy.html">Privacy Policy</a></p>
+  </div>
+</footer>
+</body>
+</html>

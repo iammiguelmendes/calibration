@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mental Rotation — AverageHuman</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta name="theme-color" content="#0d0d0d">
+<meta name="description" content="Decide if two shapes are the same or mirrored. 12 rounds testing your spatial reasoning speed.">
+<meta property="og:title" content="Mental Rotation — AverageHuman">
+<meta property="og:description" content="Decide if two shapes are the same or mirrored. 12 rounds testing your spatial reasoning speed.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AverageHuman">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
@@ -158,6 +165,11 @@ main{flex:1;padding:3rem 0}footer{padding:2rem 0;border-top:1px solid var(--bord
     <p>AverageHuman &mdash; Measuring cognition, one test at a time &nbsp;&middot;&nbsp; <a href="privacy.html">Privacy Policy</a></p>
   </div>
 </footer>
+
+<div id="cd-overlay" style="display:none;position:fixed;inset:0;background:rgba(13,13,13,0.94);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:.5rem;">
+  <div id="cd-num" aria-live="assertive" aria-atomic="true" style="font-family:'Space Mono',monospace;font-size:9rem;font-weight:700;color:#00ff9d;line-height:1;"></div>
+  <div style="font-family:'Space Mono',monospace;font-size:.9rem;color:#888;letter-spacing:2px;">GET READY</div>
+</div>
 
 <script>
 const TOTAL_ROUNDS = 12;
@@ -332,13 +344,26 @@ function handleAnswer(chosen) {
   }, FEEDBACK_MS);
 }
 
+function showCountdown(cb) {
+  const ov  = document.getElementById('cd-overlay');
+  const num = document.getElementById('cd-num');
+  ov.style.display = 'flex';
+  let c = 3;
+  num.textContent = c;
+  const t = setInterval(() => {
+    c--;
+    if (c > 0) { num.textContent = c; }
+    else { clearInterval(t); ov.style.display = 'none'; cb(); }
+  }, 1000);
+}
+
 function startTest() {
   rounds       = generateRounds();
   roundResults = [];
   current      = 0;
   phase        = 'idle';
   showScreen('screen-test');
-  showRound();
+  showCountdown(showRound);
 }
 
 function endGame() {

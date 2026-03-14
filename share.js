@@ -240,10 +240,53 @@ function _buildCanvas(testName, cards, boardHeaders, boardRows, bestLine) {
   ctx.lineWidth   = 1;
   ctx.strokeRect(0.5, 0.5, W - 1, cv.height - 1);
 
-  _dlCard(cv);
+  _copyCard(cv);
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
+
+function _copyCard(canvas) {
+  if (!navigator.clipboard?.write) {
+    _dlCard(canvas);
+    _showToast('Image saved — clipboard not supported in this browser.');
+    return;
+  }
+  canvas.toBlob(blob => {
+    navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+      .then(() => _showToast('Score card copied to clipboard!'))
+      .catch(() => { _dlCard(canvas); _showToast('Saved as PNG instead.'); });
+  }, 'image/png');
+}
+
+function _showToast(msg) {
+  const existing = document.getElementById('_db_toast');
+  if (existing) existing.remove();
+
+  const t = document.createElement('div');
+  t.id = '_db_toast';
+  t.textContent = msg;
+  Object.assign(t.style, {
+    position:     'fixed',
+    bottom:       '2rem',
+    left:         '50%',
+    transform:    'translateX(-50%)',
+    background:   '#00e887',
+    color:        '#000',
+    fontFamily:   "'Manrope', sans-serif",
+    fontWeight:   '700',
+    fontSize:     '.9rem',
+    padding:      '.7rem 1.4rem',
+    borderRadius: '8px',
+    zIndex:       '9999',
+    boxShadow:    '0 4px 24px rgba(0,232,135,0.35)',
+    pointerEvents:'none',
+    opacity:      '1',
+    transition:   'opacity .4s ease',
+  });
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; }, 2200);
+  setTimeout(() => t.remove(), 2700);
+}
 
 function _rrect(ctx, x, y, w, h, r) {
   ctx.beginPath();

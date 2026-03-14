@@ -33,8 +33,8 @@ main{flex:1;padding:3rem 0}footer{padding:2rem 0;border-top:1px solid var(--bord
 @media(prefers-reduced-motion:no-preference){@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}}
 .fade-in{animation:fadeIn .4s ease forwards}
 .feature-list{list-style:none;margin-bottom:2rem;display:flex;flex-direction:column;gap:.6rem}
-.feature-list li{color:var(--text-dim);font-size:.95rem;display:flex;align-items:flex-start;gap:.6rem}
-.feature-list li::before{content:'—';color:var(--primary);flex-shrink:0}
+.feature-list li{color:var(--text-dim);font-size:.95rem;padding-left:1.4rem;position:relative}
+.feature-list li::before{content:'—';color:var(--primary);position:absolute;left:0}
 
 /* ── Test specific ── */
 .round-label{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--text-dim);margin-bottom:1.25rem;letter-spacing:1px}
@@ -85,6 +85,7 @@ main{flex:1;padding:3rem 0}footer{padding:2rem 0;border-top:1px solid var(--bord
 .bc.bad{color:var(--secondary)}
 .bc.neutral{color:var(--text)}
 
+@media(max-width:480px){.container{padding:0 1.25rem}}
 .back-link{display:inline-flex;align-items:center;gap:.4rem;color:var(--text-dim);text-decoration:none;font-size:.85rem;font-weight:600;margin-bottom:1.75rem;transition:color .2s}
 .back-link:hover{color:var(--primary)}
 *:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
@@ -113,6 +114,7 @@ main{flex:1;padding:3rem 0}footer{padding:2rem 0;border-top:1px solid var(--bord
         <li>Shapes get rotated further as rounds progress.</li>
         <li>12 rounds total. Take your time — accuracy counts.</li>
       </ul>
+      <p style="font-size:.82rem;color:rgba(136,136,136,0.55);line-height:1.65;max-width:560px;margin-top:-.75rem;margin-bottom:1.5rem;">Mental rotation is a core measure of spatial intelligence. The ability to mentally manipulate objects in 2D and 3D space predicts performance in engineering, surgery, and navigation, and correlates with overall spatial IQ.</p>
       <button class="btn" onclick="startTest()">Start Test</button>
     </div>
 

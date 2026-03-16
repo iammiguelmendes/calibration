@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Math Estimation — AverageHuman</title>
+<title>Math Estimation Test — Brainlaps</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta name="theme-color" content="#0d0d0d">
-<meta name="description" content="Estimate arithmetic answers without calculating exactly. Tests your numerical intuition across 10 rounds.">
-<meta property="og:title" content="Math Estimation — AverageHuman">
-<meta property="og:description" content="Estimate arithmetic answers without calculating exactly. Tests your numerical intuition across 10 rounds.">
+<meta name="description" content="How sharp is your number sense? Estimate arithmetic results without exact calculation — 10 laps to benchmark your numerical intuition.">
+<meta property="og:title" content="Math Estimation Test — Brainlaps">
+<meta property="og:description" content="How sharp is your number sense? Estimate arithmetic results without exact calculation — 10 laps to benchmark your numerical intuition.">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="AverageHuman">
+<meta property="og:site_name" content="Brainlaps">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
@@ -94,7 +94,7 @@ input[type=number]{-moz-appearance:textfield}
 .result-sidebar{display:flex;flex-direction:column;gap:.75rem;flex-shrink:0;min-width:150px;padding-top:.25rem}
 .best-line{font-family:'Space Mono',monospace;font-size:.8rem;color:var(--text-dim);line-height:1.6}
 .best-line span{color:var(--primary)}
-@media(max-width:560px){.result-layout{flex-direction:column-reverse}.result-sidebar{flex-direction:row;flex-wrap:wrap}}
+@media(max-width:560px){.result-layout{flex-direction:column-reverse}.result-sidebar{flex-direction:row;flex-wrap:wrap}.result-sidebar .btn,.result-sidebar .btn-outline{flex:1;min-width:120px;text-align:center;box-sizing:border-box}}
 /* ── Rounds board ── */
 .rounds-board{flex:1;border:1px solid var(--border);border-radius:12px;overflow:hidden;max-height:360px;display:flex;flex-direction:column}
 .board-header{display:grid;grid-template-columns:1.4fr 1fr 1fr;padding:.6rem 1rem;background:var(--card-bg);position:sticky;top:0;z-index:1;flex-shrink:0}
@@ -117,7 +117,7 @@ input[type=number]{-moz-appearance:textfield}
 
 <header>
   <div class="container">
-    <a href="index.html" class="logo">Average<span>Human</span></a>
+    <a href="index.html" class="logo">Brain<span>Laps</span></a>
   </div>
 </header>
 
@@ -142,7 +142,7 @@ input[type=number]{-moz-appearance:textfield}
     <!-- TEST -->
     <div id="screen-test" class="screen">
       <div class="round-meta">
-        <div class="round-label" id="round-label">Round 1 / 10</div>
+        <div class="round-label" id="round-label">Lap 1 / 10</div>
       </div>
 
       <div class="problem-card">
@@ -187,7 +187,7 @@ input[type=number]{-moz-appearance:textfield}
 </main>
 <footer>
   <div class="container">
-    <p>AverageHuman &mdash; Measuring cognition, one test at a time &nbsp;&middot;&nbsp; <a href="privacy.html">Privacy Policy</a></p>
+    <p>Brainlaps — Free brain tests, zero sign-up. &nbsp;&middot;&nbsp; <a href="privacy.html">Privacy Policy</a></p>
   </div>
 </footer>
 
@@ -298,7 +298,7 @@ function stopTimerBar() {
 function loadRound() {
   const p = problems[round];
   phase = 'active';
-  document.getElementById('round-label').textContent = `Round ${round + 1} / ${TOTAL_ROUNDS}`;
+  document.getElementById('round-label').textContent = `Lap ${round + 1} / ${TOTAL_ROUNDS}`;
   document.getElementById('num-a').textContent = p.a.toLocaleString();
   document.getElementById('num-b').textContent = p.b.toLocaleString();
   document.getElementById('guess-input').value = '';

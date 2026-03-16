@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stroop Test — AverageHuman</title>
+<title>Stroop Cognitive Inhibition Test — Brainlaps</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta name="theme-color" content="#0d0d0d">
-<meta name="description" content="Click the ink color of a word, not what the word says. Tests your ability to override automatic reading impulses.">
-<meta property="og:title" content="Stroop Test — AverageHuman">
-<meta property="og:description" content="Click the ink color of a word, not what the word says. Tests your ability to override automatic reading impulses.">
+<meta name="description" content="Click the ink color, not the word. The classic Stroop test measures cognitive inhibition and mental flexibility across 10 laps.">
+<meta property="og:title" content="Stroop Cognitive Inhibition Test — Brainlaps">
+<meta property="og:description" content="Click the ink color, not the word. The classic Stroop test measures cognitive inhibition and mental flexibility across 10 laps.">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="AverageHuman">
+<meta property="og:site_name" content="Brainlaps">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
@@ -64,7 +64,7 @@ main{flex:1;padding:3rem 0}footer{padding:2rem 0;border-top:1px solid var(--bord
 /* ── Result layout ── */
 .result-layout{display:flex;gap:2rem;align-items:flex-start}
 .result-sidebar{display:flex;flex-direction:column;gap:.75rem;flex-shrink:0;min-width:150px;padding-top:.25rem}
-@media(max-width:560px){.result-layout{flex-direction:column-reverse}.result-sidebar{flex-direction:row;flex-wrap:wrap}}
+@media(max-width:560px){.result-layout{flex-direction:column-reverse}.result-sidebar{flex-direction:row;flex-wrap:wrap}.result-sidebar .btn,.result-sidebar .btn-outline{flex:1;min-width:120px;text-align:center;box-sizing:border-box}}
 /* ── Board ── */
 .rounds-board{flex:1;border:1px solid var(--border);border-radius:12px;overflow:hidden;max-height:400px;display:flex;flex-direction:column}
 .board-header{display:grid;grid-template-columns:1fr 1fr;padding:.6rem 1rem;background:var(--card-bg);flex-shrink:0}
@@ -84,7 +84,7 @@ main{flex:1;padding:3rem 0}footer{padding:2rem 0;border-top:1px solid var(--bord
 
 <header>
   <div class="container">
-    <a href="index.html" class="logo">Average<span>Human</span></a>
+    <a href="index.html" class="logo">Brain<span>Laps</span></a>
   </div>
 </header>
 
@@ -114,7 +114,7 @@ main{flex:1;padding:3rem 0}footer{padding:2rem 0;border-top:1px solid var(--bord
         </div>
         <div class="stroop-body">
           <div class="round-meta">
-            <div class="round-counter" id="round-counter">Round 1 of 10</div>
+            <div class="round-counter" id="round-counter">Lap 1 of 10</div>
             <div class="score-counter">Correct: <span id="correct-count">0</span></div>
           </div>
           <div class="word-area">
@@ -154,7 +154,7 @@ main{flex:1;padding:3rem 0}footer{padding:2rem 0;border-top:1px solid var(--bord
 </main>
 <footer>
   <div class="container">
-    <p>AverageHuman &mdash; Measuring cognition, one test at a time &nbsp;&middot;&nbsp; <a href="privacy.html">Privacy Policy</a></p>
+    <p>Brainlaps — Free brain tests, zero sign-up. &nbsp;&middot;&nbsp; <a href="privacy.html">Privacy Policy</a></p>
   </div>
 </footer>
 
@@ -246,7 +246,7 @@ function showRound() {
   answered = false;
   const trial = trials[currentRound];
 
-  document.getElementById('round-counter').textContent = `Round ${currentRound + 1} of ${TOTAL_ROUNDS}`;
+  document.getElementById('round-counter').textContent = `Lap ${currentRound + 1} of ${TOTAL_ROUNDS}`;
   document.getElementById('correct-count').textContent = correctCount;
 
   const wordEl = document.getElementById('color-word');

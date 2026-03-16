@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ball Tracking — AverageHuman</title>
+<title>Ball Tracking Test — Brainlaps</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta name="theme-color" content="#0d0d0d">
-<meta name="description" content="Follow a highlighted ball as it mixes with identical others. Tests your visual attention and object tracking ability.">
-<meta property="og:title" content="Ball Tracking — AverageHuman">
-<meta property="og:description" content="Follow a highlighted ball as it mixes with identical others. Tests your visual attention and object tracking ability.">
+<meta name="description" content="Spot a marked ball as it blends with identical others in motion. 5 laps of visual attention and object tracking — how many can you follow?">
+<meta property="og:title" content="Ball Tracking Test — Brainlaps">
+<meta property="og:description" content="Spot a marked ball as it blends with identical others in motion. 5 laps of visual attention and object tracking — how many can you follow?">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="AverageHuman">
+<meta property="og:site_name" content="Brainlaps">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
@@ -84,6 +84,7 @@ canvas.clickable{cursor:crosshair;}
 .feature-list{list-style:none;margin-bottom:2rem;display:flex;flex-direction:column;gap:.6rem}
 .feature-list li{color:var(--text-dim);font-size:.95rem;padding-left:1.4rem;position:relative}
 .feature-list li::before{content:'—';color:var(--primary);position:absolute;left:0}
+@media(max-width:560px){.result-actions{flex-direction:column}.result-actions .btn,.result-actions .btn-outline{width:100%;text-align:center;box-sizing:border-box}}
 @media(max-width:480px){.container{padding:0 1.25rem}}
 .back-link{display:inline-flex;align-items:center;gap:.4rem;color:var(--text-dim);text-decoration:none;font-size:.85rem;font-weight:600;margin-bottom:1.75rem;transition:color .2s}
 .back-link:hover{color:var(--primary)}*:focus-visible{outline:2px solid var(--primary);outline-offset:2px}.skip-link{position:absolute;top:-40px;left:0;background:var(--primary);color:#000;padding:.5rem 1rem;font-weight:700;font-size:.875rem;z-index:9999;text-decoration:none;border-radius:0 0 6px 0;transition:top .2s}.skip-link:focus{top:0}
@@ -94,7 +95,7 @@ canvas.clickable{cursor:crosshair;}
 
 <header>
   <div class="container">
-    <a href="index.html" class="logo">Average<span>Human</span></a>
+    <a href="index.html" class="logo">Brain<span>Laps</span></a>
   </div>
 </header>
 
@@ -119,7 +120,7 @@ canvas.clickable{cursor:crosshair;}
     <!-- TEST -->
     <div id="screen-test" class="screen">
       <div class="test-inner">
-        <div class="round-counter" id="round-counter">Round 1 of 5</div>
+        <div class="round-counter" id="round-counter">Lap 1 of 5</div>
         <div class="canvas-wrap" id="canvas-wrap">
           <canvas id="game-canvas" width="620" height="400" role="img" aria-label="Ball tracking game canvas — track the highlighted balls with your mouse"></canvas>
           <div class="click-shield" id="click-shield"></div>
@@ -150,7 +151,7 @@ canvas.clickable{cursor:crosshair;}
 </main>
 <footer>
   <div class="container">
-    <p>AverageHuman &mdash; Measuring cognition, one test at a time &nbsp;&middot;&nbsp; <a href="privacy.html">Privacy Policy</a></p>
+    <p>Brainlaps — Free brain tests, zero sign-up. &nbsp;&middot;&nbsp; <a href="privacy.html">Privacy Policy</a></p>
   </div>
 </footer>
 
@@ -437,7 +438,7 @@ function startRound(){
   setClickable(false);
   setPhaseClass('');
   document.getElementById('round-counter').textContent =
-    `Round ${round} of ${TOTAL_ROUNDS} — ${roundBallCount(round)} balls`;
+    `Lap ${round} of ${TOTAL_ROUNDS} — ${roundBallCount(round)} balls`;
   updateTally();
 
   createBalls();

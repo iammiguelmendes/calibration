@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Time Perception — AverageHuman</title>
+<title>Time Perception Test — Brainlaps</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta name="theme-color" content="#0d0d0d">
-<meta name="description" content="A hidden timer runs. When it stops, guess how many seconds passed. Test your natural time perception over 5 rounds.">
-<meta property="og:title" content="Time Perception — AverageHuman">
-<meta property="og:description" content="A hidden timer runs. When it stops, guess how many seconds passed. Test your natural time perception over 5 rounds.">
+<meta name="description" content="How accurate is your internal clock? A hidden timer counts — then you guess. Benchmark your time perception across 5 laps and see how you compare.">
+<meta property="og:title" content="Time Perception Test — Brainlaps">
+<meta property="og:description" content="How accurate is your internal clock? A hidden timer counts — then you guess. Benchmark your time perception across 5 laps and see how you compare.">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="AverageHuman">
+<meta property="og:site_name" content="Brainlaps">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
@@ -128,7 +128,7 @@ input[type=number]{-moz-appearance:textfield}
 
 <header>
   <div class="container">
-    <a href="index.html" class="logo">Average<span>Human</span></a>
+    <a href="index.html" class="logo">Brain<span>Laps</span></a>
   </div>
 </header>
 
@@ -146,7 +146,7 @@ input[type=number]{-moz-appearance:textfield}
 
     <!-- Test Screen -->
     <div id="screen-test" class="screen">
-      <div class="round-counter" id="round-counter">Round 1 of 5</div>
+      <div class="round-counter" id="round-counter">Lap 1 of 5</div>
       <div class="timer-display" id="timer-display">
         <div class="counting-text pulsing" id="counting-text">Counting...</div>
       </div>
@@ -170,7 +170,7 @@ input[type=number]{-moz-appearance:textfield}
         </div>
         <div class="rounds-board">
           <div class="board-header">
-            <span>Round</span>
+            <span>Lap</span>
             <span>Your Guess</span>
             <span>Actual</span>
           </div>
@@ -183,7 +183,7 @@ input[type=number]{-moz-appearance:textfield}
 </main>
 <footer>
   <div class="container">
-    <p>AverageHuman &mdash; Measuring cognition, one test at a time &nbsp;&middot;&nbsp; <a href="privacy.html">Privacy Policy</a></p>
+    <p>Brainlaps — Free brain tests, zero sign-up. &nbsp;&middot;&nbsp; <a href="privacy.html">Privacy Policy</a></p>
   </div>
 </footer>
 
@@ -265,7 +265,7 @@ function startTest() {
 function runRound() {
   const duration = shuffledDurations[currentRound];
 
-  document.getElementById('round-counter').textContent = `Round ${currentRound + 1} of ${TOTAL_ROUNDS}`;
+  document.getElementById('round-counter').textContent = `Lap ${currentRound + 1} of ${TOTAL_ROUNDS}`;
 
   const display = document.getElementById('timer-display');
   const countingText = document.getElementById('counting-text');

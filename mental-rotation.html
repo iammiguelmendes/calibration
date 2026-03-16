@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mental Rotation — AverageHuman</title>
+<title>Mental Rotation Test — Brainlaps</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta name="theme-color" content="#0d0d0d">
-<meta name="description" content="Decide if two shapes are the same or mirrored. 12 rounds testing your spatial reasoning speed.">
-<meta property="og:title" content="Mental Rotation — AverageHuman">
-<meta property="og:description" content="Decide if two shapes are the same or mirrored. 12 rounds testing your spatial reasoning speed.">
+<meta name="description" content="Same shape or mirror image? 12 laps of 3D spatial reasoning — a cognitive benchmark used in IQ and aptitude testing.">
+<meta property="og:title" content="Mental Rotation Test — Brainlaps">
+<meta property="og:description" content="Same shape or mirror image? 12 laps of 3D spatial reasoning — a cognitive benchmark used in IQ and aptitude testing.">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="AverageHuman">
+<meta property="og:site_name" content="Brainlaps">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
@@ -72,7 +72,7 @@ main{flex:1;padding:3rem 0}footer{padding:2rem 0;border-top:1px solid var(--bord
 /* ── Result layout ── */
 .result-layout{display:flex;gap:2rem;align-items:flex-start}
 .result-sidebar{display:flex;flex-direction:column;gap:.75rem;flex-shrink:0;min-width:150px;padding-top:.25rem}
-@media(max-width:560px){.result-layout{flex-direction:column-reverse}.result-sidebar{flex-direction:row;flex-wrap:wrap}}
+@media(max-width:560px){.result-layout{flex-direction:column-reverse}.result-sidebar{flex-direction:row;flex-wrap:wrap}.result-sidebar .btn,.result-sidebar .btn-outline{flex:1;min-width:120px;text-align:center;box-sizing:border-box}}
 .rounds-board{flex:1;border:1px solid var(--border);border-radius:12px;overflow:hidden;max-height:420px;display:flex;flex-direction:column}
 .board-header{display:grid;grid-template-columns:.5fr 1fr 1fr;padding:.6rem 1rem;background:var(--card-bg);flex-shrink:0}
 .board-header span{font-family:'Space Mono',monospace;font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim)}
@@ -96,7 +96,7 @@ main{flex:1;padding:3rem 0}footer{padding:2rem 0;border-top:1px solid var(--bord
 <a href="#main" class="skip-link">Skip to main content</a>
 <header>
   <div class="container">
-    <a href="index.html" class="logo">Average<span>Human</span></a>
+    <a href="index.html" class="logo">Brain<span>Laps</span></a>
   </div>
 </header>
 
@@ -120,7 +120,7 @@ main{flex:1;padding:3rem 0}footer{padding:2rem 0;border-top:1px solid var(--bord
 
     <!-- TEST -->
     <div id="screen-test" class="screen">
-      <div class="round-label" id="round-label">Round 1 / 12</div>
+      <div class="round-label" id="round-label">Lap 1 / 12</div>
       <div class="shapes-area">
         <div class="shape-box"><canvas id="canvas-a" width="240" height="240"></canvas></div>
         <div class="shape-sep">vs</div>
@@ -164,7 +164,7 @@ main{flex:1;padding:3rem 0}footer{padding:2rem 0;border-top:1px solid var(--bord
 </main>
 <footer>
   <div class="container">
-    <p>AverageHuman &mdash; Measuring cognition, one test at a time &nbsp;&middot;&nbsp; <a href="privacy.html">Privacy Policy</a></p>
+    <p>Brainlaps — Free brain tests, zero sign-up. &nbsp;&middot;&nbsp; <a href="privacy.html">Privacy Policy</a></p>
   </div>
 </footer>
 
@@ -311,7 +311,7 @@ function generateRounds() {
 function showRound() {
   phase = 'active';
   const r = rounds[current];
-  document.getElementById('round-label').textContent = `Round ${current + 1} / ${TOTAL_ROUNDS}`;
+  document.getElementById('round-label').textContent = `Lap ${current + 1} / ${TOTAL_ROUNDS}`;
   document.getElementById('feedback-msg').textContent = '';
   document.getElementById('feedback-msg').className   = 'feedback-msg';
   document.getElementById('btn-same').disabled   = false;

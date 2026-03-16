@@ -1,4 +1,4 @@
-// ── AverageHuman share card generator ────────────────────────────────────────
+// ── Brainlaps share card generator ────────────────────────────────────────
 // Reads all result data from the DOM and renders a branded PNG card.
 
 const _C = {
@@ -11,7 +11,7 @@ const _C = {
 };
 
 function shareScore() {
-  const testName = document.title.replace(/ [—–-] AverageHuman.*$/, '').trim();
+  const testName = document.title.replace(/ [—–-] Brainlaps.*$/, '').trim();
   const el = document.getElementById('screen-result');
 
   // Stat cards (quantity, time, visual-memory, sequence-memory, ball-tracking,
@@ -233,7 +233,7 @@ function _buildCanvas(testName, cards, boardHeaders, boardRows, bestLine) {
   ctx.fillStyle    = 'rgba(119,119,119,0.5)';
   ctx.textAlign    = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('averagehuman.com', W / 2, cv.height - 28);
+  ctx.fillText('brainlaps.com', W / 2, cv.height - 28);
 
   // Outer border
   ctx.strokeStyle = 'rgba(0,232,135,0.12)';
@@ -251,11 +251,12 @@ function _copyCard(canvas) {
     _showToast('Image saved — clipboard not supported in this browser.');
     return;
   }
-  canvas.toBlob(blob => {
-    navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
-      .then(() => _showToast('Score card copied to clipboard!'))
-      .catch(() => { _dlCard(canvas); _showToast('Saved as PNG instead.'); });
-  }, 'image/png');
+  const item = new ClipboardItem({
+    'image/png': new Promise(resolve => canvas.toBlob(resolve, 'image/png')),
+  });
+  navigator.clipboard.write([item])
+    .then(() => _showToast('Score card copied to clipboard!'))
+    .catch(() => { _dlCard(canvas); _showToast('Saved as PNG instead.'); });
 }
 
 function _showToast(msg) {
@@ -316,7 +317,7 @@ function _rrectTop(ctx, x, y, w, h, r) {
 
 function _dlCard(canvas) {
   const a = document.createElement('a');
-  a.download = 'averagehuman-score.png';
+  a.download = 'brainlaps-score.png';
   a.href = canvas.toDataURL('image/png');
   a.click();
 }

@@ -39,7 +39,9 @@ function shareScore() {
   const bestRaw = (el.querySelector('.best-line')?.innerText || '').trim();
   const bestLine = bestRaw.replace(/\n+/g, ' · ');
 
-  _buildCanvas(testName, cards, boardHeaders, boardRows, bestLine);
+  document.fonts.ready.then(() =>
+    _buildCanvas(testName, cards, boardHeaders, boardRows, bestLine)
+  );
 }
 
 // ── Canvas renderer ──────────────────────────────────────────────────────────
@@ -76,10 +78,12 @@ function _buildCanvas(testName, cards, boardHeaders, boardRows, bestLine) {
     + (bestH    ? PAD / 2 + bestH       : 0)
     + FOOTER;
 
+  const SCALE = 2;
   const cv  = document.createElement('canvas');
-  cv.width  = W;
-  cv.height = Math.max(H, 380);
+  cv.width  = W * SCALE;
+  cv.height = Math.max(H, 380) * SCALE;
   const ctx = cv.getContext('2d');
+  ctx.scale(SCALE, SCALE);
 
   // ── Background & grid ──────────────────────────────────────────────────────
   ctx.fillStyle = _C.bg;

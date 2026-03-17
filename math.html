@@ -94,7 +94,7 @@ input[type=number]{-moz-appearance:textfield}
 .result-sidebar{display:flex;flex-direction:column;gap:.75rem;flex-shrink:0;min-width:150px;padding-top:.25rem}
 .best-line{font-family:'Space Mono',monospace;font-size:.8rem;color:var(--text-dim);line-height:1.6}
 .best-line span{color:var(--primary)}
-@media(max-width:560px){.result-layout{flex-direction:column-reverse}.result-sidebar{flex-direction:row;flex-wrap:wrap}.result-sidebar .btn,.result-sidebar .btn-outline{flex:1;min-width:120px;text-align:center;box-sizing:border-box}}
+@media(max-width:560px){.result-layout{flex-direction:column-reverse}.result-sidebar{flex-direction:column;gap:.5rem}.result-sidebar .btn,.result-sidebar .btn-outline{width:100%;text-align:center;box-sizing:border-box;padding:.8rem}}
 /* ── Rounds board ── */
 .rounds-board{flex:1;border:1px solid var(--border);border-radius:12px;overflow:hidden;max-height:360px;display:flex;flex-direction:column}
 .board-header{display:grid;grid-template-columns:1.4fr 1fr 1fr;padding:.6rem 1rem;background:var(--card-bg);position:sticky;top:0;z-index:1;flex-shrink:0}

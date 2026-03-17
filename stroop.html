@@ -64,7 +64,7 @@ main{flex:1;padding:3rem 0}footer{padding:2rem 0;border-top:1px solid var(--bord
 /* ── Result layout ── */
 .result-layout{display:flex;gap:2rem;align-items:flex-start}
 .result-sidebar{display:flex;flex-direction:column;gap:.75rem;flex-shrink:0;min-width:150px;padding-top:.25rem}
-@media(max-width:560px){.result-layout{flex-direction:column-reverse}.result-sidebar{flex-direction:row;flex-wrap:wrap}.result-sidebar .btn,.result-sidebar .btn-outline{flex:1;min-width:120px;text-align:center;box-sizing:border-box}}
+@media(max-width:560px){.result-layout{flex-direction:column-reverse}.result-sidebar{flex-direction:column;gap:.5rem}.result-sidebar .btn,.result-sidebar .btn-outline{width:100%;text-align:center;box-sizing:border-box;padding:.8rem}}
 /* ── Board ── */
 .rounds-board{flex:1;border:1px solid var(--border);border-radius:12px;overflow:hidden;max-height:400px;display:flex;flex-direction:column}
 .board-header{display:grid;grid-template-columns:1fr 1fr;padding:.6rem 1rem;background:var(--card-bg);flex-shrink:0}
@@ -315,13 +315,14 @@ function startTest() {
 }
 
 function endTest() {
-  let data = JSON.parse(localStorage.getItem(LS_KEY) || 'null') || { attempts: 0, history: [] };
+  let data = JSON.parse(localStorage.getItem(LS_KEY) || 'null') || { attempts: 0, best: 0, history: [] };
   data.attempts = (data.attempts || 0) + 1;
   data.history.push({ score: correctCount, ts: Date.now() });
+  if (correctCount > (data.best || 0)) data.best = correctCount;
   localStorage.setItem(LS_KEY, JSON.stringify(data));
 
   document.getElementById('best-line').innerHTML =
-    `Attempts: <span>${data.attempts}</span>`;
+    `Personal best: <span>${data.best} / ${TOTAL_ROUNDS}</span> &nbsp;·&nbsp; Attempts: <span>${data.attempts}</span>`;
 
   // Build board
   const body = document.getElementById('board-body');

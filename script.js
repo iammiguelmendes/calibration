@@ -208,7 +208,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const best = document.createElement('div');
                     best.className = 'test-best';
                     best.textContent = 'Best: ' + meta.fmt(data.best);
-                    card.querySelector('.test-info').appendChild(best);
+                    const info = card.querySelector('.test-info');
+                    info.insertBefore(best, info.firstChild);
                 }
             }
         } catch(e) {}

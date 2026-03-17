@@ -1,113 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Brainlaps — Free Cognitive Benchmark Tests</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <meta name="theme-color" content="#0d0d0d">
-    <meta name="description" content="10 free brain performance tests — reaction time, working memory, impulse control, spatial reasoning &amp; more. No sign-up, runs entirely in your browser.">
+    <meta name="description"
+        content="10 free brain performance tests — reaction time, working memory, impulse control, spatial reasoning &amp; more. No sign-up, runs entirely in your browser.">
     <meta property="og:title" content="Brainlaps — Free Cognitive Benchmark Tests">
-    <meta property="og:description" content="10 free brain performance tests — reaction time, working memory, impulse control, spatial reasoning &amp; more. No sign-up, runs entirely in your browser.">
+    <meta property="og:description"
+        content="10 free brain performance tests — reaction time, working memory, impulse control, spatial reasoning &amp; more. No sign-up, runs entirely in your browser.">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Brainlaps">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Manrope:wght@400;600;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-<a href="#main" class="skip-link">Skip to main content</a>
+    <a href="#main" class="skip-link">Skip to main content</a>
 
-<header>
-    <div class="container">
-        <a href="index.html" class="logo">Brain<span>Laps</span></a>
-    </div>
-</header>
-
-<main id="main">
-
-    <section class="hero" id="hero">
+    <header>
         <div class="container">
-            <div class="hero-layout">
-                <div class="hero-content">
-                    <div class="hero-eyebrow">Cognitive Benchmarks</div>
-                    <h1 class="hero-title">How well does<br>your brain<br>actually work?</h1>
-                    <p class="hero-sub">Ten short tests — reaction time, visual memory, impulse control, estimation, focus. See how your cognition measures up.</p>
-                    <div class="hero-pills">
-                        <span class="pill">10 tests</span>
-                        <span class="pill">~5 min each</span>
-                        <span class="pill">No sign-up</span>
+            <a href="index.html" class="logo">Brain<span>Laps</span></a>
+        </div>
+    </header>
+
+    <main id="main">
+
+        <section class="hero" id="hero">
+            <div class="container">
+                <div class="hero-layout">
+                    <div class="hero-content">
+                        <div class="hero-eyebrow">Cognitive Benchmarks</div>
+                        <h1 class="hero-title">How well does<br>your brain<br>actually work?</h1>
+                        <p class="hero-sub">Ten cognitive tests — reaction time, visual memory, impulse control,
+                            estimation, focus <br>Multiple laps per test. See how you perform.</p>
+                        <div class="hero-pills">
+                            <span class="pill">10 tests</span>
+                            <span class="pill">~2 min each</span>
+                            <span class="pill">Free • No sign-upp</span>
+                        </div>
+                        <a href="#tests" class="hero-cta">Explore the tests <span class="cta-arrow">↓</span></a>
                     </div>
-                    <a href="#tests" class="hero-cta">Explore the tests <span class="cta-arrow">↓</span></a>
-                </div>
-                <div class="hero-visual" id="heroVisual">
-                    <canvas id="hvCanvas" role="img" aria-label="Animated orbital visualization representing cognitive benchmark metrics"></canvas>
+                    <div class="hero-visual" id="heroVisual">
+                        <canvas id="hvCanvas" role="img"
+                            aria-label="Animated orbital visualization representing cognitive benchmark metrics"></canvas>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="hero-orb hero-orb-a" id="orbA"></div>
-        <div class="hero-orb hero-orb-b" id="orbB"></div>
-    </section>
+            <div class="hero-orb hero-orb-a" id="orbA"></div>
+            <div class="hero-orb hero-orb-b" id="orbB"></div>
+        </section>
 
-    <section class="tests-section" id="tests">
+        <section class="tests-section" id="tests">
+            <div class="container">
+                <div class="section-divider">
+                    <span class="section-label">10 tests</span>
+                    <span class="section-line"></span>
+                </div>
+                <div class="tests-grid">
+                    <div class="test-card" role="button" data-test="go-nogo">
+                        <div class="test-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                            </svg></div>
+                        <div class="test-info">
+                            <div class="test-name">Go / No-Go</div>
+                        </div>
+                    </div>
+                    <div class="test-card" role="button" data-test="time">
+                        <div class="test-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <polyline points="12 6 12 12 16 14" />
+                            </svg></div>
+                        <div class="test-info">
+                            <div class="test-name">Time Perception</div>
+                        </div>
+                    </div>
+                    <div class="test-card" role="button" data-test="multitasking">
+                        <div class="test-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="7" rx="1" />
+                                <rect x="14" y="3" width="7" height="7" rx="1" />
+                                <rect x="3" y="14" width="7" height="7" rx="1" />
+                                <rect x="14" y="14" width="7" height="7" rx="1" />
+                            </svg></div>
+                        <div class="test-info">
+                            <div class="test-name">Multitasking</div>
+                        </div>
+                    </div>
+                    <div class="test-card" role="button" data-test="sequence-memory">
+                        <div class="test-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="8" y1="6" x2="21" y2="6" />
+                                <line x1="8" y1="12" x2="21" y2="12" />
+                                <line x1="8" y1="18" x2="21" y2="18" />
+                                <line x1="3" y1="6" x2="3.01" y2="6" />
+                                <line x1="3" y1="12" x2="3.01" y2="12" />
+                                <line x1="3" y1="18" x2="3.01" y2="18" />
+                            </svg></div>
+                        <div class="test-info">
+                            <div class="test-name">Sequence Memory</div>
+                        </div>
+                    </div>
+                    <div class="test-card" role="button" data-test="mental-rotation">
+                        <div class="test-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="7" rx="1" />
+                                <rect x="14" y="3" width="7" height="7" rx="1" />
+                                <path d="M6.5 14 L4 17 L6.5 20 M4 17 h6 v3 h3" />
+                            </svg></div>
+                        <div class="test-info">
+                            <div class="test-name">Mental Rotation</div>
+                        </div>
+                    </div>
+                    <div class="test-card" role="button" data-test="math">
+                        <div class="test-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                                <line x1="4" y1="9" x2="20" y2="9" />
+                                <line x1="4" y1="15" x2="20" y2="15" />
+                                <line x1="10" y1="3" x2="8" y2="21" />
+                                <line x1="16" y1="3" x2="14" y2="21" />
+                            </svg></div>
+                        <div class="test-info">
+                            <div class="test-name">Math Estimation</div>
+                        </div>
+                    </div>
+                    <div class="test-card" role="button" data-test="visual-memory">
+                        <div class="test-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg></div>
+                        <div class="test-info">
+                            <div class="test-name">Visual Memory</div>
+                        </div>
+                    </div>
+                    <div class="test-card" role="button" data-test="tapping">
+                        <div class="test-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                            </svg></div>
+                        <div class="test-info">
+                            <div class="test-name">Tap Consistency</div>
+                        </div>
+                    </div>
+                    <div class="test-card" role="button" data-test="ball-tracking">
+                        <div class="test-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <circle cx="12" cy="12" r="5" />
+                                <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+                            </svg></div>
+                        <div class="test-info">
+                            <div class="test-name">Ball Tracking</div>
+                        </div>
+                    </div>
+                    <div class="test-card" role="button" data-test="stroop">
+                        <div class="test-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="4 7 4 4 20 4 20 7" />
+                                <line x1="9" y1="20" x2="15" y2="20" />
+                                <line x1="12" y1="4" x2="12" y2="20" />
+                            </svg></div>
+                        <div class="test-info">
+                            <div class="test-name">Stroop Test</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
         <div class="container">
-            <div class="section-divider">
-                <span class="section-label">10 tests</span>
-                <span class="section-line"></span>
-            </div>
-            <div class="tests-grid">
-                <div class="test-card" role="button" data-test="go-nogo">
-                    <div class="test-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
-                    <div class="test-info"><div class="test-name">Go / No-Go</div></div>
-                </div>
-                <div class="test-card" role="button" data-test="time">
-                    <div class="test-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-                    <div class="test-info"><div class="test-name">Time Perception</div></div>
-                </div>
-                <div class="test-card" role="button" data-test="multitasking">
-                    <div class="test-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
-                    <div class="test-info"><div class="test-name">Multitasking</div></div>
-                </div>
-                <div class="test-card" role="button" data-test="sequence-memory">
-                    <div class="test-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
-                    <div class="test-info"><div class="test-name">Sequence Memory</div></div>
-                </div>
-                <div class="test-card" role="button" data-test="mental-rotation">
-                    <div class="test-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><path d="M6.5 14 L4 17 L6.5 20 M4 17 h6 v3 h3"/></svg></div>
-                    <div class="test-info"><div class="test-name">Mental Rotation</div></div>
-                </div>
-                <div class="test-card" role="button" data-test="math">
-                    <div class="test-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg></div>
-                    <div class="test-info"><div class="test-name">Math Estimation</div></div>
-                </div>
-                <div class="test-card" role="button" data-test="visual-memory">
-                    <div class="test-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
-                    <div class="test-info"><div class="test-name">Visual Memory</div></div>
-                </div>
-                <div class="test-card" role="button" data-test="tapping">
-                    <div class="test-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-                    <div class="test-info"><div class="test-name">Tap Consistency</div></div>
-                </div>
-                <div class="test-card" role="button" data-test="ball-tracking">
-                    <div class="test-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg></div>
-                    <div class="test-info"><div class="test-name">Ball Tracking</div></div>
-                </div>
-                <div class="test-card" role="button" data-test="stroop">
-                    <div class="test-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg></div>
-                    <div class="test-info"><div class="test-name">Stroop Test</div></div>
-                </div>
-            </div>
+            <p>Brainlaps — Free brain tests, zero sign-up. &nbsp;·&nbsp; <a href="privacy.html"
+                    style="color:var(--primary);text-decoration:none">Privacy Policy</a></p>
         </div>
-    </section>
+    </footer>
 
-</main>
-
-<footer>
-    <div class="container">
-        <p>Brainlaps — Free brain tests, zero sign-up. &nbsp;·&nbsp; <a href="privacy.html" style="color:var(--primary);text-decoration:none">Privacy Policy</a></p>
-    </div>
-</footer>
-
-<script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
+
 </html>

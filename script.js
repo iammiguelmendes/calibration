@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.test-card').forEach(card => {
         card.setAttribute('tabindex', '0');
         card.addEventListener('click', () => {
-            window.location.href = card.getAttribute('data-test') + '.html';
+            window.location.href = '/' + card.getAttribute('data-test');
         });
         card.addEventListener('keydown', e => {
             if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); }

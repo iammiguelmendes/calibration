@@ -44,9 +44,40 @@ function shareScore() {
   );
 }
 
+function downloadScore() {
+  const testName = document.title.replace(/ [—–-] Brainlaps.*$/, '').trim();
+  const el = document.getElementById('screen-result');
+
+  const cards = [...el.querySelectorAll('.stat-card')].map(card => {
+    const valueEl = card.querySelector('.value');
+    return {
+      label: (card.querySelector('.label')?.textContent || '').trim(),
+      value: (valueEl?.textContent || '—').trim(),
+      color: valueEl ? getComputedStyle(valueEl).color : _C.primary,
+    };
+  });
+
+  const boardHeaders = [...el.querySelectorAll('.board-header span')]
+    .map(s => s.textContent.trim());
+  const boardRows = [...el.querySelectorAll('.board-row')].map(row =>
+    [...row.querySelectorAll('.bc')].map(cell => ({
+      text:  cell.textContent.trim(),
+      color: getComputedStyle(cell).color,
+    }))
+  );
+
+  const bestRaw = (el.querySelector('.best-line')?.innerText || '').trim();
+  const bestLine = bestRaw.replace(/\n+/g, ' · ');
+
+  document.fonts.ready.then(() => {
+    const cv = _buildCanvas(testName, cards, boardHeaders, boardRows, bestLine, true);
+    _dlCard(cv);
+  });
+}
+
 // ── Canvas renderer ──────────────────────────────────────────────────────────
 
-function _buildCanvas(testName, cards, boardHeaders, boardRows, bestLine) {
+function _buildCanvas(testName, cards, boardHeaders, boardRows, bestLine, returnCanvas = false) {
   const W       = 1200;
   const PAD     = 64;
   const HEADER  = 116;   // logo + test name + separator
@@ -79,22 +110,24 @@ function _buildCanvas(testName, cards, boardHeaders, boardRows, bestLine) {
     + FOOTER;
 
   const SCALE = 2;
+  const logH  = Math.max(H, 380);   // logical height (drawing coords)
   const cv  = document.createElement('canvas');
   cv.width  = W * SCALE;
-  cv.height = Math.max(H, 380) * SCALE;
+  cv.height = logH * SCALE;
   const ctx = cv.getContext('2d');
   ctx.scale(SCALE, SCALE);
 
-  // ── Background & grid ──────────────────────────────────────────────────────
+  // ── Background ─────────────────────────────────────────────────────────────
   ctx.fillStyle = _C.bg;
-  ctx.fillRect(0, 0, W, cv.height);
+  ctx.fillRect(0, 0, W, logH);
 
+  // ── Grid (below header only, so it doesn't bleed into the logo) ────────────
   ctx.strokeStyle = 'rgba(0,232,135,0.025)';
   ctx.lineWidth = 1;
   for (let x = 0; x <= W; x += 48) {
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, cv.height); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x, HEADER); ctx.lineTo(x, logH); ctx.stroke();
   }
-  for (let y = 0; y <= cv.height; y += 48) {
+  for (let y = HEADER; y <= logH; y += 48) {
     ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
   }
 
@@ -237,13 +270,14 @@ function _buildCanvas(testName, cards, boardHeaders, boardRows, bestLine) {
   ctx.fillStyle    = 'rgba(119,119,119,0.5)';
   ctx.textAlign    = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('brainlaps.com', W / 2, cv.height - 28);
+  ctx.fillText('brainlaps.com', W / 2, logH - 28);
 
   // Outer border
   ctx.strokeStyle = 'rgba(0,232,135,0.12)';
   ctx.lineWidth   = 1;
-  ctx.strokeRect(0.5, 0.5, W - 1, cv.height - 1);
+  ctx.strokeRect(0.5, 0.5, W - 1, logH - 1);
 
+  if (returnCanvas) return cv;
   _copyCard(cv);
 }
 

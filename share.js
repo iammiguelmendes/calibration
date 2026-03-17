@@ -102,10 +102,10 @@ function _buildCanvas(testName, cards, boardHeaders, boardRows, bestLine) {
   ctx.textAlign    = 'left';
   ctx.font         = "700 18px 'Manrope', Arial, sans-serif";
   ctx.fillStyle    = _C.text;
-  ctx.fillText('Average', PAD + 38, 56);
-  const avgW = ctx.measureText('Average').width;
+  ctx.fillText('Brain', PAD + 38, 56);
+  const avgW = ctx.measureText('Brain').width;
   ctx.fillStyle = _C.primary;
-  ctx.fillText('Human', PAD + 38 + avgW, 56);
+  ctx.fillText('Laps', PAD + 38 + avgW, 56);
 
   // ── Test name ──────────────────────────────────────────────────────────────
   ctx.font      = "600 20px 'Manrope', Arial, sans-serif";

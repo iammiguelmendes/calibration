@@ -398,10 +398,10 @@ document.addEventListener('keydown', e => {
     if (intro.classList.contains('active'))  { e.preventDefault(); startTest(); }
     if (result.classList.contains('active')) { e.preventDefault(); startTest(); }
   }
-  // Space counts as a click during the test
+  // Space counts as a click during the test (including early-press detection)
   if (e.key === ' ') {
     const test = document.getElementById('screen-test');
-    if (test.classList.contains('active') && phase === 'showing') {
+    if (test.classList.contains('active') && (phase === 'showing' || phase === 'pausing' || phase === 'idle')) {
       e.preventDefault();
       handleClick();
     }

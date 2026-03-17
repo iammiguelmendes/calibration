@@ -96,7 +96,7 @@ header.scrolled {
 /* ── Hero ────────────────────────────────────── */
 .hero {
     position: relative;
-    min-height: calc(100vh - 62px);
+    min-height: min(calc(100vh - 62px), 680px);
     display: flex;
     align-items: center;
     overflow: hidden;
@@ -263,7 +263,7 @@ header.scrolled {
 
 /* ── Tests Section ───────────────────────────── */
 .tests-section {
-    padding: 4rem 0 6rem;
+    padding: 3rem 0 5rem;
     flex: 1;
 }
 

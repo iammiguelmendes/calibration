@@ -272,11 +272,6 @@ function _buildCanvas(testName, cards, boardHeaders, boardRows, bestLine, return
   ctx.textBaseline = 'middle';
   ctx.fillText('brainlaps.com', W / 2, logH - 28);
 
-  // Outer border
-  ctx.strokeStyle = 'rgba(0,232,135,0.12)';
-  ctx.lineWidth   = 1;
-  ctx.strokeRect(0.5, 0.5, W - 1, logH - 1);
-
   if (returnCanvas) return cv;
   _copyCard(cv);
 }
